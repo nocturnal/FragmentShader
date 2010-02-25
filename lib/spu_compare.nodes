@@ -1,0 +1,509 @@
+-- #################################################### --
+
+local si_ceq = class(Node)
+
+function si_ceq:get_help(out)
+  out.write[[ Compare Equal Word  
+
+ rt.w[n] = (ra.w[n] == rb.w[n]) ? 0xF… : 0x0… ]]
+end
+
+function si_ceq:new()
+  Node.new(self)
+  self.ra = self.add_port(Input('ra'))
+  self.rb = self.add_port(Input('rb'))
+  self.rt = self.add_port(Output('rt'))
+end
+
+function si_ceq:config(props)
+  Node.config(self, props)
+  props.delete('Name')
+end
+
+function si_ceq:gen_code(out, scratch)
+  local rt = 'r' .. self.rt.hex()
+  local ra = 'r' .. self.ra.get_output().hex()
+  local rb = 'r' .. self.rb.get_output().hex()
+  out.write( '\t .reg ' .. rt .. '\n')
+  out.write( '\t ceq ' .. rt .. ', ' .. ra .. ', ' .. rb .. '\n' )
+end
+
+function si_ceq:get_tip(out)
+  out.write('Compare Equal Word ')
+end
+
+function si_ceq:get_type(port)
+  return 'qword'
+end
+
+-- #################################################### --
+
+local si_ceqi = class(Node)
+
+function si_ceqi:get_help(out)
+  out.write[[ Compare Equal Word Immediate  
+
+ rt.w[n] = (ra.w[n] == ext(s10)) ? 0xF… : 0x0… ]]
+end
+
+function si_ceqi:new()
+  Node.new(self)
+  self.ra  = self.add_port(Input('ra'))
+  self.rt  = self.add_port(Output('rt'))
+  self.s10 = 0
+end
+
+function si_ceqi:config(props)
+  Node.config(self, props)
+  props.delete('Name')
+  props.text_input(
+                    's10',
+                    function() return self.s10 end,
+                    function(v) self.s10 = v end,
+                    function(v) return math.evaluate(v) end
+                  )
+end
+
+function si_ceqi:gen_code(out, scratch)
+  local rt  = 'r' .. self.rt.hex()
+  local ra  = 'r' .. self.ra.get_output().hex()
+  local s10 = math.evaluate(self.s10)
+  out.write( '\t .reg ' .. rt .. '\n')
+  out.write( '\t ceqi ' .. rt .. ', ' .. ra .. ', ' .. s10 .. '\n' )
+end
+
+function si_ceqi:get_tip(out)
+  out.write('Compare Equal Word Immediate ')
+end
+
+function si_ceqi:get_type(port)
+  return 'qword'
+end
+
+-- #################################################### --
+
+local si_ceqh = class(Node)
+
+function si_ceqh:get_help(out)
+  out.write[[ Compare Equal Halfword  
+
+ rt.h[n] = (ra.h[n] == rb.h[n]) ? 0xF… : 0x0… ]]
+end
+
+function si_ceqh:new()
+  Node.new(self)
+  self.ra = self.add_port(Input('ra'))
+  self.rb = self.add_port(Input('rb'))
+  self.rt = self.add_port(Output('rt'))
+end
+
+function si_ceqh:config(props)
+  Node.config(self, props)
+  props.delete('Name')
+end
+
+function si_ceqh:gen_code(out, scratch)
+  local rt = 'r' .. self.rt.hex()
+  local ra = 'r' .. self.ra.get_output().hex()
+  local rb = 'r' .. self.rb.get_output().hex()
+  out.write( '\t .reg ' .. rt .. '\n')
+  out.write( '\t ceqh ' .. rt .. ', ' .. ra .. ', ' .. rb .. '\n' )
+end
+
+function si_ceqh:get_tip(out)
+  out.write('Compare Equal Halfword ')
+end
+
+function si_ceqh:get_type(port)
+  return 'qword'
+end
+
+-- #################################################### --
+
+local si_ceqhi = class(Node)
+
+function si_ceqhi:get_help(out)
+  out.write[[ Compare Equal Halfword Immediate  
+
+ rt.h[n] = (ra.h[n] == ext(s10) ? 0xF… : 0x0… ]]
+end
+
+function si_ceqhi:new()
+  Node.new(self)
+  self.ra  = self.add_port(Input('ra'))
+  self.rt  = self.add_port(Output('rt'))
+  self.s10 = 0
+end
+
+function si_ceqhi:config(props)
+  Node.config(self, props)
+  props.delete('Name')
+  props.text_input(
+                    's10',
+                    function() return self.s10 end,
+                    function(v) self.s10 = v end,
+                    function(v) return math.evaluate(v) end
+                  )
+end
+
+function si_ceqhi:gen_code(out, scratch)
+  local rt  = 'r' .. self.rt.hex()
+  local ra  = 'r' .. self.ra.get_output().hex()
+  local s10 = math.evaluate(self.s10)
+  out.write( '\t .reg ' .. rt .. '\n')
+  out.write( '\t ceqhi ' .. rt .. ', ' .. ra .. ', ' .. s10 .. '\n' )
+end
+
+function si_ceqhi:get_tip(out)
+  out.write('Compare Equal Halfword Immediate ')
+end
+
+function si_ceqhi:get_type(port)
+  return 'qword'
+end
+
+-- #################################################### --
+
+local si_ceqb = class(Node)
+
+function si_ceqb:get_help(out)
+  out.write[[ Compare Equal Byte  
+
+ rt.b[n] = (ra.b[n] == rb.b[n]) ? 0xF… : 0x0… ]]
+end
+
+function si_ceqb:new()
+  Node.new(self)
+  self.ra = self.add_port(Input('ra'))
+  self.rb = self.add_port(Input('rb'))
+  self.rt = self.add_port(Output('rt'))
+end
+
+function si_ceqb:config(props)
+  Node.config(self, props)
+  props.delete('Name')
+end
+
+function si_ceqb:gen_code(out, scratch)
+  local rt = 'r' .. self.rt.hex()
+  local ra = 'r' .. self.ra.get_output().hex()
+  local rb = 'r' .. self.rb.get_output().hex()
+  out.write( '\t .reg ' .. rt .. '\n')
+  out.write( '\t ceqb ' .. rt .. ', ' .. ra .. ', ' .. rb .. '\n' )
+end
+
+function si_ceqb:get_tip(out)
+  out.write('Compare Equal Byte ')
+end
+
+function si_ceqb:get_type(port)
+  return 'qword'
+end
+
+-- #################################################### --
+
+local si_ceqbi = class(Node)
+
+function si_ceqbi:get_help(out)
+  out.write[[ Compare Equal Byte Immediate  
+
+ rt.b[n] = (ra.b[n] == s10) ? 0xF… : 0x0… ]]
+end
+
+function si_ceqbi:new()
+  Node.new(self)
+  self.ra  = self.add_port(Input('ra'))
+  self.rt  = self.add_port(Output('rt'))
+  self.s10 = 0
+end
+
+function si_ceqbi:config(props)
+  Node.config(self, props)
+  props.delete('Name')
+  props.text_input(
+                    's10',
+                    function() return self.s10 end,
+                    function(v) self.s10 = v end,
+                    function(v) return math.evaluate(v) end
+                  )
+end
+
+function si_ceqbi:gen_code(out, scratch)
+  local rt  = 'r' .. self.rt.hex()
+  local ra  = 'r' .. self.ra.get_output().hex()
+  local s10 = math.evaluate(self.s10)
+  out.write( '\t .reg ' .. rt .. '\n')
+  out.write( '\t ceqbi ' .. rt .. ', ' .. ra .. ', ' .. s10 .. '\n' )
+end
+
+function si_ceqbi:get_tip(out)
+  out.write('Compare Equal Byte Immediate ')
+end
+
+function si_ceqbi:get_type(port)
+  return 'qword'
+end
+
+-- #################################################### --
+
+local si_cgt = class(Node)
+
+function si_cgt:get_help(out)
+  out.write[[ Compare Greater Than Word  
+
+ rt.w[n] = (ra.w[n] > rb.w[n]) ? 0xF… : 0x0… ]]
+end
+
+function si_cgt:new()
+  Node.new(self)
+  self.ra = self.add_port(Input('ra'))
+  self.rb = self.add_port(Input('rb'))
+  self.rt = self.add_port(Output('rt'))
+end
+
+function si_cgt:config(props)
+  Node.config(self, props)
+  props.delete('Name')
+end
+
+function si_cgt:gen_code(out, scratch)
+  local rt = 'r' .. self.rt.hex()
+  local ra = 'r' .. self.ra.get_output().hex()
+  local rb = 'r' .. self.rb.get_output().hex()
+  out.write( '\t .reg ' .. rt .. '\n')
+  out.write( '\t cgt ' .. rt .. ', ' .. ra .. ', ' .. rb .. '\n' )
+end
+
+function si_cgt:get_tip(out)
+  out.write('Compare Greater Than Word ')
+end
+
+function si_cgt:get_type(port)
+  return 'qword'
+end
+
+-- #################################################### --
+
+local si_cgti = class(Node)
+
+function si_cgti:get_help(out)
+  out.write[[ Compare Greater Than Word Immediate  
+
+ rt.w[n] = (ra.w[n] > ext(s10)) ? 0xF… : 0x0… ]]
+end
+
+function si_cgti:new()
+  Node.new(self)
+  self.ra  = self.add_port(Input('ra'))
+  self.rt  = self.add_port(Output('rt'))
+  self.s10 = 0
+end
+
+function si_cgti:config(props)
+  Node.config(self, props)
+  props.delete('Name')
+  props.text_input(
+                    's10',
+                    function() return self.s10 end,
+                    function(v) self.s10 = v end,
+                    function(v) return math.evaluate(v) end
+                  )
+end
+
+function si_cgti:gen_code(out, scratch)
+  local rt  = 'r' .. self.rt.hex()
+  local ra  = 'r' .. self.ra.get_output().hex()
+  local s10 = math.evaluate(self.s10)
+  out.write( '\t .reg ' .. rt .. '\n')
+  out.write( '\t cgti ' .. rt .. ', ' .. ra .. ', ' .. s10 .. '\n' )
+end
+
+function si_cgti:get_tip(out)
+  out.write('Compare Greater Than Word Immediate ')
+end
+
+function si_cgti:get_type(port)
+  return 'qword'
+end
+
+-- #################################################### --
+
+local si_cgth = class(Node)
+
+function si_cgth:get_help(out)
+  out.write[[ Compare Greater Than Halfword  
+
+ rt.h[n] = (ra.h[n] > rb.h[n]) ? 0xF… : 0x0… ]]
+end
+
+function si_cgth:new()
+  Node.new(self)
+  self.ra = self.add_port(Input('ra'))
+  self.rb = self.add_port(Input('rb'))
+  self.rt = self.add_port(Output('rt'))
+end
+
+function si_cgth:config(props)
+  Node.config(self, props)
+  props.delete('Name')
+end
+
+function si_cgth:gen_code(out, scratch)
+  local rt = 'r' .. self.rt.hex()
+  local ra = 'r' .. self.ra.get_output().hex()
+  local rb = 'r' .. self.rb.get_output().hex()
+  out.write( '\t .reg ' .. rt .. '\n')
+  out.write( '\t cgth ' .. rt .. ', ' .. ra .. ', ' .. rb .. '\n' )
+end
+
+function si_cgth:get_tip(out)
+  out.write('Compare Greater Than Halfword ')
+end
+
+function si_cgth:get_type(port)
+  return 'qword'
+end
+
+-- #################################################### --
+
+local si_cgthi = class(Node)
+
+function si_cgthi:get_help(out)
+  out.write[[ Compare Greater Than Halfword Immediate  
+
+ rt.h[n] = (ra.h[n] > ext(s10)) ? 0xF… : 0x0… ]]
+end
+
+function si_cgthi:new()
+  Node.new(self)
+  self.ra  = self.add_port(Input('ra'))
+  self.rt  = self.add_port(Output('rt'))
+  self.s10 = 0
+end
+
+function si_cgthi:config(props)
+  Node.config(self, props)
+  props.delete('Name')
+  props.text_input(
+                    's10',
+                    function() return self.s10 end,
+                    function(v) self.s10 = v end,
+                    function(v) return math.evaluate(v) end
+                  )
+end
+
+function si_cgthi:gen_code(out, scratch)
+  local rt  = 'r' .. self.rt.hex()
+  local ra  = 'r' .. self.ra.get_output().hex()
+  local s10 = math.evaluate(self.s10)
+  out.write( '\t .reg ' .. rt .. '\n')
+  out.write( '\t cgthi ' .. rt .. ', ' .. ra .. ', ' .. s10 .. '\n' )
+end
+
+function si_cgthi:get_tip(out)
+  out.write('Compare Greater Than Halfword Immediate ')
+end
+
+function si_cgthi:get_type(port)
+  return 'qword'
+end
+
+-- #################################################### --
+
+local si_cgtb = class(Node)
+
+function si_cgtb:get_help(out)
+  out.write[[ Compare Greater Than Byte  
+
+ rt.b[n] = (ra.b[n] > rb.b[n]) ? 0xF… : 0x0… ]]
+end
+
+function si_cgtb:new()
+  Node.new(self)
+  self.ra = self.add_port(Input('ra'))
+  self.rb = self.add_port(Input('rb'))
+  self.rt = self.add_port(Output('rt'))
+end
+
+function si_cgtb:config(props)
+  Node.config(self, props)
+  props.delete('Name')
+end
+
+function si_cgtb:gen_code(out, scratch)
+  local rt = 'r' .. self.rt.hex()
+  local ra = 'r' .. self.ra.get_output().hex()
+  local rb = 'r' .. self.rb.get_output().hex()
+  out.write( '\t .reg ' .. rt .. '\n')
+  out.write( '\t cgtb ' .. rt .. ', ' .. ra .. ', ' .. rb .. '\n' )
+end
+
+function si_cgtb:get_tip(out)
+  out.write('Compare Greater Than Byte ')
+end
+
+function si_cgtb:get_type(port)
+  return 'qword'
+end
+
+-- #################################################### --
+
+local si_cgtbi = class(Node)
+
+function si_cgtbi:get_help(out)
+  out.write[[ Compare Greater Than Byte Immediate  
+
+ rt.b[n] = (ra.b[n] > s10) ? 0xF… : 0x0… ]]
+end
+
+function si_cgtbi:new()
+  Node.new(self)
+  self.ra  = self.add_port(Input('ra'))
+  self.rt  = self.add_port(Output('rt'))
+  self.s10 = 0
+end
+
+function si_cgtbi:config(props)
+  Node.config(self, props)
+  props.delete('Name')
+  props.text_input(
+                    's10',
+                    function() return self.s10 end,
+                    function(v) self.s10 = v end,
+                    function(v) return math.evaluate(v) end
+                  )
+end
+
+function si_cgtbi:gen_code(out, scratch)
+  local rt  = 'r' .. self.rt.hex()
+  local ra  = 'r' .. self.ra.get_output().hex()
+  local s10 = math.evaluate(self.s10)
+  out.write( '\t .reg ' .. rt .. '\n')
+  out.write( '\t cgtbi ' .. rt .. ', ' .. ra .. ', ' .. s10 .. '\n' )
+end
+
+function si_cgtbi:get_tip(out)
+  out.write('Compare Greater Than Byte Immediate ')
+end
+
+function si_cgtbi:get_type(port)
+  return 'qword'
+end
+
+register {
+  __name = 'SPU [Compare]',
+  __prologue = '',
+  __epilogue = '',
+  ['ceq'] = si_ceq,
+  ['ceqi'] = si_ceqi,
+  ['ceqh'] = si_ceqh,
+  ['ceqhi'] = si_ceqhi,
+  ['ceqb'] = si_ceqb,
+  ['ceqbi'] = si_ceqbi,
+  ['cgt'] = si_cgt,
+  ['cgti'] = si_cgti,
+  ['cgth'] = si_cgth,
+  ['cgthi'] = si_cgthi,
+  ['cgtb'] = si_cgtb,
+  ['cgtbi'] = si_cgtbi,
+}

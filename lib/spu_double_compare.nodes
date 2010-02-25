@@ -1,0 +1,161 @@
+-- #################################################### --
+
+local si_dfceq = class(Node)
+
+function si_dfceq:get_help(out)
+  out.write[[ Double Floating Compare Equal  
+
+ TODO ]]
+end
+
+function si_dfceq:new()
+  Node.new(self)
+  self.ra = self.add_port(Input('ra'))
+  self.rb = self.add_port(Input('rb'))
+  self.rt = self.add_port(Output('rt'))
+end
+
+function si_dfceq:config(props)
+  Node.config(self, props)
+  props.delete('Name')
+end
+
+function si_dfceq:gen_code(out, scratch)
+  local rt = 'r' .. self.rt.hex()
+  local ra = 'r' .. self.ra.get_output().hex()
+  local rb = 'r' .. self.rb.get_output().hex()
+  out.write( '\t .reg ' .. rt .. '\n')
+  out.write( '\t dfceq ' .. rt .. ', ' .. ra .. ', ' .. rb .. '\n' )
+end
+
+function si_dfceq:get_tip(out)
+  out.write('Double Floating Compare Equal ')
+end
+
+function si_dfceq:get_type(port)
+  return 'qword'
+end
+
+-- #################################################### --
+
+local si_dfcgt = class(Node)
+
+function si_dfcgt:get_help(out)
+  out.write[[ Double Floating Compare Greater Than  
+
+ TODO ]]
+end
+
+function si_dfcgt:new()
+  Node.new(self)
+  self.ra = self.add_port(Input('ra'))
+  self.rb = self.add_port(Input('rb'))
+  self.rt = self.add_port(Output('rt'))
+end
+
+function si_dfcgt:config(props)
+  Node.config(self, props)
+  props.delete('Name')
+end
+
+function si_dfcgt:gen_code(out, scratch)
+  local rt = 'r' .. self.rt.hex()
+  local ra = 'r' .. self.ra.get_output().hex()
+  local rb = 'r' .. self.rb.get_output().hex()
+  out.write( '\t .reg ' .. rt .. '\n')
+  out.write( '\t dfcgt ' .. rt .. ', ' .. ra .. ', ' .. rb .. '\n' )
+end
+
+function si_dfcgt:get_tip(out)
+  out.write('Double Floating Compare Greater Than ')
+end
+
+function si_dfcgt:get_type(port)
+  return 'qword'
+end
+
+-- #################################################### --
+
+local si_dfcmeq = class(Node)
+
+function si_dfcmeq:get_help(out)
+  out.write[[ Double Floating Compare Magnitude Equal  
+
+ TODO ]]
+end
+
+function si_dfcmeq:new()
+  Node.new(self)
+  self.ra = self.add_port(Input('ra'))
+  self.rb = self.add_port(Input('rb'))
+  self.rt = self.add_port(Output('rt'))
+end
+
+function si_dfcmeq:config(props)
+  Node.config(self, props)
+  props.delete('Name')
+end
+
+function si_dfcmeq:gen_code(out, scratch)
+  local rt = 'r' .. self.rt.hex()
+  local ra = 'r' .. self.ra.get_output().hex()
+  local rb = 'r' .. self.rb.get_output().hex()
+  out.write( '\t .reg ' .. rt .. '\n')
+  out.write( '\t dfcmeq ' .. rt .. ', ' .. ra .. ', ' .. rb .. '\n' )
+end
+
+function si_dfcmeq:get_tip(out)
+  out.write('Double Floating Compare Magnitude Equal ')
+end
+
+function si_dfcmeq:get_type(port)
+  return 'qword'
+end
+
+-- #################################################### --
+
+local si_dfcmgt = class(Node)
+
+function si_dfcmgt:get_help(out)
+  out.write[[ Double Floating Compare Magnitude Greater Than  
+
+ TODO ]]
+end
+
+function si_dfcmgt:new()
+  Node.new(self)
+  self.ra = self.add_port(Input('ra'))
+  self.rb = self.add_port(Input('rb'))
+  self.rt = self.add_port(Output('rt'))
+end
+
+function si_dfcmgt:config(props)
+  Node.config(self, props)
+  props.delete('Name')
+end
+
+function si_dfcmgt:gen_code(out, scratch)
+  local rt = 'r' .. self.rt.hex()
+  local ra = 'r' .. self.ra.get_output().hex()
+  local rb = 'r' .. self.rb.get_output().hex()
+  out.write( '\t .reg ' .. rt .. '\n')
+  out.write( '\t dfcmgt ' .. rt .. ', ' .. ra .. ', ' .. rb .. '\n' )
+end
+
+function si_dfcmgt:get_tip(out)
+  out.write('Double Floating Compare Magnitude Greater Than ')
+end
+
+function si_dfcmgt:get_type(port)
+  return 'qword'
+end
+
+register {
+  __name = 'SPU [Double Compare]',
+  __prologue = '',
+  __epilogue = '',
+  ['dfceq'] = si_dfceq,
+  ['dfcgt'] = si_dfcgt,
+  ['dfcmeq'] = si_dfcmeq,
+  ['dfcmgt'] = si_dfcmgt,
+}

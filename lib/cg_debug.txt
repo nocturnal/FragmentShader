@@ -1,0 +1,27 @@
+PREFIX Debug
+PREFIX_NODE_NAME debug
+
+# --------
+NAME Color A
+NODE_NAME color_a
+TYPE IN
+VARTYPE float4
+VARSEL color_a
+HELP [DEBUG ONLY] color_a
+
+# --------
+NAME Color B
+NODE_NAME color_b
+TYPE IN
+VARTYPE float4
+VARSEL color_b
+HELP [DEBUG ONLY] color_b
+
+# --------
+NAME Color Result
+NODE_NAME color_result
+TYPE OUT
+VARTYPE float4
+VARSEL color_result
+HELP [DEBUG ONLY] color_result
+

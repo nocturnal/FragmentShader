@@ -1,0 +1,380 @@
+-- #################################################### --
+
+local si_shlqbi = class(Node)
+
+function si_shlqbi:get_help(out)
+  out.write[[ Shift Left Quadword by Bits  
+
+ rt = ra << (rb.b[3] & 0x07) ]]
+end
+
+function si_shlqbi:new()
+  Node.new(self)
+  self.ra = self.add_port(Input('ra'))
+  self.rb = self.add_port(Input('rb'))
+  self.rt = self.add_port(Output('rt'))
+end
+
+function si_shlqbi:config(props)
+  Node.config(self, props)
+  props.delete('Name')
+end
+
+function si_shlqbi:gen_code(out, scratch)
+  local rt = 'r' .. self.rt.hex()
+  local ra = 'r' .. self.ra.get_output().hex()
+  local rb = 'r' .. self.rb.get_output().hex()
+  out.write( '\t .reg ' .. rt .. '\n')
+  out.write( '\t shlqbi ' .. rt .. ', ' .. ra .. ', ' .. rb .. '\n' )
+end
+
+function si_shlqbi:get_tip(out)
+  out.write('Shift Left Quadword by Bits ')
+end
+
+function si_shlqbi:get_type(port)
+  return 'qword'
+end
+
+-- #################################################### --
+
+local si_shlqbii = class(Node)
+
+function si_shlqbii:get_help(out)
+  out.write[[ Shift Left Quadword by Bits Immediate  
+
+ rt = ra << (u3 & 0x07) ]]
+end
+
+function si_shlqbii:new()
+  Node.new(self)
+  self.ra  = self.add_port(Input('ra'))
+  self.rt  = self.add_port(Output('rt'))
+  self.u3 = 0
+end
+
+function si_shlqbii:config(props)
+  Node.config(self, props)
+  props.delete('Name')
+  props.text_input(
+                    'u3',
+                    function() return self.u3 end,
+                    function(v) self.u3 = v end,
+                    function(v) return math.evaluate(v) end
+                  )
+end
+
+function si_shlqbii:gen_code(out, scratch)
+  local rt  = 'r' .. self.rt.hex()
+  local ra  = 'r' .. self.ra.get_output().hex()
+  local u3 = math.evaluate(self.u3)
+  out.write( '\t .reg ' .. rt .. '\n')
+  out.write( '\t shlqbii ' .. rt .. ', ' .. ra .. ', ' .. u3 .. '\n' )
+end
+
+function si_shlqbii:get_tip(out)
+  out.write('Shift Left Quadword by Bits Immediate ')
+end
+
+function si_shlqbii:get_type(port)
+  return 'qword'
+end
+
+-- #################################################### --
+
+local si_shlqby = class(Node)
+
+function si_shlqby:get_help(out)
+  out.write[[ Shift Left Quadword by Bytes  
+
+ rt = ra << ((rb.b[3] & 0x1F) * 8) ]]
+end
+
+function si_shlqby:new()
+  Node.new(self)
+  self.ra = self.add_port(Input('ra'))
+  self.rb = self.add_port(Input('rb'))
+  self.rt = self.add_port(Output('rt'))
+end
+
+function si_shlqby:config(props)
+  Node.config(self, props)
+  props.delete('Name')
+end
+
+function si_shlqby:gen_code(out, scratch)
+  local rt = 'r' .. self.rt.hex()
+  local ra = 'r' .. self.ra.get_output().hex()
+  local rb = 'r' .. self.rb.get_output().hex()
+  out.write( '\t .reg ' .. rt .. '\n')
+  out.write( '\t shlqby ' .. rt .. ', ' .. ra .. ', ' .. rb .. '\n' )
+end
+
+function si_shlqby:get_tip(out)
+  out.write('Shift Left Quadword by Bytes ')
+end
+
+function si_shlqby:get_type(port)
+  return 'qword'
+end
+
+-- #################################################### --
+
+local si_shlqbyi = class(Node)
+
+function si_shlqbyi:get_help(out)
+  out.write[[ Shift Left Quadword by Bytes Immediate  
+
+ rt = ra << ((u5 & 0x1F) * 8) ]]
+end
+
+function si_shlqbyi:new()
+  Node.new(self)
+  self.ra  = self.add_port(Input('ra'))
+  self.rt  = self.add_port(Output('rt'))
+  self.u5 = 0
+end
+
+function si_shlqbyi:config(props)
+  Node.config(self, props)
+  props.delete('Name')
+  props.text_input(
+                    'u5',
+                    function() return self.u5 end,
+                    function(v) self.u5 = v end,
+                    function(v) return math.evaluate(v) end
+                  )
+end
+
+function si_shlqbyi:gen_code(out, scratch)
+  local rt  = 'r' .. self.rt.hex()
+  local ra  = 'r' .. self.ra.get_output().hex()
+  local u5 = math.evaluate(self.u5)
+  out.write( '\t .reg ' .. rt .. '\n')
+  out.write( '\t shlqbyi ' .. rt .. ', ' .. ra .. ', ' .. u5 .. '\n' )
+end
+
+function si_shlqbyi:get_tip(out)
+  out.write('Shift Left Quadword by Bytes Immediate ')
+end
+
+function si_shlqbyi:get_type(port)
+  return 'qword'
+end
+
+-- #################################################### --
+
+local si_shlqbybi = class(Node)
+
+function si_shlqbybi:get_help(out)
+  out.write[[ Shift Left Quadword by Bytes from Bit Shift Count  
+
+ rt = ra << (rb.b[3] & 0xF8) ]]
+end
+
+function si_shlqbybi:new()
+  Node.new(self)
+  self.ra = self.add_port(Input('ra'))
+  self.rb = self.add_port(Input('rb'))
+  self.rt = self.add_port(Output('rt'))
+end
+
+function si_shlqbybi:config(props)
+  Node.config(self, props)
+  props.delete('Name')
+end
+
+function si_shlqbybi:gen_code(out, scratch)
+  local rt = 'r' .. self.rt.hex()
+  local ra = 'r' .. self.ra.get_output().hex()
+  local rb = 'r' .. self.rb.get_output().hex()
+  out.write( '\t .reg ' .. rt .. '\n')
+  out.write( '\t shlqbybi ' .. rt .. ', ' .. ra .. ', ' .. rb .. '\n' )
+end
+
+function si_shlqbybi:get_tip(out)
+  out.write('Shift Left Quadword by Bytes from Bit Shift Count ')
+end
+
+function si_shlqbybi:get_type(port)
+  return 'qword'
+end
+
+-- #################################################### --
+
+local si_shl = class(Node)
+
+function si_shl:get_help(out)
+  out.write[[ Shift Left Word  
+
+ rt.w[n] = ra.w[n] << (rb.w[n] & 0x3F) ]]
+end
+
+function si_shl:new()
+  Node.new(self)
+  self.ra = self.add_port(Input('ra'))
+  self.rb = self.add_port(Input('rb'))
+  self.rt = self.add_port(Output('rt'))
+end
+
+function si_shl:config(props)
+  Node.config(self, props)
+  props.delete('Name')
+end
+
+function si_shl:gen_code(out, scratch)
+  local rt = 'r' .. self.rt.hex()
+  local ra = 'r' .. self.ra.get_output().hex()
+  local rb = 'r' .. self.rb.get_output().hex()
+  out.write( '\t .reg ' .. rt .. '\n')
+  out.write( '\t shl ' .. rt .. ', ' .. ra .. ', ' .. rb .. '\n' )
+end
+
+function si_shl:get_tip(out)
+  out.write('Shift Left Word ')
+end
+
+function si_shl:get_type(port)
+  return 'qword'
+end
+
+-- #################################################### --
+
+local si_shli = class(Node)
+
+function si_shli:get_help(out)
+  out.write[[ Shift Left Word Immediate  
+
+ rt.w[n] = ra.w[n] << (u6 & 0x3F) ]]
+end
+
+function si_shli:new()
+  Node.new(self)
+  self.ra  = self.add_port(Input('ra'))
+  self.rt  = self.add_port(Output('rt'))
+  self.u6 = 0
+end
+
+function si_shli:config(props)
+  Node.config(self, props)
+  props.delete('Name')
+  props.text_input(
+                    'u6',
+                    function() return self.u6 end,
+                    function(v) self.u6 = v end,
+                    function(v) return math.evaluate(v) end
+                  )
+end
+
+function si_shli:gen_code(out, scratch)
+  local rt  = 'r' .. self.rt.hex()
+  local ra  = 'r' .. self.ra.get_output().hex()
+  local u6 = math.evaluate(self.u6)
+  out.write( '\t .reg ' .. rt .. '\n')
+  out.write( '\t shli ' .. rt .. ', ' .. ra .. ', ' .. u6 .. '\n' )
+end
+
+function si_shli:get_tip(out)
+  out.write('Shift Left Word Immediate ')
+end
+
+function si_shli:get_type(port)
+  return 'qword'
+end
+
+-- #################################################### --
+
+local si_shlh = class(Node)
+
+function si_shlh:get_help(out)
+  out.write[[ Shift Left Halfword  
+
+ rt.h[n] = ra.h[n] << (rb.h[n] & 0x1F) ]]
+end
+
+function si_shlh:new()
+  Node.new(self)
+  self.ra = self.add_port(Input('ra'))
+  self.rb = self.add_port(Input('rb'))
+  self.rt = self.add_port(Output('rt'))
+end
+
+function si_shlh:config(props)
+  Node.config(self, props)
+  props.delete('Name')
+end
+
+function si_shlh:gen_code(out, scratch)
+  local rt = 'r' .. self.rt.hex()
+  local ra = 'r' .. self.ra.get_output().hex()
+  local rb = 'r' .. self.rb.get_output().hex()
+  out.write( '\t .reg ' .. rt .. '\n')
+  out.write( '\t shlh ' .. rt .. ', ' .. ra .. ', ' .. rb .. '\n' )
+end
+
+function si_shlh:get_tip(out)
+  out.write('Shift Left Halfword ')
+end
+
+function si_shlh:get_type(port)
+  return 'qword'
+end
+
+-- #################################################### --
+
+local si_shlhi = class(Node)
+
+function si_shlhi:get_help(out)
+  out.write[[ Shift Left Halfword Immediate  
+
+ rt.h[n] = ra.h[n] << (u5 & 0x1F) ]]
+end
+
+function si_shlhi:new()
+  Node.new(self)
+  self.ra  = self.add_port(Input('ra'))
+  self.rt  = self.add_port(Output('rt'))
+  self.u5 = 0
+end
+
+function si_shlhi:config(props)
+  Node.config(self, props)
+  props.delete('Name')
+  props.text_input(
+                    'u5',
+                    function() return self.u5 end,
+                    function(v) self.u5 = v end,
+                    function(v) return math.evaluate(v) end
+                  )
+end
+
+function si_shlhi:gen_code(out, scratch)
+  local rt  = 'r' .. self.rt.hex()
+  local ra  = 'r' .. self.ra.get_output().hex()
+  local u5 = math.evaluate(self.u5)
+  out.write( '\t .reg ' .. rt .. '\n')
+  out.write( '\t shlhi ' .. rt .. ', ' .. ra .. ', ' .. u5 .. '\n' )
+end
+
+function si_shlhi:get_tip(out)
+  out.write('Shift Left Halfword Immediate ')
+end
+
+function si_shlhi:get_type(port)
+  return 'qword'
+end
+
+register {
+  __name = 'SPU [Shift (Left)] ',
+  __prologue = '',
+  __epilogue = '',
+  ['shlqbi'] = si_shlqbi,
+  ['shlqbii'] = si_shlqbii,
+  ['shlqby'] = si_shlqby,
+  ['shlqbyi'] = si_shlqbyi,
+  ['shlqbybi'] = si_shlqbybi,
+  ['shl'] = si_shl,
+  ['shli'] = si_shli,
+  ['shlh'] = si_shlh,
+  ['shlhi'] = si_shlhi,
+}

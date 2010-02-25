@@ -1,0 +1,804 @@
+-- #################################################### --
+
+local si_and = class(Node)
+
+function si_and:get_help(out)
+  out.write[[ And  
+
+ rt = ra & rb ]]
+end
+
+function si_and:new()
+  Node.new(self)
+  self.ra = self.add_port(Input('ra'))
+  self.rb = self.add_port(Input('rb'))
+  self.rt = self.add_port(Output('rt'))
+end
+
+function si_and:config(props)
+  Node.config(self, props)
+  props.delete('Name')
+end
+
+function si_and:gen_code(out, scratch)
+  local rt = 'r' .. self.rt.hex()
+  local ra = 'r' .. self.ra.get_output().hex()
+  local rb = 'r' .. self.rb.get_output().hex()
+  out.write( '\t .reg ' .. rt .. '\n')
+  out.write( '\t and ' .. rt .. ', ' .. ra .. ', ' .. rb .. '\n' )
+end
+
+function si_and:get_tip(out)
+  out.write('And ')
+end
+
+function si_and:get_type(port)
+  return 'qword'
+end
+
+-- #################################################### --
+
+local si_andc = class(Node)
+
+function si_andc:get_help(out)
+  out.write[[ And with Complement  
+
+ rt = ra & ~rb ]]
+end
+
+function si_andc:new()
+  Node.new(self)
+  self.ra = self.add_port(Input('ra'))
+  self.rb = self.add_port(Input('rb'))
+  self.rt = self.add_port(Output('rt'))
+end
+
+function si_andc:config(props)
+  Node.config(self, props)
+  props.delete('Name')
+end
+
+function si_andc:gen_code(out, scratch)
+  local rt = 'r' .. self.rt.hex()
+  local ra = 'r' .. self.ra.get_output().hex()
+  local rb = 'r' .. self.rb.get_output().hex()
+  out.write( '\t .reg ' .. rt .. '\n')
+  out.write( '\t andc ' .. rt .. ', ' .. ra .. ', ' .. rb .. '\n' )
+end
+
+function si_andc:get_tip(out)
+  out.write('And with Complement ')
+end
+
+function si_andc:get_type(port)
+  return 'qword'
+end
+
+-- #################################################### --
+
+local si_andi = class(Node)
+
+function si_andi:get_help(out)
+  out.write[[ And Word Immediate  
+
+ rt.w[n] = ra.w[n] & ext(s10) ]]
+end
+
+function si_andi:new()
+  Node.new(self)
+  self.ra  = self.add_port(Input('ra'))
+  self.rt  = self.add_port(Output('rt'))
+  self.s10 = 0
+end
+
+function si_andi:config(props)
+  Node.config(self, props)
+  props.delete('Name')
+  props.text_input(
+                    's10',
+                    function() return self.s10 end,
+                    function(v) self.s10 = v end,
+                    function(v) return math.evaluate(v) end
+                  )
+end
+
+function si_andi:gen_code(out, scratch)
+  local rt  = 'r' .. self.rt.hex()
+  local ra  = 'r' .. self.ra.get_output().hex()
+  local s10 = math.evaluate(self.s10)
+  out.write( '\t .reg ' .. rt .. '\n')
+  out.write( '\t andi ' .. rt .. ', ' .. ra .. ', ' .. s10 .. '\n' )
+end
+
+function si_andi:get_tip(out)
+  out.write('And Word Immediate ')
+end
+
+function si_andi:get_type(port)
+  return 'qword'
+end
+
+-- #################################################### --
+
+local si_andhi = class(Node)
+
+function si_andhi:get_help(out)
+  out.write[[ And Halfword Immediate  
+
+ rt.h[n] = ra.h[n] & ext(s10) ]]
+end
+
+function si_andhi:new()
+  Node.new(self)
+  self.ra  = self.add_port(Input('ra'))
+  self.rt  = self.add_port(Output('rt'))
+  self.s10 = 0
+end
+
+function si_andhi:config(props)
+  Node.config(self, props)
+  props.delete('Name')
+  props.text_input(
+                    's10',
+                    function() return self.s10 end,
+                    function(v) self.s10 = v end,
+                    function(v) return math.evaluate(v) end
+                  )
+end
+
+function si_andhi:gen_code(out, scratch)
+  local rt  = 'r' .. self.rt.hex()
+  local ra  = 'r' .. self.ra.get_output().hex()
+  local s10 = math.evaluate(self.s10)
+  out.write( '\t .reg ' .. rt .. '\n')
+  out.write( '\t andhi ' .. rt .. ', ' .. ra .. ', ' .. s10 .. '\n' )
+end
+
+function si_andhi:get_tip(out)
+  out.write('And Halfword Immediate ')
+end
+
+function si_andhi:get_type(port)
+  return 'qword'
+end
+
+-- #################################################### --
+
+local si_andbi = class(Node)
+
+function si_andbi:get_help(out)
+  out.write[[ And Byte Immediate  
+
+ rt.b[n] = ra.b[n] & s10 ]]
+end
+
+function si_andbi:new()
+  Node.new(self)
+  self.ra  = self.add_port(Input('ra'))
+  self.rt  = self.add_port(Output('rt'))
+  self.s10 = 0
+end
+
+function si_andbi:config(props)
+  Node.config(self, props)
+  props.delete('Name')
+  props.text_input(
+                    's10',
+                    function() return self.s10 end,
+                    function(v) self.s10 = v end,
+                    function(v) return math.evaluate(v) end
+                  )
+end
+
+function si_andbi:gen_code(out, scratch)
+  local rt  = 'r' .. self.rt.hex()
+  local ra  = 'r' .. self.ra.get_output().hex()
+  local s10 = math.evaluate(self.s10)
+  out.write( '\t .reg ' .. rt .. '\n')
+  out.write( '\t andbi ' .. rt .. ', ' .. ra .. ', ' .. s10 .. '\n' )
+end
+
+function si_andbi:get_tip(out)
+  out.write('And Byte Immediate ')
+end
+
+function si_andbi:get_type(port)
+  return 'qword'
+end
+
+-- #################################################### --
+
+local si_xor = class(Node)
+
+function si_xor:get_help(out)
+  out.write[[ Exclusive Or  
+
+ rt = ra ^ rb ]]
+end
+
+function si_xor:new()
+  Node.new(self)
+  self.ra = self.add_port(Input('ra'))
+  self.rb = self.add_port(Input('rb'))
+  self.rt = self.add_port(Output('rt'))
+end
+
+function si_xor:config(props)
+  Node.config(self, props)
+  props.delete('Name')
+end
+
+function si_xor:gen_code(out, scratch)
+  local rt = 'r' .. self.rt.hex()
+  local ra = 'r' .. self.ra.get_output().hex()
+  local rb = 'r' .. self.rb.get_output().hex()
+  out.write( '\t .reg ' .. rt .. '\n')
+  out.write( '\t xor ' .. rt .. ', ' .. ra .. ', ' .. rb .. '\n' )
+end
+
+function si_xor:get_tip(out)
+  out.write('Exclusive Or ')
+end
+
+function si_xor:get_type(port)
+  return 'qword'
+end
+
+-- #################################################### --
+
+local si_eqv = class(Node)
+
+function si_eqv:get_help(out)
+  out.write[[ Exclusive Or with Compliment (Equivalent)  
+
+ rt = ~(ra ^ rb) = (ra == rb) ]]
+end
+
+function si_eqv:new()
+  Node.new(self)
+  self.ra = self.add_port(Input('ra'))
+  self.rb = self.add_port(Input('rb'))
+  self.rt = self.add_port(Output('rt'))
+end
+
+function si_eqv:config(props)
+  Node.config(self, props)
+  props.delete('Name')
+end
+
+function si_eqv:gen_code(out, scratch)
+  local rt = 'r' .. self.rt.hex()
+  local ra = 'r' .. self.ra.get_output().hex()
+  local rb = 'r' .. self.rb.get_output().hex()
+  out.write( '\t .reg ' .. rt .. '\n')
+  out.write( '\t eqv ' .. rt .. ', ' .. ra .. ', ' .. rb .. '\n' )
+end
+
+function si_eqv:get_tip(out)
+  out.write('Exclusive Or with Compliment (Equivalent) ')
+end
+
+function si_eqv:get_type(port)
+  return 'qword'
+end
+
+-- #################################################### --
+
+local si_xori = class(Node)
+
+function si_xori:get_help(out)
+  out.write[[ Exclusive Or Word Immediate  
+
+ rt.w[n] = ra.w[n] ^ ext(s10) ]]
+end
+
+function si_xori:new()
+  Node.new(self)
+  self.ra  = self.add_port(Input('ra'))
+  self.rt  = self.add_port(Output('rt'))
+  self.s10 = 0
+end
+
+function si_xori:config(props)
+  Node.config(self, props)
+  props.delete('Name')
+  props.text_input(
+                    's10',
+                    function() return self.s10 end,
+                    function(v) self.s10 = v end,
+                    function(v) return math.evaluate(v) end
+                  )
+end
+
+function si_xori:gen_code(out, scratch)
+  local rt  = 'r' .. self.rt.hex()
+  local ra  = 'r' .. self.ra.get_output().hex()
+  local s10 = math.evaluate(self.s10)
+  out.write( '\t .reg ' .. rt .. '\n')
+  out.write( '\t xori ' .. rt .. ', ' .. ra .. ', ' .. s10 .. '\n' )
+end
+
+function si_xori:get_tip(out)
+  out.write('Exclusive Or Word Immediate ')
+end
+
+function si_xori:get_type(port)
+  return 'qword'
+end
+
+-- #################################################### --
+
+local si_xorhi = class(Node)
+
+function si_xorhi:get_help(out)
+  out.write[[ Exclusive Or Halfword Immediate  
+
+ rt.h[n] = ra.h[n] ^ ext(s10) ]]
+end
+
+function si_xorhi:new()
+  Node.new(self)
+  self.ra  = self.add_port(Input('ra'))
+  self.rt  = self.add_port(Output('rt'))
+  self.s10 = 0
+end
+
+function si_xorhi:config(props)
+  Node.config(self, props)
+  props.delete('Name')
+  props.text_input(
+                    's10',
+                    function() return self.s10 end,
+                    function(v) self.s10 = v end,
+                    function(v) return math.evaluate(v) end
+                  )
+end
+
+function si_xorhi:gen_code(out, scratch)
+  local rt  = 'r' .. self.rt.hex()
+  local ra  = 'r' .. self.ra.get_output().hex()
+  local s10 = math.evaluate(self.s10)
+  out.write( '\t .reg ' .. rt .. '\n')
+  out.write( '\t xorhi ' .. rt .. ', ' .. ra .. ', ' .. s10 .. '\n' )
+end
+
+function si_xorhi:get_tip(out)
+  out.write('Exclusive Or Halfword Immediate ')
+end
+
+function si_xorhi:get_type(port)
+  return 'qword'
+end
+
+-- #################################################### --
+
+local si_xorbi = class(Node)
+
+function si_xorbi:get_help(out)
+  out.write[[ Exclusive Or Byte Immediate  
+
+ rt.b[n] = ra.b[n] ^ s10 ]]
+end
+
+function si_xorbi:new()
+  Node.new(self)
+  self.ra  = self.add_port(Input('ra'))
+  self.rt  = self.add_port(Output('rt'))
+  self.s10 = 0
+end
+
+function si_xorbi:config(props)
+  Node.config(self, props)
+  props.delete('Name')
+  props.text_input(
+                    's10',
+                    function() return self.s10 end,
+                    function(v) self.s10 = v end,
+                    function(v) return math.evaluate(v) end
+                  )
+end
+
+function si_xorbi:gen_code(out, scratch)
+  local rt  = 'r' .. self.rt.hex()
+  local ra  = 'r' .. self.ra.get_output().hex()
+  local s10 = math.evaluate(self.s10)
+  out.write( '\t .reg ' .. rt .. '\n')
+  out.write( '\t xorbi ' .. rt .. ', ' .. ra .. ', ' .. s10 .. '\n' )
+end
+
+function si_xorbi:get_tip(out)
+  out.write('Exclusive Or Byte Immediate ')
+end
+
+function si_xorbi:get_type(port)
+  return 'qword'
+end
+
+-- #################################################### --
+
+local si_nand = class(Node)
+
+function si_nand:get_help(out)
+  out.write[[ Nand  
+
+ rt = ~(ra & rb) ]]
+end
+
+function si_nand:new()
+  Node.new(self)
+  self.ra = self.add_port(Input('ra'))
+  self.rb = self.add_port(Input('rb'))
+  self.rt = self.add_port(Output('rt'))
+end
+
+function si_nand:config(props)
+  Node.config(self, props)
+  props.delete('Name')
+end
+
+function si_nand:gen_code(out, scratch)
+  local rt = 'r' .. self.rt.hex()
+  local ra = 'r' .. self.ra.get_output().hex()
+  local rb = 'r' .. self.rb.get_output().hex()
+  out.write( '\t .reg ' .. rt .. '\n')
+  out.write( '\t nand ' .. rt .. ', ' .. ra .. ', ' .. rb .. '\n' )
+end
+
+function si_nand:get_tip(out)
+  out.write('Nand ')
+end
+
+function si_nand:get_type(port)
+  return 'qword'
+end
+
+-- #################################################### --
+
+local si_nor = class(Node)
+
+function si_nor:get_help(out)
+  out.write[[ Nor  
+
+ rt = ~(ra | rb) ]]
+end
+
+function si_nor:new()
+  Node.new(self)
+  self.ra = self.add_port(Input('ra'))
+  self.rb = self.add_port(Input('rb'))
+  self.rt = self.add_port(Output('rt'))
+end
+
+function si_nor:config(props)
+  Node.config(self, props)
+  props.delete('Name')
+end
+
+function si_nor:gen_code(out, scratch)
+  local rt = 'r' .. self.rt.hex()
+  local ra = 'r' .. self.ra.get_output().hex()
+  local rb = 'r' .. self.rb.get_output().hex()
+  out.write( '\t .reg ' .. rt .. '\n')
+  out.write( '\t nor ' .. rt .. ', ' .. ra .. ', ' .. rb .. '\n' )
+end
+
+function si_nor:get_tip(out)
+  out.write('Nor ')
+end
+
+function si_nor:get_type(port)
+  return 'qword'
+end
+
+-- #################################################### --
+
+local si_or = class(Node)
+
+function si_or:get_help(out)
+  out.write[[ Or  
+
+ rt = ra | rb ]]
+end
+
+function si_or:new()
+  Node.new(self)
+  self.ra = self.add_port(Input('ra'))
+  self.rb = self.add_port(Input('rb'))
+  self.rt = self.add_port(Output('rt'))
+end
+
+function si_or:config(props)
+  Node.config(self, props)
+  props.delete('Name')
+end
+
+function si_or:gen_code(out, scratch)
+  local rt = 'r' .. self.rt.hex()
+  local ra = 'r' .. self.ra.get_output().hex()
+  local rb = 'r' .. self.rb.get_output().hex()
+  out.write( '\t .reg ' .. rt .. '\n')
+  out.write( '\t or ' .. rt .. ', ' .. ra .. ', ' .. rb .. '\n' )
+end
+
+function si_or:get_tip(out)
+  out.write('Or ')
+end
+
+function si_or:get_type(port)
+  return 'qword'
+end
+
+-- #################################################### --
+
+local si_orc = class(Node)
+
+function si_orc:get_help(out)
+  out.write[[ Or with Complement  
+
+ rt = ra | ~rb ]]
+end
+
+function si_orc:new()
+  Node.new(self)
+  self.ra = self.add_port(Input('ra'))
+  self.rb = self.add_port(Input('rb'))
+  self.rt = self.add_port(Output('rt'))
+end
+
+function si_orc:config(props)
+  Node.config(self, props)
+  props.delete('Name')
+end
+
+function si_orc:gen_code(out, scratch)
+  local rt = 'r' .. self.rt.hex()
+  local ra = 'r' .. self.ra.get_output().hex()
+  local rb = 'r' .. self.rb.get_output().hex()
+  out.write( '\t .reg ' .. rt .. '\n')
+  out.write( '\t orc ' .. rt .. ', ' .. ra .. ', ' .. rb .. '\n' )
+end
+
+function si_orc:get_tip(out)
+  out.write('Or with Complement ')
+end
+
+function si_orc:get_type(port)
+  return 'qword'
+end
+
+-- #################################################### --
+
+local si_ori = class(Node)
+
+function si_ori:get_help(out)
+  out.write[[ Or Word Immediate  
+
+ rt.w[n] = ra.w[n] | ext(s10) ]]
+end
+
+function si_ori:new()
+  Node.new(self)
+  self.ra  = self.add_port(Input('ra'))
+  self.rt  = self.add_port(Output('rt'))
+  self.s10 = 0
+end
+
+function si_ori:config(props)
+  Node.config(self, props)
+  props.delete('Name')
+  props.text_input(
+                    's10',
+                    function() return self.s10 end,
+                    function(v) self.s10 = v end,
+                    function(v) return math.evaluate(v) end
+                  )
+end
+
+function si_ori:gen_code(out, scratch)
+  local rt  = 'r' .. self.rt.hex()
+  local ra  = 'r' .. self.ra.get_output().hex()
+  local s10 = math.evaluate(self.s10)
+  out.write( '\t .reg ' .. rt .. '\n')
+  out.write( '\t ori ' .. rt .. ', ' .. ra .. ', ' .. s10 .. '\n' )
+end
+
+function si_ori:get_tip(out)
+  out.write('Or Word Immediate ')
+end
+
+function si_ori:get_type(port)
+  return 'qword'
+end
+
+-- #################################################### --
+
+local si_orhi = class(Node)
+
+function si_orhi:get_help(out)
+  out.write[[ Or Halfword Immediate  
+
+ rt.h[n] = ra.h[n] | ext(s10) ]]
+end
+
+function si_orhi:new()
+  Node.new(self)
+  self.ra  = self.add_port(Input('ra'))
+  self.rt  = self.add_port(Output('rt'))
+  self.s10 = 0
+end
+
+function si_orhi:config(props)
+  Node.config(self, props)
+  props.delete('Name')
+  props.text_input(
+                    's10',
+                    function() return self.s10 end,
+                    function(v) self.s10 = v end,
+                    function(v) return math.evaluate(v) end
+                  )
+end
+
+function si_orhi:gen_code(out, scratch)
+  local rt  = 'r' .. self.rt.hex()
+  local ra  = 'r' .. self.ra.get_output().hex()
+  local s10 = math.evaluate(self.s10)
+  out.write( '\t .reg ' .. rt .. '\n')
+  out.write( '\t orhi ' .. rt .. ', ' .. ra .. ', ' .. s10 .. '\n' )
+end
+
+function si_orhi:get_tip(out)
+  out.write('Or Halfword Immediate ')
+end
+
+function si_orhi:get_type(port)
+  return 'qword'
+end
+
+-- #################################################### --
+
+local si_iohl = class(Node)
+
+function si_iohl:get_help(out)
+  out.write[[ Immediate Or Halfword Lower  
+
+ rt.w[n] |= u16 ]]
+end
+
+function si_iohl:new()
+  Node.new(self)
+  self.ra  = self.add_port(Input('ra'))
+  self.rt  = self.add_port(Output('rt'))
+  self.u16 = 0
+end
+
+function si_iohl:config(props)
+  Node.config(self, props)
+  props.delete('Name')
+  props.text_input(
+                    'u16',
+                    function() return self.u16 end,
+                    function(v) self.u16 = v end,
+                    function(v) return math.evaluate(v) end
+                  )
+end
+
+function si_iohl:gen_code(out, scratch)
+  local rt  = 'r' .. self.rt.hex()
+  local ra  = 'r' .. self.ra.get_output().hex()
+  local u16 = math.evaluate(self.u16)
+  out.write( '\t .define ' .. rt .. ' ' .. ra .. '\n')
+  out.write( '\t iohl ' .. rt .. ', ' .. u16 .. '\n' )
+end
+
+function si_iohl:get_tip(out)
+  out.write('Immediate Or Halfword Lower ')
+end
+
+function si_iohl:get_type(port)
+  return 'qword'
+end
+
+-- #################################################### --
+
+local si_orbi = class(Node)
+
+function si_orbi:get_help(out)
+  out.write[[ Or Byte Immediate  
+
+ rt.b[n] = ra.b[n] | s10 ]]
+end
+
+function si_orbi:new()
+  Node.new(self)
+  self.ra  = self.add_port(Input('ra'))
+  self.rt  = self.add_port(Output('rt'))
+  self.s10 = 0
+end
+
+function si_orbi:config(props)
+  Node.config(self, props)
+  props.delete('Name')
+  props.text_input(
+                    's10',
+                    function() return self.s10 end,
+                    function(v) self.s10 = v end,
+                    function(v) return math.evaluate(v) end
+                  )
+end
+
+function si_orbi:gen_code(out, scratch)
+  local rt  = 'r' .. self.rt.hex()
+  local ra  = 'r' .. self.ra.get_output().hex()
+  local s10 = math.evaluate(self.s10)
+  out.write( '\t .reg ' .. rt .. '\n')
+  out.write( '\t orbi ' .. rt .. ', ' .. ra .. ', ' .. s10 .. '\n' )
+end
+
+function si_orbi:get_tip(out)
+  out.write('Or Byte Immediate ')
+end
+
+function si_orbi:get_type(port)
+  return 'qword'
+end
+
+-- #################################################### --
+
+local si_orx = class(Node)
+
+function si_orx:get_help(out)
+  out.write[[ Or Across  
+
+ rt=0; rt.w[0] = (ra.w[0] | ra.w[1] | ra.w[2] | ra.w[3]) ]]
+end
+
+function si_orx:new()
+  Node.new(self)
+  self.ra = self.add_port(Input('ra'))
+  self.rt = self.add_port(Output('rt'))
+end
+
+function si_orx:config(props)
+  Node.config(self, props)
+  props.delete('Name')
+end
+
+function si_orx:gen_code(out, scratch)
+  local rt = 'r' .. self.rt.hex()
+  local ra = 'r' .. self.ra.get_output().hex()
+  out.write( '\t .reg ' .. rt .. '\n')
+  out.write( '\t orx ' .. rt .. ', ' .. ra .. '\n' )
+end
+
+function si_orx:get_tip(out)
+  out.write('Or Across ')
+end
+
+function si_orx:get_type(port)
+  return 'qword'
+end
+
+register {
+  __name = 'SPU [Logical]',
+  __prologue = '',
+  __epilogue = '',
+  ['and'] = si_and,
+  ['andc'] = si_andc,
+  ['andi'] = si_andi,
+  ['andhi'] = si_andhi,
+  ['andbi'] = si_andbi,
+  ['xor'] = si_xor,
+  ['eqv'] = si_eqv,
+  ['xori'] = si_xori,
+  ['xorhi'] = si_xorhi,
+  ['xorbi'] = si_xorbi,
+  ['nand'] = si_nand,
+  ['nor'] = si_nor,
+  ['or'] = si_or,
+  ['orc'] = si_orc,
+  ['ori'] = si_ori,
+  ['orhi'] = si_orhi,
+  ['iohl'] = si_iohl,
+  ['orbi'] = si_orbi,
+  ['orx'] = si_orx,
+}

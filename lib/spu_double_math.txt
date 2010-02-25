@@ -1,0 +1,9 @@
+NODENAME	SPU [Double Math]
+dfa 	"rt, ra, rb"	Double Floating Add 	TODO
+dfs 	"rt, ra, rb"	Double Floating Subtract 	TODO
+dfm 	"rt, ra, rb"	Double Floating Multiply 	TODO
+dfma 	"rt, ra, rb"	Double Floating Multiply and Add 	TODO
+dfms 	"rt, ra, rb"	Double Floating Multiply and Subtract 	TODO
+dfnma 	"rt, ra, rb"	Double Floating Negative Multiply and Add 	TODO
+dfnms 	"rt, ra, rb"	Double Floating Negative Multiply and Subtract 	TODO
+dftsv 	"rt, ra, u7"	Double Floating Test Special Value 	TODO

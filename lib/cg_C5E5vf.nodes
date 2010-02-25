@@ -1,0 +1,260 @@
+-- #################################################### --
+
+local cg_c5e5vf_lighting_light_position = class(Node)
+
+function cg_c5e5vf_lighting_light_position:get_help(out)
+  out.write[[TODO]]
+end
+
+function cg_c5e5vf_lighting_light_position:new()
+  Node.new(self)
+  self.d = self.add_port(Output('d'))
+end
+
+function cg_c5e5vf_lighting_light_position:get_type(port)
+  return 'float3'
+end
+
+function cg_c5e5vf_lighting_light_position:config(props)
+  Node.config(self, props)
+  props.delete('Name')
+end
+
+function cg_c5e5vf_lighting_light_position:gen_code(out, scratch)
+  out.write( '\t#define r' .. self.d.hex() .. ' light.position\n' )
+end
+
+function cg_c5e5vf_lighting_light_position:get_tip(out)
+  out.write( 'light.position' )
+end
+
+-- #################################################### --
+
+local cg_c5e5vf_lighting_light_color = class(Node)
+
+function cg_c5e5vf_lighting_light_color:get_help(out)
+  out.write[[TODO]]
+end
+
+function cg_c5e5vf_lighting_light_color:new()
+  Node.new(self)
+  self.d = self.add_port(Output('d'))
+end
+
+function cg_c5e5vf_lighting_light_color:get_type(port)
+  return 'float3'
+end
+
+function cg_c5e5vf_lighting_light_color:config(props)
+  Node.config(self, props)
+  props.delete('Name')
+end
+
+function cg_c5e5vf_lighting_light_color:gen_code(out, scratch)
+  out.write( '\t#define r' .. self.d.hex() .. ' light.color\n' )
+end
+
+function cg_c5e5vf_lighting_light_color:get_tip(out)
+  out.write( 'light.color' )
+end
+
+-- #################################################### --
+
+local cg_c5e5vf_lighting_position = class(Node)
+
+function cg_c5e5vf_lighting_position:get_help(out)
+  out.write[[TODO]]
+end
+
+function cg_c5e5vf_lighting_position:new()
+  Node.new(self)
+  self.d = self.add_port(Output('d'))
+end
+
+function cg_c5e5vf_lighting_position:get_type(port)
+  return 'float3'
+end
+
+function cg_c5e5vf_lighting_position:config(props)
+  Node.config(self, props)
+  props.delete('Name')
+end
+
+function cg_c5e5vf_lighting_position:gen_code(out, scratch)
+  out.write( '\t#define r' .. self.d.hex() .. ' P\n' )
+end
+
+function cg_c5e5vf_lighting_position:get_tip(out)
+  out.write( 'position' )
+end
+
+-- #################################################### --
+
+local cg_c5e5vf_lighting_normal = class(Node)
+
+function cg_c5e5vf_lighting_normal:get_help(out)
+  out.write[[TODO]]
+end
+
+function cg_c5e5vf_lighting_normal:new()
+  Node.new(self)
+  self.d = self.add_port(Output('d'))
+end
+
+function cg_c5e5vf_lighting_normal:get_type(port)
+  return 'float3'
+end
+
+function cg_c5e5vf_lighting_normal:config(props)
+  Node.config(self, props)
+  props.delete('Name')
+end
+
+function cg_c5e5vf_lighting_normal:gen_code(out, scratch)
+  out.write( '\t#define r' .. self.d.hex() .. ' N\n' )
+end
+
+function cg_c5e5vf_lighting_normal:get_tip(out)
+  out.write( 'normal' )
+end
+
+-- #################################################### --
+
+local cg_c5e5vf_lighting_eye_position = class(Node)
+
+function cg_c5e5vf_lighting_eye_position:get_help(out)
+  out.write[[TODO]]
+end
+
+function cg_c5e5vf_lighting_eye_position:new()
+  Node.new(self)
+  self.d = self.add_port(Output('d'))
+end
+
+function cg_c5e5vf_lighting_eye_position:get_type(port)
+  return 'float3'
+end
+
+function cg_c5e5vf_lighting_eye_position:config(props)
+  Node.config(self, props)
+  props.delete('Name')
+end
+
+function cg_c5e5vf_lighting_eye_position:gen_code(out, scratch)
+  out.write( '\t#define r' .. self.d.hex() .. ' eyePosition\n' )
+end
+
+function cg_c5e5vf_lighting_eye_position:get_tip(out)
+  out.write( 'eye_position' )
+end
+
+-- #################################################### --
+
+local cg_c5e5vf_lighting_shininess = class(Node)
+
+function cg_c5e5vf_lighting_shininess:get_help(out)
+  out.write[[TODO]]
+end
+
+function cg_c5e5vf_lighting_shininess:new()
+  Node.new(self)
+  self.d = self.add_port(Output('d'))
+end
+
+function cg_c5e5vf_lighting_shininess:get_type(port)
+  return 'float'
+end
+
+function cg_c5e5vf_lighting_shininess:config(props)
+  Node.config(self, props)
+  props.delete('Name')
+end
+
+function cg_c5e5vf_lighting_shininess:gen_code(out, scratch)
+  out.write( '\t#define r' .. self.d.hex() .. ' shininess\n' )
+end
+
+function cg_c5e5vf_lighting_shininess:get_tip(out)
+  out.write( 'shininess' )
+end
+
+-- #################################################### --
+
+local cg_c5e5vf_lighting_out_diffuse_color = class(Node)
+
+function cg_c5e5vf_lighting_out_diffuse_color:get_help(out)
+  out.write[[TODO]]
+end
+
+function cg_c5e5vf_lighting_out_diffuse_color:new()
+  Node.new(self)
+  self.a = self.add_port(Input('a'))
+end
+
+function cg_c5e5vf_lighting_out_diffuse_color:get_type(port)
+  return nil
+end
+
+function cg_c5e5vf_lighting_out_diffuse_color:config(props)
+  Node.config(self, props)
+  props.delete('Name')
+end
+
+function cg_c5e5vf_lighting_out_diffuse_color:gen_code(out, scratch)
+  local a    = 'r' .. self.a.get_output().hex()
+
+  out.write( '\tdiffuseResult = ' .. a .. ';\n' )
+end
+
+function cg_c5e5vf_lighting_out_diffuse_color:get_tip(out)
+  out.write( 'diffuse_color' )
+end
+
+-- #################################################### --
+
+local cg_c5e5vf_lighting_out_specular_color = class(Node)
+
+function cg_c5e5vf_lighting_out_specular_color:get_help(out)
+  out.write[[TODO]]
+end
+
+function cg_c5e5vf_lighting_out_specular_color:new()
+  Node.new(self)
+  self.a = self.add_port(Input('a'))
+end
+
+function cg_c5e5vf_lighting_out_specular_color:get_type(port)
+  return nil
+end
+
+function cg_c5e5vf_lighting_out_specular_color:config(props)
+  Node.config(self, props)
+  props.delete('Name')
+end
+
+function cg_c5e5vf_lighting_out_specular_color:gen_code(out, scratch)
+  local a    = 'r' .. self.a.get_output().hex()
+
+  out.write( '\tspecularResult = ' .. a .. ';\n' )
+end
+
+function cg_c5e5vf_lighting_out_specular_color:get_tip(out)
+  out.write( 'specular_color' )
+end
+
+-- #################################################### --
+
+register {
+  __name = 'Cg [_C5E5 vertex lighting]',
+  __prologue = '',
+  __epilogue = '',
+
+  ['Light Position (float3)']        = cg_c5e5vf_lighting_light_position,
+  ['Light Color (float3)']           = cg_c5e5vf_lighting_light_color,
+  ['Position (float3)']              = cg_c5e5vf_lighting_position,
+  ['Normal (float3)']                = cg_c5e5vf_lighting_normal,
+  ['Eye Position (float3)']          = cg_c5e5vf_lighting_eye_position,
+  ['Shininess (float)']              = cg_c5e5vf_lighting_shininess,
+  ['[OUT] Diffuse Color (float3)']   = cg_c5e5vf_lighting_out_diffuse_color,
+  ['[OUT] Specular Color (float3)']  = cg_c5e5vf_lighting_out_specular_color,
+}

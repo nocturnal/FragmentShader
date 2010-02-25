@@ -1,0 +1,196 @@
+-- #################################################### --
+
+local si_absdb = class(Node)
+
+function si_absdb:get_help(out)
+  out.write[[ Absolute Differences of Bytes 
+
+ rt.b[n] = abs(ra.b[n] = rb.b[n]) ]]
+end
+
+function si_absdb:new()
+  Node.new(self)
+  self.ra = self.add_port(Input('ra'))
+  self.rb = self.add_port(Input('rb'))
+  self.rt = self.add_port(Output('rt'))
+end
+
+function si_absdb:config(props)
+  Node.config(self, props)
+  props.delete('Name')
+end
+
+function si_absdb:gen_code(out, scratch)
+  local rt = 'r' .. self.rt.hex()
+  local ra = 'r' .. self.ra.get_output().hex()
+  local rb = 'r' .. self.rb.get_output().hex()
+  out.write( '\t .reg ' .. rt .. '\n')
+  out.write( '\t absdb ' .. rt .. ', ' .. ra .. ', ' .. rb .. '\n' )
+end
+
+function si_absdb:get_tip(out)
+  out.write('Absolute Differences of Bytes')
+end
+
+function si_absdb:get_type(port)
+  return 'qword'
+end
+
+-- #################################################### --
+
+local si_avgb = class(Node)
+
+function si_avgb:get_help(out)
+  out.write[[ Average Bytes  
+
+ rt.b[n] = (ra.b[n] + rb.b[n] + 1) / 2 ]]
+end
+
+function si_avgb:new()
+  Node.new(self)
+  self.ra = self.add_port(Input('ra'))
+  self.rb = self.add_port(Input('rb'))
+  self.rt = self.add_port(Output('rt'))
+end
+
+function si_avgb:config(props)
+  Node.config(self, props)
+  props.delete('Name')
+end
+
+function si_avgb:gen_code(out, scratch)
+  local rt = 'r' .. self.rt.hex()
+  local ra = 'r' .. self.ra.get_output().hex()
+  local rb = 'r' .. self.rb.get_output().hex()
+  out.write( '\t .reg ' .. rt .. '\n')
+  out.write( '\t avgb ' .. rt .. ', ' .. ra .. ', ' .. rb .. '\n' )
+end
+
+function si_avgb:get_tip(out)
+  out.write('Average Bytes ')
+end
+
+function si_avgb:get_type(port)
+  return 'qword'
+end
+
+-- #################################################### --
+
+local si_clz = class(Node)
+
+function si_clz:get_help(out)
+  out.write[[ Count Leading Zeros  
+
+ rt.w[n] = leadingZeroCount(ra.w[n]) ]]
+end
+
+function si_clz:new()
+  Node.new(self)
+  self.ra = self.add_port(Input('ra'))
+  self.rt = self.add_port(Output('rt'))
+end
+
+function si_clz:config(props)
+  Node.config(self, props)
+  props.delete('Name')
+end
+
+function si_clz:gen_code(out, scratch)
+  local rt = 'r' .. self.rt.hex()
+  local ra = 'r' .. self.ra.get_output().hex()
+  out.write( '\t .reg ' .. rt .. '\n')
+  out.write( '\t clz ' .. rt .. ', ' .. ra .. '\n' )
+end
+
+function si_clz:get_tip(out)
+  out.write('Count Leading Zeros ')
+end
+
+function si_clz:get_type(port)
+  return 'qword'
+end
+
+-- #################################################### --
+
+local si_cntb = class(Node)
+
+function si_cntb:get_help(out)
+  out.write[[ Count Ones in Bytes  
+
+ rt.b[n] = numOneBits(ra.b[n]) ]]
+end
+
+function si_cntb:new()
+  Node.new(self)
+  self.ra = self.add_port(Input('ra'))
+  self.rt = self.add_port(Output('rt'))
+end
+
+function si_cntb:config(props)
+  Node.config(self, props)
+  props.delete('Name')
+end
+
+function si_cntb:gen_code(out, scratch)
+  local rt = 'r' .. self.rt.hex()
+  local ra = 'r' .. self.ra.get_output().hex()
+  out.write( '\t .reg ' .. rt .. '\n')
+  out.write( '\t cntb ' .. rt .. ', ' .. ra .. '\n' )
+end
+
+function si_cntb:get_tip(out)
+  out.write('Count Ones in Bytes ')
+end
+
+function si_cntb:get_type(port)
+  return 'qword'
+end
+
+-- #################################################### --
+
+local si_sumb = class(Node)
+
+function si_sumb:get_help(out)
+  out.write[[ Sum Bytes into Halfwords  
+
+ rt.h[n] = (n&1) ? (rb.b[(n-1)*2] + rb.b[(n-1)*2+1] + rb.b[(n-1)*2+2] + rb.b[(n-1)*2+3]) : (ra.b[n*2] + ra.b[n*2+1] + ra.b[n*2+2] + ra.b[n*2+3]) ]]
+end
+
+function si_sumb:new()
+  Node.new(self)
+  self.ra = self.add_port(Input('ra'))
+  self.rb = self.add_port(Input('rb'))
+  self.rt = self.add_port(Output('rt'))
+end
+
+function si_sumb:config(props)
+  Node.config(self, props)
+  props.delete('Name')
+end
+
+function si_sumb:gen_code(out, scratch)
+  local rt = 'r' .. self.rt.hex()
+  local ra = 'r' .. self.ra.get_output().hex()
+  local rb = 'r' .. self.rb.get_output().hex()
+  out.write( '\t .reg ' .. rt .. '\n')
+  out.write( '\t sumb ' .. rt .. ', ' .. ra .. ', ' .. rb .. '\n' )
+end
+
+function si_sumb:get_tip(out)
+  out.write('Sum Bytes into Halfwords ')
+end
+
+function si_sumb:get_type(port)
+  return 'qword'
+end
+
+register {
+  __name = 'SPU [Misc]',
+  __prologue = '',
+  __epilogue = '',
+  ['absdb'] = si_absdb,
+  ['avgb'] = si_avgb,
+  ['clz'] = si_clz,
+  ['cntb'] = si_cntb,
+  ['sumb'] = si_sumb,
+}

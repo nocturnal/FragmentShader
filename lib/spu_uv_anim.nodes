@@ -1,0 +1,209 @@
+-- #################################################### --
+
+local si_u_in = class(Node)
+
+function si_u_in:get_help(out)
+  out.write[[ u-input generator 
+
+ blah ]]
+end
+
+function si_u_in:new()
+  Node.new(self)
+  self.rt = self.add_port(Output('rt'))
+end
+
+function si_u_in:config(props)
+  Node.config(self, props)
+  props.delete('Name')
+end
+
+function si_u_in:gen_code(out, scratch)
+  local rt = 'r' .. self.rt.hex()
+  out.write( '\t .define ' .. rt .. ' u_in\n')
+end
+
+function si_u_in:get_tip(out)
+  out.write('u-input generator')
+end
+
+function si_u_in:get_type(port)
+  return 'qword'
+end
+
+-- #################################################### --
+
+local si_v_in = class(Node)
+
+function si_v_in:get_help(out)
+  out.write[[ v-input generator 
+
+ blahblah ]]
+end
+
+function si_v_in:new()
+  Node.new(self)
+  self.rt = self.add_port(Output('rt'))
+end
+
+function si_v_in:config(props)
+  Node.config(self, props)
+  props.delete('Name')
+end
+
+function si_v_in:gen_code(out, scratch)
+  local rt = 'r' .. self.rt.hex()
+  out.write( '\t .define ' .. rt .. ' v_in\n')
+end
+
+function si_v_in:get_tip(out)
+  out.write('v-input generator')
+end
+
+function si_v_in:get_type(port)
+  return 'qword'
+end
+
+-- #################################################### --
+
+local si_uv_time = class(Node)
+
+function si_uv_time:get_help(out)
+  out.write[[ time-input generator 
+
+ blahblah ]]
+end
+
+function si_uv_time:new()
+  Node.new(self)
+  self.rt = self.add_port(Output('rt'))
+end
+
+function si_uv_time:config(props)
+  Node.config(self, props)
+  props.delete('Name')
+end
+
+function si_uv_time:gen_code(out, scratch)
+  local rt = 'r' .. self.rt.hex()
+  out.write( '\t .define ' .. rt .. ' uv_time\n')
+end
+
+function si_uv_time:get_tip(out)
+  out.write('time-input generator')
+end
+
+function si_uv_time:get_type(port)
+  return 'qword'
+end
+
+-- #################################################### --
+
+local si_uv_ndx = class(Node)
+
+function si_uv_ndx:get_help(out)
+  out.write[[ uv current index generator 
+
+ blahblah ]]
+end
+
+function si_uv_ndx:new()
+  Node.new(self)
+  self.rt = self.add_port(Output('rt'))
+end
+
+function si_uv_ndx:config(props)
+  Node.config(self, props)
+  props.delete('Name')
+end
+
+function si_uv_ndx:gen_code(out, scratch)
+  local rt = 'r' .. self.rt.hex()
+  out.write( '\t .define ' .. rt .. ' uv_ndx\n')
+end
+
+function si_uv_ndx:get_tip(out)
+  out.write('uv current index generator')
+end
+
+function si_uv_ndx:get_type(port)
+  return 'qword'
+end
+
+-- #################################################### --
+
+local si_u_out = class(Node)
+
+function si_u_out:get_help(out)
+  out.write[[ u-output consumer 
+
+ blah ]]
+end
+
+function si_u_out:new()
+  Node.new(self)
+  self.ra = self.add_port(Input('ra'))
+end
+
+function si_u_out:config(props)
+  Node.config(self, props)
+  props.delete('Name')
+end
+
+function si_u_out:gen_code(out, scratch)
+  local ra = 'r' .. self.ra.get_output().hex()
+  out.write( '\t .define u_out ' .. ra .. '\n')
+end
+
+function si_u_out:get_tip(out)
+  out.write('u-output consumer')
+end
+
+function si_u_out:get_type(port)
+  return 'qword'
+end
+
+-- #################################################### --
+
+local si_v_out = class(Node)
+
+function si_v_out:get_help(out)
+  out.write[[ v-output consumer 
+
+ blahblah ]]
+end
+
+function si_v_out:new()
+  Node.new(self)
+  self.ra = self.add_port(Input('ra'))
+end
+
+function si_v_out:config(props)
+  Node.config(self, props)
+  props.delete('Name')
+end
+
+function si_v_out:gen_code(out, scratch)
+  local ra = 'r' .. self.ra.get_output().hex()
+  out.write( '\t .define v_out ' .. ra .. '\n')
+end
+
+function si_v_out:get_tip(out)
+  out.write('v-output consumer')
+end
+
+function si_v_out:get_type(port)
+  return 'qword'
+end
+
+register {
+  __name = 'SPU [_UV Anim]',
+  __prologue = '',
+  __epilogue = '',
+  ['u_in'] = si_u_in,
+  ['v_in'] = si_v_in,
+  ['uv_time'] = si_uv_time,
+  ['uv_ndx'] = si_uv_ndx,
+  ['u_out'] = si_u_out,
+  ['v_out'] = si_v_out,
+}

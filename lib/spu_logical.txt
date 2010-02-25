@@ -1,0 +1,20 @@
+NODENAME	SPU [Logical]
+and 	"rt, ra, rb"	And 	rt = ra & rb
+andc 	"rt, ra, rb"	And with Complement 	rt = ra & ~rb
+andi 	"rt, ra, s10"	And Word Immediate 	rt.w[n] = ra.w[n] & ext(s10)
+andhi 	"rt, ra, s10"	And Halfword Immediate 	rt.h[n] = ra.h[n] & ext(s10)
+andbi 	"rt, ra, s10"	And Byte Immediate 	rt.b[n] = ra.b[n] & s10
+xor 	"rt, ra, rb"	Exclusive Or 	rt = ra ^ rb
+eqv 	"rt, ra, rb"	Exclusive Or with Compliment (Equivalent) 	rt = ~(ra ^ rb) = (ra == rb)
+xori 	"rt, ra, s10"	Exclusive Or Word Immediate 	rt.w[n] = ra.w[n] ^ ext(s10)
+xorhi 	"rt, ra, s10"	Exclusive Or Halfword Immediate 	rt.h[n] = ra.h[n] ^ ext(s10)
+xorbi 	"rt, ra, s10"	Exclusive Or Byte Immediate 	rt.b[n] = ra.b[n] ^ s10
+nand 	"rt, ra, rb"	Nand 	rt = ~(ra & rb)
+nor 	"rt, ra, rb"	Nor 	rt = ~(ra | rb)
+or 	"rt, ra, rb"	Or 	rt = ra | rb
+orc 	"rt, ra, rb"	Or with Complement 	rt = ra | ~rb
+ori 	"rt, ra, s10"	Or Word Immediate 	rt.w[n] = ra.w[n] | ext(s10)
+orhi 	"rt, ra, s10"	Or Halfword Immediate 	rt.h[n] = ra.h[n] | ext(s10)
+iohl 	"rta, u16"	Immediate Or Halfword Lower 	rt.w[n] |= u16
+orbi 	"rt, ra, s10"	Or Byte Immediate 	rt.b[n] = ra.b[n] | s10
+orx 	"rt, ra"	Or Across 	rt=0; rt.w[0] = (ra.w[0] | ra.w[1] | ra.w[2] | ra.w[3])

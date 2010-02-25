@@ -1,0 +1,388 @@
+-- #################################################### --
+
+local si_shufb = class(Node)
+
+function si_shufb:get_help(out)
+  out.write[[ Shuffle Bytes 
+
+ Let x = msk.b[n], where n goes from 0 to 15:
+ - if x in 0 .. 0x7F:
+ o if (x & 0x10) == 0x00, then d.b[n] = r0.b[x & 0x0F]
+ o if (x & 0x10) == 0x10, then d.b[n] = r1.b[x & 0x0F]
+ - if x in 0x80 .. 0xBF: d.b[n] = 0x00
+ - if x in 0xC0 .. 0xDF: d.b[n] = 0xFF
+ - if x in 0xE0 .. 0xFF: d.b[n] = 0x80 ]]
+end
+
+function si_shufb:new()
+  Node.new(self)
+  self.ra = self.add_port(Input('ra'))
+  self.rb = self.add_port(Input('rb'))
+  self.rc = self.add_port(Input('rc'))
+  self.rt = self.add_port(Output('rt'))
+end
+
+function si_shufb:config(props)
+  Node.config(self, props)
+  props.delete('Name')
+end
+
+function si_shufb:gen_code(out, scratch)
+  local rt = 'r' .. self.rt.hex()
+  local ra = 'r' .. self.ra.get_output().hex()
+  local rb = 'r' .. self.rb.get_output().hex()
+  local rc = 'r' .. self.rc.get_output().hex()
+  out.write( '\t .reg ' .. rt .. '\n')
+  out.write( '\t shufb ' .. rt .. ', ' .. ra .. ', ' .. rb .. ', ' .. rc .. '\n' )
+end
+
+function si_shufb:get_tip(out)
+  out.write('Shuffle Bytes')
+end
+
+function si_shufb:get_type(port)
+  return 'qword'
+end
+
+-- #################################################### --
+
+local si_cdd = class(Node)
+
+function si_cdd:get_help(out)
+  out.write[[ Generate Controls for Doubleword Insertion (d-form) 
+
+   ]]
+end
+
+function si_cdd:new()
+  Node.new(self)
+  self.ra  = self.add_port(Input('ra'))
+  self.rt  = self.add_port(Output('rt'))
+  self.u7 = 0
+end
+
+function si_cdd:config(props)
+  Node.config(self, props)
+  props.delete('Name')
+  props.text_input(
+                    'u7',
+                    function() return self.u7 end,
+                    function(v) self.u7 = v end,
+                    function(v) return math.evaluate(v) end
+                  )
+end
+
+function si_cdd:gen_code(out, scratch)
+  local rt  = 'r' .. self.rt.hex()
+  local ra  = 'r' .. self.ra.get_output().hex()
+  local u7 = math.evaluate(self.u7)
+  out.write( '\t .reg ' .. rt .. '\n')
+  out.write( '\t cdd ' .. rt .. ', ' .. u7 .. '(' .. ra .. ')\n' )
+end
+
+function si_cdd:get_tip(out)
+  out.write('Generate Controls for Doubleword Insertion (d-form)')
+end
+
+function si_cdd:get_type(port)
+  return 'qword'
+end
+
+-- #################################################### --
+
+local si_cdx = class(Node)
+
+function si_cdx:get_help(out)
+  out.write[[ Generate Controls for Doubleword Insertion (x-form) 
+
+   ]]
+end
+
+function si_cdx:new()
+  Node.new(self)
+  self.ra = self.add_port(Input('ra'))
+  self.rb = self.add_port(Input('rb'))
+  self.rt = self.add_port(Output('rt'))
+end
+
+function si_cdx:config(props)
+  Node.config(self, props)
+  props.delete('Name')
+end
+
+function si_cdx:gen_code(out, scratch)
+  local rt = 'r' .. self.rt.hex()
+  local ra = 'r' .. self.ra.get_output().hex()
+  local rb = 'r' .. self.rb.get_output().hex()
+  out.write( '\t .reg ' .. rt .. '\n')
+  out.write( '\t cdx ' .. rt .. ', ' .. ra .. ', ' .. rb .. '\n' )
+end
+
+function si_cdx:get_tip(out)
+  out.write('Generate Controls for Doubleword Insertion (x-form)')
+end
+
+function si_cdx:get_type(port)
+  return 'qword'
+end
+
+-- #################################################### --
+
+local si_cwd = class(Node)
+
+function si_cwd:get_help(out)
+  out.write[[ Generate Controls for Word Insertion (d-form) 
+
+   ]]
+end
+
+function si_cwd:new()
+  Node.new(self)
+  self.ra  = self.add_port(Input('ra'))
+  self.rt  = self.add_port(Output('rt'))
+  self.u7 = 0
+end
+
+function si_cwd:config(props)
+  Node.config(self, props)
+  props.delete('Name')
+  props.text_input(
+                    'u7',
+                    function() return self.u7 end,
+                    function(v) self.u7 = v end,
+                    function(v) return math.evaluate(v) end
+                  )
+end
+
+function si_cwd:gen_code(out, scratch)
+  local rt  = 'r' .. self.rt.hex()
+  local ra  = 'r' .. self.ra.get_output().hex()
+  local u7 = math.evaluate(self.u7)
+  out.write( '\t .reg ' .. rt .. '\n')
+  out.write( '\t cwd ' .. rt .. ', ' .. u7 .. '(' .. ra .. ')\n' )
+end
+
+function si_cwd:get_tip(out)
+  out.write('Generate Controls for Word Insertion (d-form)')
+end
+
+function si_cwd:get_type(port)
+  return 'qword'
+end
+
+-- #################################################### --
+
+local si_cwx = class(Node)
+
+function si_cwx:get_help(out)
+  out.write[[ Generate Controls for Word Insertion (x-form) 
+
+   ]]
+end
+
+function si_cwx:new()
+  Node.new(self)
+  self.ra = self.add_port(Input('ra'))
+  self.rb = self.add_port(Input('rb'))
+  self.rt = self.add_port(Output('rt'))
+end
+
+function si_cwx:config(props)
+  Node.config(self, props)
+  props.delete('Name')
+end
+
+function si_cwx:gen_code(out, scratch)
+  local rt = 'r' .. self.rt.hex()
+  local ra = 'r' .. self.ra.get_output().hex()
+  local rb = 'r' .. self.rb.get_output().hex()
+  out.write( '\t .reg ' .. rt .. '\n')
+  out.write( '\t cwx ' .. rt .. ', ' .. ra .. ', ' .. rb .. '\n' )
+end
+
+function si_cwx:get_tip(out)
+  out.write('Generate Controls for Word Insertion (x-form)')
+end
+
+function si_cwx:get_type(port)
+  return 'qword'
+end
+
+-- #################################################### --
+
+local si_chd = class(Node)
+
+function si_chd:get_help(out)
+  out.write[[ Generate Controls for Halfword Insertion (d-form)  
+
+  ]]
+end
+
+function si_chd:new()
+  Node.new(self)
+  self.ra  = self.add_port(Input('ra'))
+  self.rt  = self.add_port(Output('rt'))
+  self.u7 = 0
+end
+
+function si_chd:config(props)
+  Node.config(self, props)
+  props.delete('Name')
+  props.text_input(
+                    'u7',
+                    function() return self.u7 end,
+                    function(v) self.u7 = v end,
+                    function(v) return math.evaluate(v) end
+                  )
+end
+
+function si_chd:gen_code(out, scratch)
+  local rt  = 'r' .. self.rt.hex()
+  local ra  = 'r' .. self.ra.get_output().hex()
+  local u7 = math.evaluate(self.u7)
+  out.write( '\t .reg ' .. rt .. '\n')
+  out.write( '\t chd ' .. rt .. ', ' .. u7 .. '(' .. ra .. ')\n' )
+end
+
+function si_chd:get_tip(out)
+  out.write('Generate Controls for Halfword Insertion (d-form) ')
+end
+
+function si_chd:get_type(port)
+  return 'qword'
+end
+
+-- #################################################### --
+
+local si_chx = class(Node)
+
+function si_chx:get_help(out)
+  out.write[[ Generate Controls for Halfword Insertion (x-form)  
+
+  ]]
+end
+
+function si_chx:new()
+  Node.new(self)
+  self.ra = self.add_port(Input('ra'))
+  self.rb = self.add_port(Input('rb'))
+  self.rt = self.add_port(Output('rt'))
+end
+
+function si_chx:config(props)
+  Node.config(self, props)
+  props.delete('Name')
+end
+
+function si_chx:gen_code(out, scratch)
+  local rt = 'r' .. self.rt.hex()
+  local ra = 'r' .. self.ra.get_output().hex()
+  local rb = 'r' .. self.rb.get_output().hex()
+  out.write( '\t .reg ' .. rt .. '\n')
+  out.write( '\t chx ' .. rt .. ', ' .. ra .. ', ' .. rb .. '\n' )
+end
+
+function si_chx:get_tip(out)
+  out.write('Generate Controls for Halfword Insertion (x-form) ')
+end
+
+function si_chx:get_type(port)
+  return 'qword'
+end
+
+-- #################################################### --
+
+local si_cbd = class(Node)
+
+function si_cbd:get_help(out)
+  out.write[[ Generate Controls for Byte Insertion (d-form)  
+
+  ]]
+end
+
+function si_cbd:new()
+  Node.new(self)
+  self.ra  = self.add_port(Input('ra'))
+  self.rt  = self.add_port(Output('rt'))
+  self.u7 = 0
+end
+
+function si_cbd:config(props)
+  Node.config(self, props)
+  props.delete('Name')
+  props.text_input(
+                    'u7',
+                    function() return self.u7 end,
+                    function(v) self.u7 = v end,
+                    function(v) return math.evaluate(v) end
+                  )
+end
+
+function si_cbd:gen_code(out, scratch)
+  local rt  = 'r' .. self.rt.hex()
+  local ra  = 'r' .. self.ra.get_output().hex()
+  local u7 = math.evaluate(self.u7)
+  out.write( '\t .reg ' .. rt .. '\n')
+  out.write( '\t cbd ' .. rt .. ', ' .. u7 .. '(' .. ra .. ')\n' )
+end
+
+function si_cbd:get_tip(out)
+  out.write('Generate Controls for Byte Insertion (d-form) ')
+end
+
+function si_cbd:get_type(port)
+  return 'qword'
+end
+
+-- #################################################### --
+
+local si_cbx = class(Node)
+
+function si_cbx:get_help(out)
+  out.write[[ Generate Controls for Byte Insertion (x-form)  
+
+  ]]
+end
+
+function si_cbx:new()
+  Node.new(self)
+  self.ra = self.add_port(Input('ra'))
+  self.rb = self.add_port(Input('rb'))
+  self.rt = self.add_port(Output('rt'))
+end
+
+function si_cbx:config(props)
+  Node.config(self, props)
+  props.delete('Name')
+end
+
+function si_cbx:gen_code(out, scratch)
+  local rt = 'r' .. self.rt.hex()
+  local ra = 'r' .. self.ra.get_output().hex()
+  local rb = 'r' .. self.rb.get_output().hex()
+  out.write( '\t .reg ' .. rt .. '\n')
+  out.write( '\t cbx ' .. rt .. ', ' .. ra .. ', ' .. rb .. '\n' )
+end
+
+function si_cbx:get_tip(out)
+  out.write('Generate Controls for Byte Insertion (x-form) ')
+end
+
+function si_cbx:get_type(port)
+  return 'qword'
+end
+
+register {
+  __name = 'SPU [Byte Shuffle]',
+  __prologue = '',
+  __epilogue = '',
+  ['shufb'] = si_shufb,
+  ['cdd'] = si_cdd,
+  ['cdx'] = si_cdx,
+  ['cwd'] = si_cwd,
+  ['cwx'] = si_cwx,
+  ['chd'] = si_chd,
+  ['chx'] = si_chx,
+  ['cbd'] = si_cbd,
+  ['cbx'] = si_cbx,
+}

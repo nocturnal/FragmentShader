@@ -1,0 +1,18 @@
+select	cg_sel_lt	Select Less Than	<
+select	cg_sel_gt	Select Greater Than	>
+select	cg_sel_gte	Select Greater Than Equal	>=
+select	cg_sel_lte	Select Less Than Equal	<=
+select	cg_sel_eq	Select Equal	==
+select	cg_sel_neq	Select Not Equal	!=
+
+compare	cg_cmp_lt	Compare Less Than	<
+compare	cg_cmp_gt	Compare Greater Than	>
+compare	cg_cmp_gte	Compare Greater Than Equal	>=
+compare	cg_cmp_lte	Compare Less Than Equal	<=
+compare	cg_cmp_eq	Compare Equal	==
+compare	cg_cmp_neq	Compare Not Equal	!=
+
+comparez	cg_cmp_ltz	Compare Less Than Zero	<
+comparez	cg_cmp_gtz	Compare Greater Than Zero	>
+comparez	cg_cmp_gtez	Compare Greater Than Equal Zero	>=
+comparez	cg_cmp_ltez	Compare Less Than Equal Zero	<=

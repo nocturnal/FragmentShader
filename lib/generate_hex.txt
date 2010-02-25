@@ -1,0 +1,6 @@
+function generate_hex()
+	local new_var = {}
+	local new_var_hex = string.match( tostring(new_var), 'table: (.*)')
+
+	return (new_var_hex)
+end

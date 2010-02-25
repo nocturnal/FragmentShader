@@ -1,0 +1,26 @@
+NODENAME	SPU [Integer Math]
+a	"rt, ra, rb"	Add Word	rt.w[n] = ra.w[n] + rb.h[w]
+ai 	"rt, ra, s10"	Add Word Immediate 	rt.w[n] = ra.w[n] + ext(s10)
+ah 	"rt, ra, rb"	Add Halfword 	rt.h[n] = ra.h[n] + rb.h[n]
+ahi 	"rt, ra, s10"	Add Halfword Immediate 	rt.h[n] = ra.h[n] + ext(s10)
+addx 	"rt, ra, rb"	Add Extended (With Carry)	rt.w[n] = (ra.w[n] + rb.w[n] + (rt.w[n]&1))
+bg 	"rt, ra, rb"	Borrow Generate 	rt .w[n] = ((-ra.w[n] + rb.w[n]) < 0) ? 0 : 1
+bgx 	"rt, ra, rb"	Borrow Generate Extended (With Borrow) 	rt .w[n] = ((-ra.w[n] + rb.w[n] + (rt.w[n]&1)-1) < 0) ? 0 : 1
+cg 	"rt, ra, rb"	Carry Generate 	rt.w[n] = (ra.w[n] + rb.w[n]) > 0xF… ? 1 : 0
+cgx 	"rt, ra, rb"	Carry Generate Extended (With Carry)	rt.w[n] = (ra.w[n] + rb.w[n] + (rt.w[n]&1)) > 0xF… ? 1 : 0
+sf 	"rt, ra, rb"	Subtract from Word 	rt.w[n] = -ra.w[n] + rb.w[n]
+sfi 	"rt, ra, s10"	Subtract from Word Immediate 	rt.w[n] = -ra.w[n] + ext(s10)
+sfh 	"rt, ra, rb"	Subtract from Halfword 	rt.h[n] = -ra.h[n] + rb.h[n]
+sfhi 	"rt, ra, s10"	Subtract from Halfword Immediate 	rt.h[n] = -ra.h[n] + ext(s10)
+sfx 	"rt, ra, rb"	Subtract from Extended (With Borrow)	rt.w[n] = (-ra.w[n] + rb.w[n] + (rt.w[n]&1) – 1)
+mpy 	"rt, ra, rb"	Multiply 	rt.w[n] = ra.h[2n+1] * rb.h[2n+1]
+mpyi 	"rt, ra, s10"	Multiply Immediate 	rt.w[n] = ra.h[2n+1] * ext(s10)
+mpyu 	"rt, ra, rb"	Multiply Unsigned 	rt.w[n] = ra.h[2n+1] * rb.h[2n+1]
+mpyui 	"rt, ra, s10"	Multiply Unsigned Immediate 	rt.w[n] = ra.h[2n+1] * ext(s10)
+mpya 	"rt, ra, rb, rc"	Multiply and Add 	rt.w[n] = ra.h[2n+1] * rb.h[2n+1] + rc.w[n]
+mpys 	"rt, ra, rb"	Multiply and Shift Right 	rt.w[n] = ra.h[2n+1] * rb.h[2n+1] >> 16
+mpyh 	"rt, ra, rb"	Multiply High 	rt.w[n] = ra.h[2n] * rb.h[2n+1] << 16
+mpyhh 	"rt, ra, rb"	Multiply High High 	rt.w[n] = ra.h[2n] * rb.h[2n]
+mpyhha 	"rt, ra, rb"	Multiply High High and Add 	rt.w[n] += ra.h[2n] * rb.h[2n]
+mpyhhu 	"rt, ra, rb"	Multiply High High Unsigned 	rt.w[n] = ra.h[2n] * rb.h[2n]
+mpyhhau 	"rt, ra, rb"	Multiply High High Unsigned and Add 	rt.w[n] += ra.h[2n] * rb.h[2n]

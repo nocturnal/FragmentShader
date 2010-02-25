@@ -1,0 +1,999 @@
+-- #################################################### --
+
+local cg_add = class(Node)
+
+function cg_add:get_help(out)
+	out.write( 'd = x + y' )
+	out.write( '\n' )
+	out.write( 'Supported Types:\n' )
+    out.write( 'float\n' ) 
+    out.write( 'half\n' ) 
+    out.write( 'fixed\n' ) 
+    out.write( 'int\n' ) 
+    out.write( 'float4\n' ) 
+    out.write( 'half4\n' ) 
+    out.write( 'fixed4\n' ) 
+    out.write( 'int4\n' ) 
+    out.write( 'float3\n' ) 
+    out.write( 'half3\n' ) 
+    out.write( 'fixed3\n' ) 
+    out.write( 'int3\n' ) 
+    out.write( 'float2\n' ) 
+    out.write( 'half2\n' ) 
+    out.write( 'fixed2\n' ) 
+    out.write( 'int2\n' ) 
+    out.write( 'float4x4\n' ) 
+    out.write( 'half4x4\n' ) 
+    out.write( 'fixed4x4\n' ) 
+    out.write( 'int4x4\n' ) 
+    out.write( 'float4x3\n' ) 
+    out.write( 'half4x3\n' ) 
+    out.write( 'fixed4x3\n' ) 
+    out.write( 'int4x3\n' ) 
+    out.write( 'float4x2\n' ) 
+    out.write( 'half4x2\n' ) 
+    out.write( 'fixed4x2\n' ) 
+    out.write( 'int4x2\n' ) 
+    out.write( 'float3x4\n' ) 
+    out.write( 'half3x4\n' ) 
+    out.write( 'fixed3x4\n' ) 
+    out.write( 'int3x4\n' ) 
+    out.write( 'float3x3\n' ) 
+    out.write( 'half3x3\n' ) 
+    out.write( 'fixed3x3\n' ) 
+    out.write( 'int3x3\n' ) 
+    out.write( 'float3x2\n' ) 
+    out.write( 'half3x2\n' ) 
+    out.write( 'fixed3x2\n' ) 
+    out.write( 'int3x2\n' ) 
+    out.write( 'float2x4\n' ) 
+    out.write( 'half2x4\n' ) 
+    out.write( 'fixed2x4\n' ) 
+    out.write( 'int2x4\n' ) 
+    out.write( 'float2x3\n' ) 
+    out.write( 'half2x3\n' ) 
+    out.write( 'fixed2x3\n' ) 
+    out.write( 'int2x3\n' ) 
+    out.write( 'float2x2\n' ) 
+    out.write( 'half2x2\n' ) 
+    out.write( 'fixed2x2\n' ) 
+    out.write( 'int2x2\n' )  
+end
+
+function cg_add:new()
+	Node.new(self)
+	self.a = self.add_port(Input('a'))
+	self.b = self.add_port(Input('b'))
+	self.d = self.add_port(Output('d'))
+end
+
+function cg_add:get_type(port)
+
+	local tx = self.a.get_output().get_type()
+	local ty = self.b.get_output().get_type()
+
+        if (   ( tx == 'float' ) 
+            or ( tx == 'half' ) 
+            or ( tx == 'fixed' ) 
+            or ( tx == 'int' ) 
+            or ( tx == 'float4' ) 
+            or ( tx == 'half4' ) 
+            or ( tx == 'fixed4' ) 
+            or ( tx == 'int4' ) 
+            or ( tx == 'float3' ) 
+            or ( tx == 'half3' ) 
+            or ( tx == 'fixed3' ) 
+            or ( tx == 'int3' ) 
+            or ( tx == 'float2' ) 
+            or ( tx == 'half2' ) 
+            or ( tx == 'fixed2' ) 
+            or ( tx == 'int2' ) 
+            or ( tx == 'float4x4' ) 
+            or ( tx == 'half4x4' ) 
+            or ( tx == 'fixed4x4' ) 
+            or ( tx == 'int4x4' ) 
+            or ( tx == 'float4x3' ) 
+            or ( tx == 'half4x3' ) 
+            or ( tx == 'fixed4x3' ) 
+            or ( tx == 'int4x3' ) 
+            or ( tx == 'float4x2' ) 
+            or ( tx == 'half4x2' ) 
+            or ( tx == 'fixed4x2' ) 
+            or ( tx == 'int4x2' ) 
+            or ( tx == 'float3x4' ) 
+            or ( tx == 'half3x4' ) 
+            or ( tx == 'fixed3x4' ) 
+            or ( tx == 'int3x4' ) 
+            or ( tx == 'float3x3' ) 
+            or ( tx == 'half3x3' ) 
+            or ( tx == 'fixed3x3' ) 
+            or ( tx == 'int3x3' ) 
+            or ( tx == 'float3x2' ) 
+            or ( tx == 'half3x2' ) 
+            or ( tx == 'fixed3x2' ) 
+            or ( tx == 'int3x2' ) 
+            or ( tx == 'float2x4' ) 
+            or ( tx == 'half2x4' ) 
+            or ( tx == 'fixed2x4' ) 
+            or ( tx == 'int2x4' ) 
+            or ( tx == 'float2x3' ) 
+            or ( tx == 'half2x3' ) 
+            or ( tx == 'fixed2x3' ) 
+            or ( tx == 'int2x3' ) 
+            or ( tx == 'float2x2' ) 
+            or ( tx == 'half2x2' ) 
+            or ( tx == 'fixed2x2' ) 
+            or ( tx == 'int2x2' ) ) then
+        
+	    if ((tx == ty)) then
+		    return tx
+	    end
+	end
+
+	return nil
+end
+
+function cg_add:config(props)
+	Node.config(self, props)
+	props.delete('Name')
+end
+
+function cg_add:gen_code(out, scratch)
+	local tx   = self.a.get_output().get_type()
+	local t    = tx
+	local x    = 'r' .. self.a.get_output().hex()
+	local y    = 'r' .. self.b.get_output().hex()
+	local d    = 'r' .. self.d.hex()
+
+	out.write( '	' .. t .. ' ' .. d .. ' = ' .. x .. ' + ' .. y .. ';\n' )
+end
+
+function cg_add:get_tip(out)
+	out.write( 'd = x + y' )
+end
+
+-- #################################################### --
+
+local cg_sub = class(Node)
+
+function cg_sub:get_help(out)
+	out.write( 'd = x - y' )
+	out.write( '\n' )
+	out.write( 'Supported Types:\n' )
+    out.write( 'float\n' ) 
+    out.write( 'half\n' ) 
+    out.write( 'fixed\n' ) 
+    out.write( 'int\n' ) 
+    out.write( 'float4\n' ) 
+    out.write( 'half4\n' ) 
+    out.write( 'fixed4\n' ) 
+    out.write( 'int4\n' ) 
+    out.write( 'float3\n' ) 
+    out.write( 'half3\n' ) 
+    out.write( 'fixed3\n' ) 
+    out.write( 'int3\n' ) 
+    out.write( 'float2\n' ) 
+    out.write( 'half2\n' ) 
+    out.write( 'fixed2\n' ) 
+    out.write( 'int2\n' ) 
+    out.write( 'float4x4\n' ) 
+    out.write( 'half4x4\n' ) 
+    out.write( 'fixed4x4\n' ) 
+    out.write( 'int4x4\n' ) 
+    out.write( 'float4x3\n' ) 
+    out.write( 'half4x3\n' ) 
+    out.write( 'fixed4x3\n' ) 
+    out.write( 'int4x3\n' ) 
+    out.write( 'float4x2\n' ) 
+    out.write( 'half4x2\n' ) 
+    out.write( 'fixed4x2\n' ) 
+    out.write( 'int4x2\n' ) 
+    out.write( 'float3x4\n' ) 
+    out.write( 'half3x4\n' ) 
+    out.write( 'fixed3x4\n' ) 
+    out.write( 'int3x4\n' ) 
+    out.write( 'float3x3\n' ) 
+    out.write( 'half3x3\n' ) 
+    out.write( 'fixed3x3\n' ) 
+    out.write( 'int3x3\n' ) 
+    out.write( 'float3x2\n' ) 
+    out.write( 'half3x2\n' ) 
+    out.write( 'fixed3x2\n' ) 
+    out.write( 'int3x2\n' ) 
+    out.write( 'float2x4\n' ) 
+    out.write( 'half2x4\n' ) 
+    out.write( 'fixed2x4\n' ) 
+    out.write( 'int2x4\n' ) 
+    out.write( 'float2x3\n' ) 
+    out.write( 'half2x3\n' ) 
+    out.write( 'fixed2x3\n' ) 
+    out.write( 'int2x3\n' ) 
+    out.write( 'float2x2\n' ) 
+    out.write( 'half2x2\n' ) 
+    out.write( 'fixed2x2\n' ) 
+    out.write( 'int2x2\n' )  
+end
+
+function cg_sub:new()
+	Node.new(self)
+	self.a = self.add_port(Input('a'))
+	self.b = self.add_port(Input('b'))
+	self.d = self.add_port(Output('d'))
+end
+
+function cg_sub:get_type(port)
+
+	local tx = self.a.get_output().get_type()
+	local ty = self.b.get_output().get_type()
+
+        if (   ( tx == 'float' ) 
+            or ( tx == 'half' ) 
+            or ( tx == 'fixed' ) 
+            or ( tx == 'int' ) 
+            or ( tx == 'float4' ) 
+            or ( tx == 'half4' ) 
+            or ( tx == 'fixed4' ) 
+            or ( tx == 'int4' ) 
+            or ( tx == 'float3' ) 
+            or ( tx == 'half3' ) 
+            or ( tx == 'fixed3' ) 
+            or ( tx == 'int3' ) 
+            or ( tx == 'float2' ) 
+            or ( tx == 'half2' ) 
+            or ( tx == 'fixed2' ) 
+            or ( tx == 'int2' ) 
+            or ( tx == 'float4x4' ) 
+            or ( tx == 'half4x4' ) 
+            or ( tx == 'fixed4x4' ) 
+            or ( tx == 'int4x4' ) 
+            or ( tx == 'float4x3' ) 
+            or ( tx == 'half4x3' ) 
+            or ( tx == 'fixed4x3' ) 
+            or ( tx == 'int4x3' ) 
+            or ( tx == 'float4x2' ) 
+            or ( tx == 'half4x2' ) 
+            or ( tx == 'fixed4x2' ) 
+            or ( tx == 'int4x2' ) 
+            or ( tx == 'float3x4' ) 
+            or ( tx == 'half3x4' ) 
+            or ( tx == 'fixed3x4' ) 
+            or ( tx == 'int3x4' ) 
+            or ( tx == 'float3x3' ) 
+            or ( tx == 'half3x3' ) 
+            or ( tx == 'fixed3x3' ) 
+            or ( tx == 'int3x3' ) 
+            or ( tx == 'float3x2' ) 
+            or ( tx == 'half3x2' ) 
+            or ( tx == 'fixed3x2' ) 
+            or ( tx == 'int3x2' ) 
+            or ( tx == 'float2x4' ) 
+            or ( tx == 'half2x4' ) 
+            or ( tx == 'fixed2x4' ) 
+            or ( tx == 'int2x4' ) 
+            or ( tx == 'float2x3' ) 
+            or ( tx == 'half2x3' ) 
+            or ( tx == 'fixed2x3' ) 
+            or ( tx == 'int2x3' ) 
+            or ( tx == 'float2x2' ) 
+            or ( tx == 'half2x2' ) 
+            or ( tx == 'fixed2x2' ) 
+            or ( tx == 'int2x2' ) ) then
+        
+	    if ((tx == ty)) then
+		    return tx
+	    end
+	end
+
+	return nil
+end
+
+function cg_sub:config(props)
+	Node.config(self, props)
+	props.delete('Name')
+end
+
+function cg_sub:gen_code(out, scratch)
+	local tx   = self.a.get_output().get_type()
+	local t    = tx
+	local x    = 'r' .. self.a.get_output().hex()
+	local y    = 'r' .. self.b.get_output().hex()
+	local d    = 'r' .. self.d.hex()
+
+	out.write( '	' .. t .. ' ' .. d .. ' = ' .. x .. ' - ' .. y .. ';\n' )
+end
+
+function cg_sub:get_tip(out)
+	out.write( 'd = x - y' )
+end
+
+-- #################################################### --
+
+local cg_mul = class(Node)
+
+function cg_mul:get_help(out)
+	out.write( 'd = x * y' )
+	out.write( '\n' )
+	out.write( 'Supported Types:\n' )
+    out.write( 'float\n' ) 
+    out.write( 'half\n' ) 
+    out.write( 'fixed\n' ) 
+    out.write( 'int\n' ) 
+    out.write( 'float4\n' ) 
+    out.write( 'half4\n' ) 
+    out.write( 'fixed4\n' ) 
+    out.write( 'int4\n' ) 
+    out.write( 'float3\n' ) 
+    out.write( 'half3\n' ) 
+    out.write( 'fixed3\n' ) 
+    out.write( 'int3\n' ) 
+    out.write( 'float2\n' ) 
+    out.write( 'half2\n' ) 
+    out.write( 'fixed2\n' ) 
+    out.write( 'int2\n' ) 
+    out.write( 'float4x4\n' ) 
+    out.write( 'half4x4\n' ) 
+    out.write( 'fixed4x4\n' ) 
+    out.write( 'int4x4\n' ) 
+    out.write( 'float4x3\n' ) 
+    out.write( 'half4x3\n' ) 
+    out.write( 'fixed4x3\n' ) 
+    out.write( 'int4x3\n' ) 
+    out.write( 'float4x2\n' ) 
+    out.write( 'half4x2\n' ) 
+    out.write( 'fixed4x2\n' ) 
+    out.write( 'int4x2\n' ) 
+    out.write( 'float3x4\n' ) 
+    out.write( 'half3x4\n' ) 
+    out.write( 'fixed3x4\n' ) 
+    out.write( 'int3x4\n' ) 
+    out.write( 'float3x3\n' ) 
+    out.write( 'half3x3\n' ) 
+    out.write( 'fixed3x3\n' ) 
+    out.write( 'int3x3\n' ) 
+    out.write( 'float3x2\n' ) 
+    out.write( 'half3x2\n' ) 
+    out.write( 'fixed3x2\n' ) 
+    out.write( 'int3x2\n' ) 
+    out.write( 'float2x4\n' ) 
+    out.write( 'half2x4\n' ) 
+    out.write( 'fixed2x4\n' ) 
+    out.write( 'int2x4\n' ) 
+    out.write( 'float2x3\n' ) 
+    out.write( 'half2x3\n' ) 
+    out.write( 'fixed2x3\n' ) 
+    out.write( 'int2x3\n' ) 
+    out.write( 'float2x2\n' ) 
+    out.write( 'half2x2\n' ) 
+    out.write( 'fixed2x2\n' ) 
+    out.write( 'int2x2\n' )  
+end
+
+function cg_mul:new()
+	Node.new(self)
+	self.a = self.add_port(Input('a'))
+	self.b = self.add_port(Input('b'))
+	self.d = self.add_port(Output('d'))
+end
+
+function cg_mul:get_type(port)
+
+	local tx = self.a.get_output().get_type()
+	local ty = self.b.get_output().get_type()
+
+        if (   ( tx == 'float' ) 
+            or ( tx == 'half' ) 
+            or ( tx == 'fixed' ) 
+            or ( tx == 'int' ) 
+            or ( tx == 'float4' ) 
+            or ( tx == 'half4' ) 
+            or ( tx == 'fixed4' ) 
+            or ( tx == 'int4' ) 
+            or ( tx == 'float3' ) 
+            or ( tx == 'half3' ) 
+            or ( tx == 'fixed3' ) 
+            or ( tx == 'int3' ) 
+            or ( tx == 'float2' ) 
+            or ( tx == 'half2' ) 
+            or ( tx == 'fixed2' ) 
+            or ( tx == 'int2' ) 
+            or ( tx == 'float4x4' ) 
+            or ( tx == 'half4x4' ) 
+            or ( tx == 'fixed4x4' ) 
+            or ( tx == 'int4x4' ) 
+            or ( tx == 'float4x3' ) 
+            or ( tx == 'half4x3' ) 
+            or ( tx == 'fixed4x3' ) 
+            or ( tx == 'int4x3' ) 
+            or ( tx == 'float4x2' ) 
+            or ( tx == 'half4x2' ) 
+            or ( tx == 'fixed4x2' ) 
+            or ( tx == 'int4x2' ) 
+            or ( tx == 'float3x4' ) 
+            or ( tx == 'half3x4' ) 
+            or ( tx == 'fixed3x4' ) 
+            or ( tx == 'int3x4' ) 
+            or ( tx == 'float3x3' ) 
+            or ( tx == 'half3x3' ) 
+            or ( tx == 'fixed3x3' ) 
+            or ( tx == 'int3x3' ) 
+            or ( tx == 'float3x2' ) 
+            or ( tx == 'half3x2' ) 
+            or ( tx == 'fixed3x2' ) 
+            or ( tx == 'int3x2' ) 
+            or ( tx == 'float2x4' ) 
+            or ( tx == 'half2x4' ) 
+            or ( tx == 'fixed2x4' ) 
+            or ( tx == 'int2x4' ) 
+            or ( tx == 'float2x3' ) 
+            or ( tx == 'half2x3' ) 
+            or ( tx == 'fixed2x3' ) 
+            or ( tx == 'int2x3' ) 
+            or ( tx == 'float2x2' ) 
+            or ( tx == 'half2x2' ) 
+            or ( tx == 'fixed2x2' ) 
+            or ( tx == 'int2x2' ) ) then
+        
+	    if ((tx == ty)) then
+		    return tx
+	    end
+	end
+
+	return nil
+end
+
+function cg_mul:config(props)
+	Node.config(self, props)
+	props.delete('Name')
+end
+
+function cg_mul:gen_code(out, scratch)
+	local tx   = self.a.get_output().get_type()
+	local t    = tx
+	local x    = 'r' .. self.a.get_output().hex()
+	local y    = 'r' .. self.b.get_output().hex()
+	local d    = 'r' .. self.d.hex()
+
+	out.write( '	' .. t .. ' ' .. d .. ' = ' .. x .. ' * ' .. y .. ';\n' )
+end
+
+function cg_mul:get_tip(out)
+	out.write( 'd = x * y' )
+end
+
+-- #################################################### --
+
+local cg_div = class(Node)
+
+function cg_div:get_help(out)
+	out.write( 'd = x / y' )
+	out.write( '\n' )
+	out.write( 'Supported Types:\n' )
+    out.write( 'float\n' ) 
+    out.write( 'half\n' ) 
+    out.write( 'fixed\n' ) 
+    out.write( 'int\n' ) 
+    out.write( 'float4\n' ) 
+    out.write( 'half4\n' ) 
+    out.write( 'fixed4\n' ) 
+    out.write( 'int4\n' ) 
+    out.write( 'float3\n' ) 
+    out.write( 'half3\n' ) 
+    out.write( 'fixed3\n' ) 
+    out.write( 'int3\n' ) 
+    out.write( 'float2\n' ) 
+    out.write( 'half2\n' ) 
+    out.write( 'fixed2\n' ) 
+    out.write( 'int2\n' ) 
+    out.write( 'float4x4\n' ) 
+    out.write( 'half4x4\n' ) 
+    out.write( 'fixed4x4\n' ) 
+    out.write( 'int4x4\n' ) 
+    out.write( 'float4x3\n' ) 
+    out.write( 'half4x3\n' ) 
+    out.write( 'fixed4x3\n' ) 
+    out.write( 'int4x3\n' ) 
+    out.write( 'float4x2\n' ) 
+    out.write( 'half4x2\n' ) 
+    out.write( 'fixed4x2\n' ) 
+    out.write( 'int4x2\n' ) 
+    out.write( 'float3x4\n' ) 
+    out.write( 'half3x4\n' ) 
+    out.write( 'fixed3x4\n' ) 
+    out.write( 'int3x4\n' ) 
+    out.write( 'float3x3\n' ) 
+    out.write( 'half3x3\n' ) 
+    out.write( 'fixed3x3\n' ) 
+    out.write( 'int3x3\n' ) 
+    out.write( 'float3x2\n' ) 
+    out.write( 'half3x2\n' ) 
+    out.write( 'fixed3x2\n' ) 
+    out.write( 'int3x2\n' ) 
+    out.write( 'float2x4\n' ) 
+    out.write( 'half2x4\n' ) 
+    out.write( 'fixed2x4\n' ) 
+    out.write( 'int2x4\n' ) 
+    out.write( 'float2x3\n' ) 
+    out.write( 'half2x3\n' ) 
+    out.write( 'fixed2x3\n' ) 
+    out.write( 'int2x3\n' ) 
+    out.write( 'float2x2\n' ) 
+    out.write( 'half2x2\n' ) 
+    out.write( 'fixed2x2\n' ) 
+    out.write( 'int2x2\n' )  
+end
+
+function cg_div:new()
+	Node.new(self)
+	self.a = self.add_port(Input('a'))
+	self.b = self.add_port(Input('b'))
+	self.d = self.add_port(Output('d'))
+end
+
+function cg_div:get_type(port)
+
+	local tx = self.a.get_output().get_type()
+	local ty = self.b.get_output().get_type()
+
+        if (   ( tx == 'float' ) 
+            or ( tx == 'half' ) 
+            or ( tx == 'fixed' ) 
+            or ( tx == 'int' ) 
+            or ( tx == 'float4' ) 
+            or ( tx == 'half4' ) 
+            or ( tx == 'fixed4' ) 
+            or ( tx == 'int4' ) 
+            or ( tx == 'float3' ) 
+            or ( tx == 'half3' ) 
+            or ( tx == 'fixed3' ) 
+            or ( tx == 'int3' ) 
+            or ( tx == 'float2' ) 
+            or ( tx == 'half2' ) 
+            or ( tx == 'fixed2' ) 
+            or ( tx == 'int2' ) 
+            or ( tx == 'float4x4' ) 
+            or ( tx == 'half4x4' ) 
+            or ( tx == 'fixed4x4' ) 
+            or ( tx == 'int4x4' ) 
+            or ( tx == 'float4x3' ) 
+            or ( tx == 'half4x3' ) 
+            or ( tx == 'fixed4x3' ) 
+            or ( tx == 'int4x3' ) 
+            or ( tx == 'float4x2' ) 
+            or ( tx == 'half4x2' ) 
+            or ( tx == 'fixed4x2' ) 
+            or ( tx == 'int4x2' ) 
+            or ( tx == 'float3x4' ) 
+            or ( tx == 'half3x4' ) 
+            or ( tx == 'fixed3x4' ) 
+            or ( tx == 'int3x4' ) 
+            or ( tx == 'float3x3' ) 
+            or ( tx == 'half3x3' ) 
+            or ( tx == 'fixed3x3' ) 
+            or ( tx == 'int3x3' ) 
+            or ( tx == 'float3x2' ) 
+            or ( tx == 'half3x2' ) 
+            or ( tx == 'fixed3x2' ) 
+            or ( tx == 'int3x2' ) 
+            or ( tx == 'float2x4' ) 
+            or ( tx == 'half2x4' ) 
+            or ( tx == 'fixed2x4' ) 
+            or ( tx == 'int2x4' ) 
+            or ( tx == 'float2x3' ) 
+            or ( tx == 'half2x3' ) 
+            or ( tx == 'fixed2x3' ) 
+            or ( tx == 'int2x3' ) 
+            or ( tx == 'float2x2' ) 
+            or ( tx == 'half2x2' ) 
+            or ( tx == 'fixed2x2' ) 
+            or ( tx == 'int2x2' ) ) then
+        
+	    if ((tx == ty)) then
+		    return tx
+	    end
+	end
+
+	return nil
+end
+
+function cg_div:config(props)
+	Node.config(self, props)
+	props.delete('Name')
+end
+
+function cg_div:gen_code(out, scratch)
+	local tx   = self.a.get_output().get_type()
+	local t    = tx
+	local x    = 'r' .. self.a.get_output().hex()
+	local y    = 'r' .. self.b.get_output().hex()
+	local d    = 'r' .. self.d.hex()
+
+	out.write( '	' .. t .. ' ' .. d .. ' = ' .. x .. ' / ' .. y .. ';\n' )
+end
+
+function cg_div:get_tip(out)
+	out.write( 'd = x / y' )
+end
+
+-- #################################################### --
+
+local cg_neg = class(Node)
+
+function cg_neg:get_help(out)
+	out.write( 'd = -(x)' )
+	out.write( '\n' )
+	out.write( 'Supported Types:\n' )
+    out.write( 'float\n' ) 
+    out.write( 'half\n' ) 
+    out.write( 'fixed\n' ) 
+    out.write( 'int\n' ) 
+    out.write( 'float4\n' ) 
+    out.write( 'half4\n' ) 
+    out.write( 'fixed4\n' ) 
+    out.write( 'int4\n' ) 
+    out.write( 'float3\n' ) 
+    out.write( 'half3\n' ) 
+    out.write( 'fixed3\n' ) 
+    out.write( 'int3\n' ) 
+    out.write( 'float2\n' ) 
+    out.write( 'half2\n' ) 
+    out.write( 'fixed2\n' ) 
+    out.write( 'int2\n' ) 
+    out.write( 'float4x4\n' ) 
+    out.write( 'half4x4\n' ) 
+    out.write( 'fixed4x4\n' ) 
+    out.write( 'int4x4\n' ) 
+    out.write( 'float4x3\n' ) 
+    out.write( 'half4x3\n' ) 
+    out.write( 'fixed4x3\n' ) 
+    out.write( 'int4x3\n' ) 
+    out.write( 'float4x2\n' ) 
+    out.write( 'half4x2\n' ) 
+    out.write( 'fixed4x2\n' ) 
+    out.write( 'int4x2\n' ) 
+    out.write( 'float3x4\n' ) 
+    out.write( 'half3x4\n' ) 
+    out.write( 'fixed3x4\n' ) 
+    out.write( 'int3x4\n' ) 
+    out.write( 'float3x3\n' ) 
+    out.write( 'half3x3\n' ) 
+    out.write( 'fixed3x3\n' ) 
+    out.write( 'int3x3\n' ) 
+    out.write( 'float3x2\n' ) 
+    out.write( 'half3x2\n' ) 
+    out.write( 'fixed3x2\n' ) 
+    out.write( 'int3x2\n' ) 
+    out.write( 'float2x4\n' ) 
+    out.write( 'half2x4\n' ) 
+    out.write( 'fixed2x4\n' ) 
+    out.write( 'int2x4\n' ) 
+    out.write( 'float2x3\n' ) 
+    out.write( 'half2x3\n' ) 
+    out.write( 'fixed2x3\n' ) 
+    out.write( 'int2x3\n' ) 
+    out.write( 'float2x2\n' ) 
+    out.write( 'half2x2\n' ) 
+    out.write( 'fixed2x2\n' ) 
+    out.write( 'int2x2\n' )  
+end
+
+function cg_neg:new()
+	Node.new(self)
+	self.a = self.add_port(Input('a'))
+	self.d = self.add_port(Output('d'))
+end
+
+function cg_neg:get_type(port)
+
+	local tx = self.a.get_output().get_type()
+
+        if (   ( tx == 'float' ) 
+            or ( tx == 'half' ) 
+            or ( tx == 'fixed' ) 
+            or ( tx == 'int' ) 
+            or ( tx == 'float4' ) 
+            or ( tx == 'half4' ) 
+            or ( tx == 'fixed4' ) 
+            or ( tx == 'int4' ) 
+            or ( tx == 'float3' ) 
+            or ( tx == 'half3' ) 
+            or ( tx == 'fixed3' ) 
+            or ( tx == 'int3' ) 
+            or ( tx == 'float2' ) 
+            or ( tx == 'half2' ) 
+            or ( tx == 'fixed2' ) 
+            or ( tx == 'int2' ) 
+            or ( tx == 'float4x4' ) 
+            or ( tx == 'half4x4' ) 
+            or ( tx == 'fixed4x4' ) 
+            or ( tx == 'int4x4' ) 
+            or ( tx == 'float4x3' ) 
+            or ( tx == 'half4x3' ) 
+            or ( tx == 'fixed4x3' ) 
+            or ( tx == 'int4x3' ) 
+            or ( tx == 'float4x2' ) 
+            or ( tx == 'half4x2' ) 
+            or ( tx == 'fixed4x2' ) 
+            or ( tx == 'int4x2' ) 
+            or ( tx == 'float3x4' ) 
+            or ( tx == 'half3x4' ) 
+            or ( tx == 'fixed3x4' ) 
+            or ( tx == 'int3x4' ) 
+            or ( tx == 'float3x3' ) 
+            or ( tx == 'half3x3' ) 
+            or ( tx == 'fixed3x3' ) 
+            or ( tx == 'int3x3' ) 
+            or ( tx == 'float3x2' ) 
+            or ( tx == 'half3x2' ) 
+            or ( tx == 'fixed3x2' ) 
+            or ( tx == 'int3x2' ) 
+            or ( tx == 'float2x4' ) 
+            or ( tx == 'half2x4' ) 
+            or ( tx == 'fixed2x4' ) 
+            or ( tx == 'int2x4' ) 
+            or ( tx == 'float2x3' ) 
+            or ( tx == 'half2x3' ) 
+            or ( tx == 'fixed2x3' ) 
+            or ( tx == 'int2x3' ) 
+            or ( tx == 'float2x2' ) 
+            or ( tx == 'half2x2' ) 
+            or ( tx == 'fixed2x2' ) 
+            or ( tx == 'int2x2' ) ) then
+        
+		return tx
+	end
+
+	return nil
+end
+
+function cg_neg:config(props)
+	Node.config(self, props)
+	props.delete('Name')
+end
+
+function cg_neg:gen_code(out, scratch)
+	local tx   = self.a.get_output().get_type()
+	local t    = tx
+	local x    = 'r' .. self.a.get_output().hex()
+	local d    = 'r' .. self.d.hex()
+
+	out.write( '	' .. t .. ' ' .. d .. ' = -(' .. x .. ');\n' )
+end
+
+function cg_neg:get_tip(out)
+	out.write( 'd = -(x)' )
+end
+
+-- #################################################### --
+
+local cg_mod = class(Node)
+
+function cg_mod:get_help(out)
+	out.write( 'd = x % y' )
+	out.write( '\n' )
+	out.write( 'Supported Types:\n' )
+    out.write( 'int\n' ) 
+    out.write( 'int4\n' ) 
+    out.write( 'int3\n' ) 
+    out.write( 'int2\n' ) 
+    out.write( 'int4x4\n' ) 
+    out.write( 'int4x3\n' ) 
+    out.write( 'int4x2\n' ) 
+    out.write( 'int3x4\n' ) 
+    out.write( 'int3x3\n' ) 
+    out.write( 'int3x2\n' ) 
+    out.write( 'int2x4\n' ) 
+    out.write( 'int2x3\n' ) 
+    out.write( 'int2x2\n' )  
+end
+
+function cg_mod:new()
+	Node.new(self)
+	self.a = self.add_port(Input('a'))
+	self.b = self.add_port(Input('b'))
+	self.d = self.add_port(Output('d'))
+end
+
+function cg_mod:get_type(port)
+
+	local tx = self.a.get_output().get_type()
+	local ty = self.b.get_output().get_type()
+
+        if (   ( tx == 'int' ) 
+            or ( tx == 'int4' ) 
+            or ( tx == 'int3' ) 
+            or ( tx == 'int2' ) 
+            or ( tx == 'int4x4' ) 
+            or ( tx == 'int4x3' ) 
+            or ( tx == 'int4x2' ) 
+            or ( tx == 'int3x4' ) 
+            or ( tx == 'int3x3' ) 
+            or ( tx == 'int3x2' ) 
+            or ( tx == 'int2x4' ) 
+            or ( tx == 'int2x3' ) 
+            or ( tx == 'int2x2' ) ) then
+        
+	    if ((tx == ty)) then
+		    return tx
+	    end
+	end
+
+	return nil
+end
+
+function cg_mod:config(props)
+	Node.config(self, props)
+	props.delete('Name')
+end
+
+function cg_mod:gen_code(out, scratch)
+	local tx   = self.a.get_output().get_type()
+	local t    = tx
+	local x    = 'r' .. self.a.get_output().hex()
+	local y    = 'r' .. self.b.get_output().hex()
+	local d    = 'r' .. self.d.hex()
+
+	out.write( '	' .. t .. ' ' .. d .. ' = ' .. x .. ' % ' .. y .. ';\n' )
+end
+
+function cg_mod:get_tip(out)
+	out.write( 'd = x % y' )
+end
+
+-- #################################################### --
+
+local cg_inc = class(Node)
+
+function cg_inc:get_help(out)
+	out.write( 'd = x++' )
+	out.write( '\n' )
+	out.write( 'Supported Types:\n' )
+    out.write( 'int\n' ) 
+    out.write( 'int4\n' ) 
+    out.write( 'int3\n' ) 
+    out.write( 'int2\n' ) 
+    out.write( 'int4x4\n' ) 
+    out.write( 'int4x3\n' ) 
+    out.write( 'int4x2\n' ) 
+    out.write( 'int3x4\n' ) 
+    out.write( 'int3x3\n' ) 
+    out.write( 'int3x2\n' ) 
+    out.write( 'int2x4\n' ) 
+    out.write( 'int2x3\n' ) 
+    out.write( 'int2x2\n' )  
+end
+
+function cg_inc:new()
+	Node.new(self)
+	self.a = self.add_port(Input('a'))
+	self.d = self.add_port(Output('d'))
+end
+
+function cg_inc:get_type(port)
+
+	local tx = self.a.get_output().get_type()
+
+        if (   ( tx == 'int' ) 
+            or ( tx == 'int4' ) 
+            or ( tx == 'int3' ) 
+            or ( tx == 'int2' ) 
+            or ( tx == 'int4x4' ) 
+            or ( tx == 'int4x3' ) 
+            or ( tx == 'int4x2' ) 
+            or ( tx == 'int3x4' ) 
+            or ( tx == 'int3x3' ) 
+            or ( tx == 'int3x2' ) 
+            or ( tx == 'int2x4' ) 
+            or ( tx == 'int2x3' ) 
+            or ( tx == 'int2x2' ) ) then
+        
+		return tx
+	end
+
+	return nil
+end
+
+function cg_inc:config(props)
+	Node.config(self, props)
+	props.delete('Name')
+end
+
+function cg_inc:gen_code(out, scratch)
+	local tx   = self.a.get_output().get_type()
+	local t    = tx
+	local x    = 'r' .. self.a.get_output().hex()
+	local d    = 'r' .. self.d.hex()
+
+	out.write( '	' .. t .. ' ' .. d .. ' = ' .. x .. '++;\n' )
+end
+
+function cg_inc:get_tip(out)
+	out.write( 'd = x++' )
+end
+
+-- #################################################### --
+
+local cg_dec = class(Node)
+
+function cg_dec:get_help(out)
+	out.write( 'd = x--' )
+	out.write( '\n' )
+	out.write( 'Supported Types:\n' )
+    out.write( 'int\n' ) 
+    out.write( 'int4\n' ) 
+    out.write( 'int3\n' ) 
+    out.write( 'int2\n' ) 
+    out.write( 'int4x4\n' ) 
+    out.write( 'int4x3\n' ) 
+    out.write( 'int4x2\n' ) 
+    out.write( 'int3x4\n' ) 
+    out.write( 'int3x3\n' ) 
+    out.write( 'int3x2\n' ) 
+    out.write( 'int2x4\n' ) 
+    out.write( 'int2x3\n' ) 
+    out.write( 'int2x2\n' )  
+end
+
+function cg_dec:new()
+	Node.new(self)
+	self.a = self.add_port(Input('a'))
+	self.d = self.add_port(Output('d'))
+end
+
+function cg_dec:get_type(port)
+
+	local tx = self.a.get_output().get_type()
+
+        if (   ( tx == 'int' ) 
+            or ( tx == 'int4' ) 
+            or ( tx == 'int3' ) 
+            or ( tx == 'int2' ) 
+            or ( tx == 'int4x4' ) 
+            or ( tx == 'int4x3' ) 
+            or ( tx == 'int4x2' ) 
+            or ( tx == 'int3x4' ) 
+            or ( tx == 'int3x3' ) 
+            or ( tx == 'int3x2' ) 
+            or ( tx == 'int2x4' ) 
+            or ( tx == 'int2x3' ) 
+            or ( tx == 'int2x2' ) ) then
+        
+		return tx
+	end
+
+	return nil
+end
+
+function cg_dec:config(props)
+	Node.config(self, props)
+	props.delete('Name')
+end
+
+function cg_dec:gen_code(out, scratch)
+	local tx   = self.a.get_output().get_type()
+	local t    = tx
+	local x    = 'r' .. self.a.get_output().hex()
+	local d    = 'r' .. self.d.hex()
+
+	out.write( '	' .. t .. ' ' .. d .. ' = ' .. x .. '--;\n' )
+end
+
+function cg_dec:get_tip(out)
+	out.write( 'd = x--' )
+end
+
+-- #################################################### --
+
+register {
+  __name = 'Cg [Arithmetic Operators]',
+  __prologue = '',
+  __epilogue = '',
+  ['Add'] = cg_add,
+  ['Subtract'] = cg_sub,
+  ['Multiply'] = cg_mul,
+  ['Divide'] = cg_div,
+  ['Negate'] = cg_neg,
+  ['Mod'] = cg_mod,
+  ['Increment'] = cg_inc,
+  ['Decrement'] = cg_dec,
+}
+

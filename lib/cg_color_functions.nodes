@@ -1,0 +1,1080 @@
+local cg_blend_opacity = class(Node)
+
+function cg_blend_opacity:get_help(out)
+    out.write( 'd = t * b + (1-t)*a ' )
+    out.write( '\n' )
+    out.write( '\n' )
+    out.write( 'Supported Types:\n' )
+    out.write( 'float\n' ) 
+    out.write( 'half\n' ) 
+    out.write( 'fixed\n' ) 
+    out.write( 'float4\n' ) 
+    out.write( 'half4\n' ) 
+    out.write( 'fixed4\n' ) 
+    out.write( 'float3\n' ) 
+    out.write( 'half3\n' ) 
+    out.write( 'fixed3\n' ) 
+    out.write( 'float2\n' ) 
+    out.write( 'half2\n' ) 
+    out.write( 'fixed2\n' ) 
+end
+
+function cg_blend_opacity:new()
+    Node.new(self)
+    self.a = self.add_port(Input('a'))
+    self.b = self.add_port(Input('b'))
+    self.t = self.add_port(Input('t'))
+    self.d = self.add_port(Output('d'))
+end
+
+function cg_blend_opacity:get_type(port)
+
+    local tx = self.a.get_output().get_type()
+    local ty = self.b.get_output().get_type()
+    local tt = self.t.get_output().get_type()
+
+        if (   ( tx == 'float' ) 
+            or ( tx == 'half' ) 
+            or ( tx == 'fixed' ) 
+            or ( tx == 'int' ) 
+            or ( tx == 'float4' ) 
+            or ( tx == 'half4' ) 
+            or ( tx == 'fixed4' ) 
+            or ( tx == 'int4' ) 
+            or ( tx == 'float3' ) 
+            or ( tx == 'half3' ) 
+            or ( tx == 'fixed3' ) 
+            or ( tx == 'int3' ) 
+            or ( tx == 'float2' ) 
+            or ( tx == 'half2' ) 
+            or ( tx == 'fixed2' ) 
+            or ( tx == 'int2' ) ) then
+        
+        if ((tx == ty) and (tx == tt)) then
+            return tx
+        end
+    end
+
+    return nil
+end
+
+function cg_blend_opacity:config(props)
+    Node.config(self, props)
+    props.delete('Name')
+end
+
+function cg_blend_opacity:gen_code(out, scratch)
+    local tx         = self.a.get_output().get_type()
+    local type       = tx
+    local x          = 'r' .. self.a.get_output().hex()
+    local y          = 'r' .. self.b.get_output().hex()
+    local t          = 'r' .. self.t.get_output().hex()
+    local d          = 'r' .. self.d.hex()
+    local f_1pt0     = tx .. '( 1.0 )'
+    local f_1subt    = '( ' .. f_1pt0 .. ' - ' .. t .. ' )'
+    local f_1subta   = '( ' .. f_1subt .. ' * ' .. x .. ' )'
+    local f_tb       = '( ' .. t .. ' * ' .. y .. ' )'
+    local f_out      = '( ' .. f_tb .. ' + ' .. f_1subta .. ' )'
+    
+    out.write( '\t' .. type .. ' ' .. d .. ' = ' .. f_out .. ';\n' )
+end
+
+function cg_blend_opacity:get_tip(out)
+    out.write( 'd = t * b + (1-t)*a ' )
+end
+
+-- #################################################### --
+
+local cg_blend_transparency = class(Node)
+
+function cg_blend_transparency:get_help(out)
+    out.write( 'd = (1-t) * b + t * a')
+    out.write( '\n' )
+    out.write( '\n' )
+    out.write( 'Supported Types:\n' )
+    out.write( 'float\n' ) 
+    out.write( 'half\n' ) 
+    out.write( 'fixed\n' ) 
+    out.write( 'float4\n' ) 
+    out.write( 'half4\n' ) 
+    out.write( 'fixed4\n' ) 
+    out.write( 'float3\n' ) 
+    out.write( 'half3\n' ) 
+    out.write( 'fixed3\n' ) 
+    out.write( 'float2\n' ) 
+    out.write( 'half2\n' ) 
+    out.write( 'fixed2\n' ) 
+end
+
+function cg_blend_transparency:new()
+    Node.new(self)
+    self.a = self.add_port(Input('a'))
+    self.b = self.add_port(Input('b'))
+    self.t = self.add_port(Input('t'))
+    self.d = self.add_port(Output('d'))
+end
+
+function cg_blend_transparency:get_type(port)
+
+    local tx = self.a.get_output().get_type()
+    local ty = self.b.get_output().get_type()
+    local tt = self.t.get_output().get_type()
+
+        if (   ( tx == 'float' ) 
+            or ( tx == 'half' ) 
+            or ( tx == 'fixed' ) 
+            or ( tx == 'int' ) 
+            or ( tx == 'float4' ) 
+            or ( tx == 'half4' ) 
+            or ( tx == 'fixed4' ) 
+            or ( tx == 'int4' ) 
+            or ( tx == 'float3' ) 
+            or ( tx == 'half3' ) 
+            or ( tx == 'fixed3' ) 
+            or ( tx == 'int3' ) 
+            or ( tx == 'float2' ) 
+            or ( tx == 'half2' ) 
+            or ( tx == 'fixed2' ) 
+            or ( tx == 'int2' ) ) then
+        
+        if ((tx == ty) and (tx == tt)) then
+            return tx
+        end
+    end
+
+    return nil
+end
+
+function cg_blend_transparency:config(props)
+    Node.config(self, props)
+    props.delete('Name')
+end
+
+function cg_blend_transparency:gen_code(out, scratch)
+    local tx         = self.a.get_output().get_type()
+    local type       = tx
+    local x          = 'r' .. self.a.get_output().hex()
+    local y          = 'r' .. self.b.get_output().hex()
+    local t          = 'r' .. self.t.get_output().hex()
+    local d          = 'r' .. self.d.hex()
+    local f_1pt0     = tx .. '( 1.0 )'
+    local f_1subt    = '( ' .. f_1pt0 .. ' - ' .. t .. ' )'
+    local f_1subtb   = '( ' .. f_1subt .. ' * ' .. y .. ' )'
+    local f_ta       = '( ' .. t .. ' * ' .. x .. ' )'
+    local f_out      = '( ' .. f_1subtb .. ' + ' .. f_ta .. ' )'
+    
+    out.write( '\t' .. type .. ' ' .. d .. ' = ' .. f_out .. ';\n' )
+end
+
+function cg_blend_transparency:get_tip(out)
+    out.write( 'd = (1-t) * b + t * a')
+end
+
+-- #################################################### --
+
+
+
+
+-- #################################################### --
+-- ## Color blend functions
+-- #################################################### --
+
+function cg_blend_average_gen_code(out, a, b, d)
+    local tx     = a.get_output().get_type()
+    local t      = tx
+    local x      = 'r' .. a.get_output().hex()
+    local y      = 'r' .. b.get_output().hex()
+    local d      = 'r' .. d.hex()
+    local f_0pt5 = tx .. '( 0.5 )'
+
+    out.write( '\t' .. t .. ' ' .. d .. ' = ' .. f_0pt5 .. ' * ( ' .. x .. ' + ' .. y .. ' );\n' )
+end
+
+function cg_blend_average_get_tip(out)
+    out.write( 'd = (a+b)/2' )
+end
+
+function cg_blend_screen_gen_code(out, a, b, d)
+    local tx     = a.get_output().get_type()
+    local t      = tx
+    local x      = 'r' .. a.get_output().hex()
+    local y      = 'r' .. b.get_output().hex()
+    local d      = 'r' .. d.hex()
+    local f_1pt0 = tx .. '( 1.0 )'
+
+    out.write( '\t' .. t .. ' ' .. d .. ' = ' .. f_1pt0 .. ' - ( ' .. f_1pt0 .. ' - ' .. x .. ' ) * ( ' .. f_1pt0 .. ' - ' .. y .. ' );\n' )
+end
+
+function cg_blend_screen_get_tip(out)
+    out.write( 'd = 1-(1-a)*(1-b)' )
+end
+
+function cg_blend_darken_gen_code(out, a, b, d)
+    local tx     = a.get_output().get_type()
+    local t      = tx
+    local x      = 'r' .. a.get_output().hex()
+    local y      = 'r' .. b.get_output().hex()
+    local d      = 'r' .. d.hex()
+    local f_1pt0 = tx .. '( 1.0 )'
+
+    out.write( '\t' .. t .. ' ' .. d .. ' = lerp(' .. y .. ', ' .. x .. ', ' .. t .. '(' .. x .. ' < ' .. y .. ') );' .. '\n' );
+end
+
+function cg_blend_darken_get_tip(out)
+    out.write( 'd = if (a < b ) then a else b' )
+end
+
+function cg_blend_lighten_gen_code(out, a, b, d)
+    local tx     = a.get_output().get_type()
+    local t      = tx
+    local x      = 'r' .. a.get_output().hex()
+    local y      = 'r' .. b.get_output().hex()
+    local d      = 'r' .. d.hex()
+    local f_1pt0 = tx .. '( 1.0 )'
+
+    out.write( '\t' .. t .. ' ' .. d .. ' = lerp(' .. y .. ', ' .. x .. ', ' .. t .. '(' .. x .. ' > ' .. y .. ') );' .. '\n' );
+end
+
+function cg_blend_lighten_get_tip(out)
+    out.write( 'd = if (a > b ) then a else b' )
+end
+
+function cg_blend_difference_gen_code(out, a, b, d)
+    local tx     = a.get_output().get_type()
+    local t      = tx
+    local x      = 'r' .. a.get_output().hex()
+    local y      = 'r' .. b.get_output().hex()
+    local d      = 'r' .. d.hex()
+
+    out.write( '\t' .. t .. ' ' .. d .. ' = abs( ' .. x .. ' - ' .. y .. ' );\n' )
+end
+
+function cg_blend_difference_get_tip(out)
+    out.write( 'd = |a-b|' )
+end
+
+function cg_blend_negation_gen_code(out, a, b, d)
+    local tx     = a.get_output().get_type()
+    local t      = tx
+    local x      = 'r' .. a.get_output().hex()
+    local y      = 'r' .. b.get_output().hex()
+    local d      = 'r' .. d.hex()
+    local f_1pt0 = tx .. '( 1.0 )'
+
+    out.write( '\t' .. t .. ' ' .. d .. ' = ' .. f_1pt0 .. ' - abs( ' .. f_1pt0 .. ' - ' .. x .. ' - ' .. y .. ' );\n' )
+end
+
+function cg_blend_negation_get_tip(out)
+    out.write( 'd = 1-|1-a-b|' )
+end
+
+function cg_blend_exclusion_gen_code(out, a, b, d)
+    local tx     = a.get_output().get_type()
+    local t      = tx
+    local x      = 'r' .. a.get_output().hex()
+    local y      = 'r' .. b.get_output().hex()
+    local d      = 'r' .. d.hex()
+    local f_2pt0 = tx .. '( 2.0 )'
+
+    out.write( '\t' .. t .. ' ' .. d .. ' = ( ' .. x .. ' + ' .. y .. ' ) - ( ' .. f_2pt0 .. ' * ' .. x .. ' * ' .. y .. ' );\n' )
+end
+
+function cg_blend_exclusion_get_tip(out)
+    out.write( 'd = a+b-2ab' )
+end
+
+function cg_blend_overlay_gen_code(out, a, b, d)
+    local tx     = a.get_output().get_type()
+    local t      = tx
+    local x      = 'r' .. a.get_output().hex()
+    local y      = 'r' .. b.get_output().hex()
+    local d      = 'r' .. d.hex()
+    local f_2pt0 = tx .. '( 2.0 )'
+    local f_0pt5 = tx .. '( 0.5 )'
+    local f_1pt0 = tx .. '( 1.0 )'
+
+    local test_pass     = '( ' .. f_2pt0 .. ' * ' .. x .. ' * ' .. y .. ' )'
+    local test_pass_var = {}
+    local test_pass_a   = 'r' .. string.match( tostring(test_pass_var), 'table: (.*)')
+
+    local test_fail     = '( ' .. f_1pt0 .. ' -  ' .. f_2pt0 .. ' * ( ' .. f_1pt0 .. ' - ' .. x .. ' ) * ( ' .. f_1pt0 .. ' - ' .. y .. ' ) )'
+    local test_fail_var = {}
+    local test_fail_b   = 'r' .. string.match( tostring(test_fail_var), 'table: (.*)')
+    
+    out.write( '\t' .. tx .. ' ' .. test_pass_a .. ' = ' .. test_pass .. ';\n' ) 
+    out.write( '\t' .. tx .. ' ' .. test_fail_b .. ' = ' .. test_fail .. ';\n' ) 
+    out.write( '\t' .. t .. ' ' .. d .. ' = lerp(' .. test_fail_b .. ', ' .. test_pass_a .. ', ' .. t .. '(' .. x .. ' < ' .. f_0pt5 .. ') );' .. '\n' );
+end
+
+function cg_blend_overlay_get_tip(out)
+    out.write( 'd = if ( a < 0.5 ) then (2ab) else (1-2*(1-a)*(1-b))' )
+end
+
+
+function cg_blend_hard_light_gen_code(out, a, b, d)
+    local tx     = a.get_output().get_type()
+    local t      = tx
+    local x      = 'r' .. a.get_output().hex()
+    local y      = 'r' .. b.get_output().hex()
+    local d      = 'r' .. d.hex()
+    local f_2pt0 = tx .. '( 2.0 )'
+    local f_0pt5 = tx .. '( 0.5 )'
+    local f_1pt0 = tx .. '( 1.0 )'
+
+    local test_pass     = '( ' .. f_2pt0 .. ' * ' .. x .. ' * ' .. y .. ' )'
+    local test_pass_var = {}
+    local test_pass_a   = 'r' .. string.match( tostring(test_pass_var), 'table: (.*)')
+
+    local test_fail     = '( ' .. f_1pt0 .. ' -  ' .. f_2pt0 .. ' * ( ' .. f_1pt0 .. ' - ' .. x .. ' ) * ( ' .. f_1pt0 .. ' - ' .. y .. ' ) )'
+    local test_fail_var = {}
+    local test_fail_b   = 'r' .. string.match( tostring(test_fail_var), 'table: (.*)')
+    
+    out.write( '\t' .. tx .. ' ' .. test_pass_a .. ' = ' .. test_pass .. ';\n' ) 
+    out.write( '\t' .. tx .. ' ' .. test_fail_b .. ' = ' .. test_fail .. ';\n' ) 
+    out.write( '\t' .. t .. ' ' .. d .. ' = lerp(' .. test_fail_b .. ', ' .. test_pass_a .. ', ' .. t .. '(' .. y .. ' < ' .. f_0pt5 .. ') );' .. '\n' );
+end
+
+function cg_blend_hard_light_get_tip(out)
+    out.write( 'd = if ( b < 0.5 ) then (2ab) else (1-2*(1-a)*(1-b))' )
+end
+
+function cg_blend_soft_light_gen_code(out, a, b, d)
+    local tx        = a.get_output().get_type()
+    local t         = tx
+    local x         = 'r' .. a.get_output().hex()
+    local y         = 'r' .. b.get_output().hex()
+    local d         = 'r' .. d.hex()
+    local f_2pt0    = tx .. '( 2.0 )'
+    local f_0pt5    = tx .. '( 0.5 )'
+    local f_1pt0    = tx .. '( 1.0 )'
+    local f_2ab     = '( ' .. f_2pt0 .. ' * ' .. x .. ' * ' .. y .. ' )' 
+    local f_aa      = '( ' .. x .. ' * ' .. x .. ' )'
+    local f_1sub2b  = '( ' .. f_1pt0 .. ' - ' .. f_2pt0 .. ' * ' .. y .. ' )' 
+    local f_2bsub1  = '( ' .. f_2pt0 .. ' * ' .. y .. ' - ' .. f_1pt0 .. ' )' 
+    local f_2a      = '( ' .. f_2pt0 .. ' * ' .. x .. ' ) '
+    local f_1subb   = '( ' .. f_1pt0 .. ' - ' .. y .. ' ) '
+
+    local test_pass     = '( ' .. f_2ab .. ' + ' .. f_aa .. ' * ' .. f_1sub2b .. ' )'
+    local test_pass_var = {}
+    local test_pass_a   = 'r' .. string.match( tostring(test_pass_var), 'table: (.*)')
+
+    local test_fail     = '( ' .. 'sqrt(' .. x .. ') * ' .. f_2bsub1 .. ' + ' .. f_2a .. ' * ' .. f_1subb .. ' )'
+    local test_fail_var = {}
+    local test_fail_b   = 'r' .. string.match( tostring(test_fail_var), 'table: (.*)')
+    
+    out.write( '\t' .. tx .. ' ' .. test_pass_a .. ' = ' .. test_pass .. ';\n' ) 
+    out.write( '\t' .. tx .. ' ' .. test_fail_b .. ' = ' .. test_fail .. ';\n' ) 
+    out.write( '\t' .. t .. ' ' .. d .. ' = lerp(' .. test_fail_b .. ', ' .. test_pass_a .. ', ' .. t .. '(' .. y .. ' < ' .. f_0pt5 .. ') );' .. '\n' );
+end
+
+function cg_blend_soft_light_get_tip(out)
+    out.write( 'd = if ( b < 0.5 ) then (2ab + aa * (1-2b)) else (sqrt(a) * (2b-1) + 2a * (1-b))' )
+end
+
+function cg_blend_soft_light_alt_1_gen_code(out, a, b, d)
+    local tx        = a.get_output().get_type()
+    local t         = tx
+    local x         = 'r' .. a.get_output().hex()
+    local y         = 'r' .. b.get_output().hex()
+    local d         = 'r' .. d.hex()
+    local f_2pt0    = tx .. '( 2.0 )'
+    local f_0pt5    = tx .. '( 0.5 )'
+    local f_1pt0    = tx .. '( 1.0 )'
+    local f_1subb   = '( ' .. f_1pt0 .. ' - ' .. y .. ' ) '
+    local f_1suba   = '( ' .. f_1pt0 .. ' - ' .. x .. ' ) '
+    local f_ab      = '( ' .. x .. ' * ' .. y .. ' )'
+
+    local f_out     = '( ' .. f_1suba .. ' * ' .. f_ab .. ' + ' .. x .. ' * ( ' .. f_1pt0 .. ' - ' .. f_1suba .. ' * ' .. f_1subb .. ' ) )'
+    
+    out.write( '\t' .. t .. ' ' .. d .. ' = ' .. f_out .. ';\n' )
+end
+
+function cg_blend_soft_light_alt_1_get_tip(out)
+    out.write( 'd = (1-a) * ab + a * ( 1 - (1-a) * (1-b) )' )
+end
+
+function cg_blend_soft_light_alt_2_gen_code(out, a, b, d)
+    local tx        = a.get_output().get_type()
+    local t         = tx
+    local x         = 'r' .. a.get_output().hex()
+    local y         = 'r' .. b.get_output().hex()
+    local d         = 'r' .. d.hex()
+    local f_2pt0    = tx .. '( 2.0 )'
+    local f_0pt5    = tx .. '( 0.5 )'
+    local f_1pt0    = tx .. '( 1.0 )'
+    local f_1subb   = '( ' .. f_1pt0 .. ' - ' .. y .. ' ) '
+    local f_1suba   = '( ' .. f_1pt0 .. ' - ' .. y .. ' ) '
+    local f_aa      = '( ' .. x .. ' * ' .. x .. ' )'
+    local f_2aab    = '( ' .. f_2pt0 .. '*' .. x .. '*' .. x .. ' * ' .. y .. ' )'
+    local f_2ab     = '( ' .. f_2pt0 .. '*' .. x .. ' * ' .. y .. ' )'
+    local f_out     = '( ' .. f_2ab .. ' + ' .. f_aa .. ' - ' .. f_2aab .. ' )'
+    
+    out.write( '\t' .. t .. ' ' .. d .. ' = ' .. f_out .. ';\n' )
+end
+
+function cg_blend_soft_light_alt_2_get_tip(out)
+    out.write( 'd = 2ab + aa - 2aab' )
+end
+
+function cg_blend_dodge_gen_code(out, a, b, d)
+    local tx        = a.get_output().get_type()
+    local t         = tx
+    local x         = 'r' .. a.get_output().hex()
+    local y         = 'r' .. b.get_output().hex()
+    local d         = 'r' .. d.hex()
+    local f_1pt0    = tx .. '( 1.0 )'
+    local f_1subb   = '( ' .. f_1pt0 .. ' - ' .. y .. ' ) '
+    local f_out     = '( ' .. x .. ' / ' .. f_1subb .. ' )'
+    
+    out.write( '\t' .. t .. ' ' .. d .. ' = ' .. f_out .. ';\n' )
+end
+
+function cg_blend_dodge_get_tip(out)
+    out.write( 'd = a / (1-b)' )
+end
+
+function cg_blend_inverse_dodge_gen_code(out, a, b, d)
+    local tx        = a.get_output().get_type()
+    local t         = tx
+    local x         = 'r' .. a.get_output().hex()
+    local y         = 'r' .. b.get_output().hex()
+    local d         = 'r' .. d.hex()
+    local f_1pt0    = tx .. '( 1.0 )'
+    local f_1suba   = '( ' .. f_1pt0 .. ' - ' .. x .. ' ) '
+    local f_out     = '( ' .. y .. ' / ' .. f_1suba .. ' )'
+    
+    out.write( '\t' .. t .. ' ' .. d .. ' = ' .. f_out .. ';\n' )
+end
+
+function cg_blend_inverse_dodge_get_tip(out)
+    out.write( 'd = b / (1-a)' )
+end
+
+function cg_blend_soft_dodge_gen_code(out, a, b, d)
+    local tx        = a.get_output().get_type()
+    local t         = tx
+    local x         = 'r' .. a.get_output().hex()
+    local y         = 'r' .. b.get_output().hex()
+    local d         = 'r' .. d.hex()
+    local f_2pt0    = tx .. '( 2.0 )'
+    local f_0pt5    = tx .. '( 0.5 )'
+    local f_1pt0    = tx .. '( 1.0 )'
+    local f_aaddb   = '( ' .. x .. ' + ' .. y .. ' )' 
+    local f_1subb   = '( ' .. f_1pt0 .. ' - ' .. y .. ')'
+
+    local test_pass     = '( ' .. f_0pt5 .. ' * ' .. a .. ' / ' .. f_1subb .. ' )'
+    local test_pass_var = {}
+    local test_pass_a   = 'r' .. string.match( tostring(test_pass_var), 'table: (.*)')
+
+    local test_fail     = '( ' .. f_1pt0 .. ' - ' .. f_0pt5 .. ' * ' .. f_1subb .. ' / ' .. x .. ' )'
+    local test_fail_var = {}
+    local test_fail_b   = 'r' .. string.match( tostring(test_fail_var), 'table: (.*)')
+    
+    out.write( '\t' .. tx .. ' ' .. test_pass_a .. ' = ' .. test_pass .. ';\n' ) 
+    out.write( '\t' .. tx .. ' ' .. test_fail_b .. ' = ' .. test_fail .. ';\n' ) 
+    out.write( '\t' .. t .. ' ' .. d .. ' = lerp(' .. test_fail_b .. ', ' .. test_pass_a .. ', ' .. t .. '(' .. f_aaddb .. ' < ' .. f_1pt0 .. ') );' .. '\n' );
+end
+
+function cg_blend_soft_dodge_get_tip(out)
+    out.write( 'd = if ( a+b < 1.0 ) then (0.5a / (1-b)) else (1 - 0.5(1-b)/a)' )
+end
+
+function cg_blend_burn_gen_code(out, a, b, d)
+    local tx        = a.get_output().get_type()
+    local t         = tx
+    local x         = 'r' .. a.get_output().hex()
+    local y         = 'r' .. b.get_output().hex()
+    local d         = 'r' .. d.hex()
+    local f_1pt0    = tx .. '( 1.0 )'
+    local f_1suba   = '( ' .. f_1pt0 .. ' - ' .. x .. ' ) '
+    local f_out     = '( ' .. f_1pt0 .. ' - ' .. f_1suba .. ' / ' .. y .. ' )'
+    
+    out.write( '\t' .. t .. ' ' .. d .. ' = ' .. f_out .. ';\n' )
+end
+
+function cg_blend_burn_get_tip(out)
+    out.write( 'd = 1-(1-a)/b' )
+end
+
+function cg_blend_inverse_burn_gen_code(out, a, b, d)
+    local tx        = a.get_output().get_type()
+    local t         = tx
+    local x         = 'r' .. a.get_output().hex()
+    local y         = 'r' .. b.get_output().hex()
+    local d         = 'r' .. d.hex()
+    local f_1pt0    = tx .. '( 1.0 )'
+    local f_1subb   = '( ' .. f_1pt0 .. ' - ' .. y .. ' ) '
+    local f_out     = '( ' .. f_1pt0 .. ' - ' .. f_1subb .. ' / ' .. x .. ' )'
+    
+    out.write( '\t' .. t .. ' ' .. d .. ' = ' .. f_out .. ';\n' )
+end
+
+function cg_blend_inverse_burn_get_tip(out)
+    out.write( 'd = 1-(1-b)/a' )
+end
+
+function cg_blend_soft_burn_gen_code(out, a, b, d)
+    local tx        = a.get_output().get_type()
+    local t         = tx
+    local x         = 'r' .. a.get_output().hex()
+    local y         = 'r' .. b.get_output().hex()
+    local d         = 'r' .. d.hex()
+    local f_2pt0    = tx .. '( 2.0 )'
+    local f_0pt5    = tx .. '( 0.5 )'
+    local f_1pt0    = tx .. '( 1.0 )'
+    local f_aaddb   = '( ' .. x .. ' + ' .. y .. ' )' 
+    local f_1suba   = '( ' .. f_1pt0 .. ' - ' .. x .. ')'
+
+    local test_pass     = '( ' .. f_0pt5 .. '*' .. y .. ' / ' .. f_1suba .. ' )'
+    local test_pass_var = {}
+    local test_pass_a   = 'r' .. string.match( tostring(test_pass_var), 'table: (.*)')
+
+    local test_fail     = '( ' .. f_1pt0 .. ' - ' .. f_0pt5 .. ' * ' .. f_1suba .. ' / ' .. y .. ' )'
+    local test_fail_var = {}
+    local test_fail_b   = 'r' .. string.match( tostring(test_fail_var), 'table: (.*)')
+    
+    out.write( '\t' .. tx .. ' ' .. test_pass_a .. ' = ' .. test_pass .. ';\n' ) 
+    out.write( '\t' .. tx .. ' ' .. test_fail_b .. ' = ' .. test_fail .. ';\n' ) 
+    out.write( '\t' .. t .. ' ' .. d .. ' = lerp(' .. test_fail_b .. ', ' .. test_pass_a .. ', ' .. t .. '(' .. f_aaddb .. ' < ' .. f_1pt0 .. ') );' .. '\n' );
+end
+
+function cg_blend_soft_burn_get_tip(out)
+    out.write( 'd = if ( a+b < 1.0 ) then (0.5b / (1-a)) else (1 - 0.5(1-a)/b)' )
+end
+
+function cg_blend_reflect_gen_code(out, a, b, d)
+    local tx        = a.get_output().get_type()
+    local t         = tx
+    local x         = 'r' .. a.get_output().hex()
+    local y         = 'r' .. b.get_output().hex()
+    local d         = 'r' .. d.hex()
+    local f_1pt0    = tx .. '( 1.0 )'
+    local f_aa      = '( ' .. x .. ' * ' .. x .. ' ) '
+    local f_1subb   = '( ' .. f_1pt0 .. ' - ' .. y .. ' ) '
+    local f_out     = '( ' .. f_aa .. ' / ' .. f_1subb .. ' )'
+    
+    out.write( '\t' .. t .. ' ' .. d .. ' = ' .. f_out .. ';\n' )
+end
+
+function cg_blend_reflect_get_tip(out)
+    out.write( 'd = aa / (1-b)' )
+end
+
+function cg_blend_glow_gen_code(out, a, b, d)
+    local tx        = a.get_output().get_type()
+    local t         = tx
+    local x         = 'r' .. a.get_output().hex()
+    local y         = 'r' .. b.get_output().hex()
+    local d         = 'r' .. d.hex()
+    local f_1pt0    = tx .. '( 1.0 )'
+    local f_bb      = '( ' .. y .. ' * ' .. y .. ' ) '
+    local f_1suba   = '( ' .. f_1pt0 .. ' - ' .. x .. ' ) '
+    local f_out     = '( ' .. f_bb .. ' / ' .. f_1suba .. ' )'
+    
+    out.write( '\t' .. t .. ' ' .. d .. ' = ' .. f_out .. ';\n' )
+end
+
+function cg_blend_glow_get_tip(out)
+    out.write( 'd = bb / (1-a)' )
+end
+
+function cg_blend_freeze_gen_code(out, a, b, d)
+    local tx         = a.get_output().get_type()
+    local t          = tx
+    local x          = 'r' .. a.get_output().hex()
+    local y          = 'r' .. b.get_output().hex()
+    local d          = 'r' .. d.hex()
+    local f_1pt0     = tx .. '( 1.0 )'
+    local f_2pt0     = tx .. '( 2.0 )'
+    local f_2a       = '( ' .. f_2pt0 .. ' * ' .. x .. ' ) '
+    local f_aa       = '( ' .. x .. ' * ' .. x .. ' ) '
+    local f_1suba_sq = '( ' .. f_1pt0 .. ' - ' .. f_2a .. ' + ' .. f_aa .. ' )'
+    local f_out      = '( ' .. f_1pt0 .. ' - ' .. f_1suba_sq .. ' / ' .. y .. ' )'
+    
+    out.write( '\t' .. t .. ' ' .. d .. ' = ' .. f_out .. ';\n' )
+end
+
+function cg_blend_freeze_get_tip(out)
+    out.write( 'd = 1 - (1-a)(1-a) / b ')
+end
+
+function cg_blend_heat_gen_code(out, a, b, d)
+    local tx         = a.get_output().get_type()
+    local t          = tx
+    local x          = 'r' .. a.get_output().hex()
+    local y          = 'r' .. b.get_output().hex()
+    local d          = 'r' .. d.hex()
+    local f_1pt0     = tx .. '( 1.0 )'
+    local f_2pt0     = tx .. '( 2.0 )'
+    local f_2b       = '( ' .. f_2pt0 .. ' * ' .. y .. ' ) '
+    local f_bb       = '( ' .. y .. ' * ' .. y .. ' ) '
+    local f_1subb_sq = '( ' .. f_1pt0 .. ' - ' .. f_2b .. ' + ' .. f_bb .. ' )'
+    local f_out      = '( ' .. f_1pt0 .. ' - ' .. f_1subb_sq .. ' / ' .. x .. ' )'
+    
+    out.write( '\t' .. t .. ' ' .. d .. ' = ' .. f_out .. ';\n' )
+end
+
+function cg_blend_heat_get_tip(out)
+    out.write( 'd = 1 - (1-b)(1-b) / a ')
+end
+
+function cg_blend_additive_gen_code(out, a, b, d)
+    local tx         = a.get_output().get_type()
+    local t          = tx
+    local x          = 'r' .. a.get_output().hex()
+    local y          = 'r' .. b.get_output().hex()
+    local d          = 'r' .. d.hex()
+    local f_out      = '( ' .. x .. ' + ' .. y .. ' )'
+    
+    out.write( '\t' .. t .. ' ' .. d .. ' = ' .. f_out .. ';\n' )
+end
+
+function cg_blend_additive_get_tip(out)
+    out.write( 'd = a + b' )
+end
+
+function cg_blend_subtractive_gen_code(out, a, b, d)
+    local tx         = a.get_output().get_type()
+    local t          = tx
+    local x          = 'r' .. a.get_output().hex()
+    local y          = 'r' .. b.get_output().hex()
+    local d          = 'r' .. d.hex()
+    local f_1pt0     = tx .. '( 1.0 )'
+    local f_out      = '( ' .. x .. ' + ' .. y .. ' - ' .. f_1pt0 .. ' )'
+    
+    out.write( '\t' .. t .. ' ' .. d .. ' = ' .. f_out .. ';\n' )
+end
+
+function cg_blend_subtractive_get_tip(out)
+    out.write( 'd = a + b - 1' )
+end
+
+function cg_blend_stamp_gen_code(out, a, b, d)
+    local tx         = a.get_output().get_type()
+    local t          = tx
+    local x          = 'r' .. a.get_output().hex()
+    local y          = 'r' .. b.get_output().hex()
+    local d          = 'r' .. d.hex()
+    local f_1pt0     = tx .. '( 1.0 )'
+    local f_2pt0     = tx .. '( 2.0 )'
+    local f_2b       = '( ' .. f_2pt0 .. ' * ' .. y .. ' ) '
+    local f_out      = '( ' .. x .. ' + ' .. f_2b .. ' - ' .. f_1pt0 .. ' )'
+    
+    out.write( '\t' .. t .. ' ' .. d .. ' = ' .. f_out .. ';\n' )
+end
+
+function cg_blend_stamp_get_tip(out)
+    out.write( 'd = a + 2b - 1' )
+end
+
+function cg_blend_interpolation_gen_code(out, a, b, d)
+    local tx         = a.get_output().get_type()
+    local t          = tx
+    local x          = 'r' .. a.get_output().hex()
+    local y          = 'r' .. b.get_output().hex()
+    local d          = 'r' .. d.hex()
+    local f_1pt0     = tx .. '( 1.0 )'
+    local f_2pt0     = tx .. '( 2.0 )'
+    local f_0pt5     = tx .. '( 0.5 )'
+    local f_0pt25    = tx .. '( 0.25 )'
+    local f_pi       = tx .. '( 3.1415926535897932385 )'
+    local f_0pt25cpa = '( ' .. f_0pt25 .. ' * ' .. 'cos( ' .. f_pi .. " * " .. x .. ' )' .. ' )'
+    local f_0pt25cpb = '( ' .. f_0pt25 .. ' * ' .. 'cos( ' .. f_pi .. " * " .. y .. ' )' .. ' )'
+    local f_out      = '( ' .. f_0pt5 .. ' - ' .. f_0pt25cpa .. ' - ' .. f_0pt25cpb .. ' )'
+    
+    out.write( '\t' .. t .. ' ' .. d .. ' = ' .. f_out .. ';\n' )
+end
+
+function cg_blend_interpolation_get_tip(out)
+    out.write( 'd = 0.5 - 0.25*cos(pi*a) - 0.25*cos(pi*b)' )
+end
+
+-- #################################################### --
+
+local cg_color_blend = class(Node)
+
+function cg_color_blend:get_help(out)
+    out.write( 'Select blend mode between two color values')
+    out.write( '\n' )
+    out.write( '\n' )
+    out.write( 'Supported Types:\n' )
+    out.write( 'float\n' ) 
+    out.write( 'half\n' ) 
+    out.write( 'fixed\n' ) 
+    out.write( 'float4\n' ) 
+    out.write( 'half4\n' ) 
+    out.write( 'fixed4\n' ) 
+    out.write( 'float3\n' ) 
+    out.write( 'half3\n' ) 
+    out.write( 'fixed3\n' ) 
+    out.write( 'float2\n' ) 
+    out.write( 'half2\n' ) 
+    out.write( 'fixed2\n' ) 
+end
+
+function cg_color_blend:new()
+    Node.new(self)
+    self.a = self.add_port(Input('a'))
+    self.b = self.add_port(Input('b'))
+    self.d = self.add_port(Output('d'))
+
+    self.blend_choices = { 
+        'Average',
+        'Screen',
+        'Darken',
+        'Lighten',
+        'Difference',
+        'Negation',
+        'Exclusion',
+        'Overlay',
+        'Hard Light',
+        'Soft Light',
+        'Soft Light (Alt 1)',
+        'Soft Light (Alt 2)',
+        'Dodge',
+        'Inverse Dodge',
+        'Soft Dodge',
+        'Burn',
+        'Inverse Burn',
+        'Soft Burn',
+        'Reflect',
+        'Glow',
+        'Freeze',
+        'Heat',
+        'Additive',
+        'Subtractive',
+        'Stamp',
+        'Interpolation'
+    }
+
+    self.blend_ndx = 1
+
+    self.name = 'Blend [' .. self.blend_choices[self.blend_ndx] .. ']'
+end
+
+function cg_color_blend:get_type(port)
+
+    local tx = self.a.get_output().get_type()
+    local ty = self.b.get_output().get_type()
+
+        if (   ( tx == 'float' ) 
+            or ( tx == 'half' ) 
+            or ( tx == 'fixed' ) 
+            or ( tx == 'int' ) 
+            or ( tx == 'float4' ) 
+            or ( tx == 'half4' ) 
+            or ( tx == 'fixed4' ) 
+            or ( tx == 'int4' ) 
+            or ( tx == 'float3' ) 
+            or ( tx == 'half3' ) 
+            or ( tx == 'fixed3' ) 
+            or ( tx == 'int3' ) 
+            or ( tx == 'float2' ) 
+            or ( tx == 'half2' ) 
+            or ( tx == 'fixed2' ) 
+            or ( tx == 'int2' ) ) then
+        
+        if ((tx == ty)) then
+            return tx
+        end
+    end
+
+    return nil
+end
+
+function cg_color_blend:config(props)
+    Node.config(self, props)
+    props.delete('Name')
+
+    props.list(
+        'Blend Function',
+        self.blend_choices,
+        function() return self.blend_ndx end,
+        function(v) self.name = 'Blend [' .. self.blend_choices[v] .. ']' self.blend_ndx = v end
+    )
+end
+
+function cg_color_blend:gen_code(out, scratch)
+    local blend_gen_code_functions = {
+        ['Average'] = cg_blend_average_gen_code,
+        ['Screen'] = cg_blend_screen_gen_code,
+        ['Darken'] = cg_blend_darken_gen_code,
+        ['Lighten'] = cg_blend_lighten_gen_code,
+        ['Difference'] = cg_blend_difference_gen_code,
+        ['Negation'] = cg_blend_negation_gen_code,
+        ['Exclusion'] = cg_blend_exclusion_gen_code,
+        ['Overlay'] = cg_blend_overlay_gen_code,
+        ['Hard Light'] = cg_blend_hard_light_gen_code,
+        ['Soft Light'] = cg_blend_soft_light_gen_code,
+        ['Soft Light (Alt 1)'] = cg_blend_soft_light_alt_1_gen_code,
+        ['Soft Light (Alt 2)'] = cg_blend_soft_light_alt_2_gen_code,
+        ['Dodge'] = cg_blend_dodge_gen_code,
+        ['Inverse Dodge'] = cg_blend_inverse_dodge_gen_code,
+        ['Soft Dodge'] = cg_blend_soft_dodge_gen_code,
+        ['Burn'] = cg_blend_burn_gen_code,
+        ['Inverse Burn'] = cg_blend_inverse_burn_gen_code,
+        ['Soft Burn'] = cg_blend_soft_burn_gen_code,
+        ['Reflect'] = cg_blend_reflect_gen_code,
+        ['Glow'] = cg_blend_glow_gen_code,
+        ['Freeze'] = cg_blend_freeze_gen_code,
+        ['Heat'] = cg_blend_heat_gen_code,
+        ['Additive'] = cg_blend_additive_gen_code,
+        ['Subtractive'] = cg_blend_subtractive_gen_code,
+        ['Stamp'] = cg_blend_stamp_gen_code,
+        ['Interpolation'] = cg_blend_interpolation_gen_code
+    }
+
+    local blend_name     = self.blend_choices[ self.blend_ndx ]
+    local blend_gen_code = blend_gen_code_functions[ blend_name ]
+
+    blend_gen_code( out, self.a, self.b, self.d )
+end
+
+function cg_color_blend:get_tip(out)
+    local blend_get_tip_functions = {
+        ['Average'] = cg_blend_average_get_tip,
+        ['Screen'] = cg_blend_screen_get_tip,
+        ['Darken'] = cg_blend_darken_get_tip,
+        ['Lighten'] = cg_blend_lighten_get_tip,
+        ['Difference'] = cg_blend_difference_get_tip,
+        ['Negation'] = cg_blend_negation_get_tip,
+        ['Exclusion'] = cg_blend_exclusion_get_tip,
+        ['Overlay'] = cg_blend_overlay_get_tip,
+        ['Hard Light'] = cg_blend_hard_light_get_tip,
+        ['Soft Light'] = cg_blend_soft_light_get_tip,
+        ['Soft Light (Alt 1)'] = cg_blend_soft_light_alt_1_get_tip,
+        ['Soft Light (Alt 2)'] = cg_blend_soft_light_alt_2_get_tip,
+        ['Dodge'] = cg_blend_dodge_get_tip,
+        ['Inverse Dodge'] = cg_blend_inverse_dodge_get_tip,
+        ['Soft Dodge'] = cg_blend_soft_dodge_get_tip,
+        ['Burn'] = cg_blend_burn_get_tip,
+        ['Inverse Burn'] = cg_blend_inverse_burn_get_tip,
+        ['Soft Burn'] = cg_blend_soft_burn_get_tip,
+        ['Reflect'] = cg_blend_reflect_get_tip,
+        ['Glow'] = cg_blend_glow_get_tip,
+        ['Freeze'] = cg_blend_freeze_get_tip,
+        ['Heat'] = cg_blend_heat_get_tip,
+        ['Additive'] = cg_blend_additive_get_tip,
+        ['Subtractive'] = cg_blend_subtractive_get_tip,
+        ['Stamp'] = cg_blend_stamp_get_tip,
+        ['Interpolation'] = cg_blend_interpolation_get_tip
+    }
+
+    local blend_name    = self.blend_choices[ self.blend_ndx ]
+    local blend_get_tip = blend_get_tip_functions[ blend_name ]
+
+    blend_get_tip( out, self.a, self.b, self.d )
+end
+
+-- #################################################### --
+
+local cg_color_blend_layer = class(Node)
+
+function cg_color_blend_layer:get_help(out)
+    out.write( 'Select blend mode between two color values')
+    out.write( '\n' )
+    out.write( '\n' )
+    out.write( 'Supported Types:\n' )
+    out.write( 'float\n' ) 
+    out.write( 'half\n' ) 
+    out.write( 'fixed\n' ) 
+    out.write( 'float4\n' ) 
+    out.write( 'half4\n' ) 
+    out.write( 'fixed4\n' ) 
+    out.write( 'float3\n' ) 
+    out.write( 'half3\n' ) 
+    out.write( 'fixed3\n' ) 
+    out.write( 'float2\n' ) 
+    out.write( 'half2\n' ) 
+    out.write( 'fixed2\n' ) 
+end
+
+function cg_color_blend_layer:new()
+    Node.new(self)
+    self.a = self.add_port(Input('a'))
+    self.b = self.add_port(Input('b'))
+    self.opacity = self.add_port(Input('opacity'))
+    self.d = self.add_port(Output('d'))
+
+    self.blend_choices = { 
+        'Average',
+        'Screen',
+        'Darken',
+        'Lighten',
+        'Difference',
+        'Negation',
+        'Exclusion',
+        'Overlay',
+        'Hard Light',
+        'Soft Light',
+        'Soft Light (Alt 1)',
+        'Soft Light (Alt 2)',
+        'Dodge',
+        'Inverse Dodge',
+        'Soft Dodge',
+        'Burn',
+        'Inverse Burn',
+        'Soft Burn',
+        'Reflect',
+        'Glow',
+        'Freeze',
+        'Heat',
+        'Additive',
+        'Subtractive',
+        'Stamp',
+        'Interpolation'
+    }
+
+    self.blend_ndx = 1
+
+    self.name = 'Blend [' .. self.blend_choices[self.blend_ndx] .. ']'
+end
+
+function cg_color_blend_layer:get_type(port)
+
+    local tx = self.a.get_output().get_type()
+    local ty = self.b.get_output().get_type()
+    local to = self.opacity.get_output().get_type()
+
+        if (   ( tx == 'float' ) 
+            or ( tx == 'float4' ) 
+            or ( tx == 'float3' ) 
+            or ( tx == 'float2' ) ) then 
+        
+            if ((tx == ty) and (to == 'float')) then
+                return tx
+            end
+        end
+
+        if (   ( tx == 'half' ) 
+            or ( tx == 'half4' ) 
+            or ( tx == 'half3' ) 
+            or ( tx == 'half2' ) ) then 
+        
+            if ((tx == ty) and (to == 'half')) then
+                return tx
+            end
+        end
+
+        if (   ( tx == 'fixed' ) 
+            or ( tx == 'fixed4' ) 
+            or ( tx == 'fixed3' ) 
+            or ( tx == 'fixed2' ) ) then 
+        
+            if ((tx == ty) and (to == 'fixed')) then
+                return tx
+            end
+        end
+
+    return nil
+end
+
+function cg_color_blend_layer:config(props)
+    Node.config(self, props)
+    props.delete('Name')
+
+    props.list(
+        'Blend Function',
+        self.blend_choices,
+        function() return self.blend_ndx end,
+        function(v) self.name = 'Blend [' .. self.blend_choices[v] .. ']' self.blend_ndx = v end
+    )
+end
+
+function cg_color_blend_layer:gen_code(out, scratch)
+    local blend_gen_code_functions = {
+        ['Average'] = cg_blend_average_gen_code,
+        ['Screen'] = cg_blend_screen_gen_code,
+        ['Darken'] = cg_blend_darken_gen_code,
+        ['Lighten'] = cg_blend_lighten_gen_code,
+        ['Difference'] = cg_blend_difference_gen_code,
+        ['Negation'] = cg_blend_negation_gen_code,
+        ['Exclusion'] = cg_blend_exclusion_gen_code,
+        ['Overlay'] = cg_blend_overlay_gen_code,
+        ['Hard Light'] = cg_blend_hard_light_gen_code,
+        ['Soft Light'] = cg_blend_soft_light_gen_code,
+        ['Soft Light (Alt 1)'] = cg_blend_soft_light_alt_1_gen_code,
+        ['Soft Light (Alt 2)'] = cg_blend_soft_light_alt_2_gen_code,
+        ['Dodge'] = cg_blend_dodge_gen_code,
+        ['Inverse Dodge'] = cg_blend_inverse_dodge_gen_code,
+        ['Soft Dodge'] = cg_blend_soft_dodge_gen_code,
+        ['Burn'] = cg_blend_burn_gen_code,
+        ['Inverse Burn'] = cg_blend_inverse_burn_gen_code,
+        ['Soft Burn'] = cg_blend_soft_burn_gen_code,
+        ['Reflect'] = cg_blend_reflect_gen_code,
+        ['Glow'] = cg_blend_glow_gen_code,
+        ['Freeze'] = cg_blend_freeze_gen_code,
+        ['Heat'] = cg_blend_heat_gen_code,
+        ['Additive'] = cg_blend_additive_gen_code,
+        ['Subtractive'] = cg_blend_subtractive_gen_code,
+        ['Stamp'] = cg_blend_stamp_gen_code,
+        ['Interpolation'] = cg_blend_interpolation_gen_code
+    }
+
+    local blend_name     = self.blend_choices[ self.blend_ndx ]
+    local blend_gen_code = blend_gen_code_functions[ blend_name ]
+
+    local temp_var = {} 
+    temp_var.hex_value = string.match( tostring(temp_var), 'table: (.*)') 
+    temp_var.hex       = function() return temp_var.hex_value end
+
+    blend_gen_code( out, self.a, self.b, temp_var )
+
+    local type       = self.a.get_output().get_type()
+    local x          = 'r' .. self.a.get_output().hex()
+    local y          = 'r' .. temp_var.hex()
+    local d          = 'r' .. self.d.hex()
+    local opacity    = 'r' .. self.opacity.get_output().hex()
+    
+    out.write( '\t' .. type .. ' ' .. d .. ' = lerp(' .. x .. ',' .. y .. ',' .. type .. '(' .. opacity .. '));\n' )
+end
+
+function cg_color_blend_layer:get_tip(out)
+    local blend_get_tip_functions = {
+        ['Average'] = cg_blend_average_get_tip,
+        ['Screen'] = cg_blend_screen_get_tip,
+        ['Darken'] = cg_blend_darken_get_tip,
+        ['Lighten'] = cg_blend_lighten_get_tip,
+        ['Difference'] = cg_blend_difference_get_tip,
+        ['Negation'] = cg_blend_negation_get_tip,
+        ['Exclusion'] = cg_blend_exclusion_get_tip,
+        ['Overlay'] = cg_blend_overlay_get_tip,
+        ['Hard Light'] = cg_blend_hard_light_get_tip,
+        ['Soft Light'] = cg_blend_soft_light_get_tip,
+        ['Soft Light (Alt 1)'] = cg_blend_soft_light_alt_1_get_tip,
+        ['Soft Light (Alt 2)'] = cg_blend_soft_light_alt_2_get_tip,
+        ['Dodge'] = cg_blend_dodge_get_tip,
+        ['Inverse Dodge'] = cg_blend_inverse_dodge_get_tip,
+        ['Soft Dodge'] = cg_blend_soft_dodge_get_tip,
+        ['Burn'] = cg_blend_burn_get_tip,
+        ['Inverse Burn'] = cg_blend_inverse_burn_get_tip,
+        ['Soft Burn'] = cg_blend_soft_burn_get_tip,
+        ['Reflect'] = cg_blend_reflect_get_tip,
+        ['Glow'] = cg_blend_glow_get_tip,
+        ['Freeze'] = cg_blend_freeze_get_tip,
+        ['Heat'] = cg_blend_heat_get_tip,
+        ['Additive'] = cg_blend_additive_get_tip,
+        ['Subtractive'] = cg_blend_subtractive_get_tip,
+        ['Stamp'] = cg_blend_stamp_get_tip,
+        ['Interpolation'] = cg_blend_interpolation_get_tip
+    }
+
+    local blend_name    = self.blend_choices[ self.blend_ndx ]
+    local blend_get_tip = blend_get_tip_functions[ blend_name ]
+
+    blend_get_tip( out, self.a, self.b, self.d )
+
+end
+
+
+-- #################################################### --
+
+register {
+    __name = 'Cg [Color Functions]',
+    __prologue = '',
+    __epilogue = '',
+    ['Color Blend']  = cg_color_blend,
+    ['Color Blend and Layer']  = cg_color_blend_layer,
+    ['Opacity']      = cg_blend_opacity,
+    ['Transparency'] = cg_blend_transparency,
+}

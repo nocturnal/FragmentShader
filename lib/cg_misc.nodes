@@ -1,0 +1,1238 @@
+
+-- #################################################### --
+
+local cg_copy = class(Node)
+
+function cg_copy:get_help(out)
+	out.write[[TODO]]
+end
+
+function cg_copy:new()
+	Node.new(self)
+	self.a = self.add_port(Input('a'))
+	self.x = self.add_port(Output('x'))
+	self.y = self.add_port(Output('y'))
+
+end
+
+function cg_copy:get_type(port)
+
+	local tx = self.a.get_output().get_type()
+
+	return tx
+end
+
+function cg_copy:config(props)
+
+	Node.config(self, props)
+	props.delete('Name')
+
+end
+
+function cg_copy:gen_code(out, scratch)
+
+	local tx = self.a.get_output().get_type()
+	local x  = 'r' .. self.a.get_output().hex()
+
+	out.write( '\t' .. tx .. ' r' .. self.x.hex() .. ' = ' .. x .. ';\n' )
+	out.write( '\t' .. tx .. ' r' .. self.y.hex() .. ' = ' .. x .. ';\n' )
+end
+
+function cg_copy:get_tip(out)
+
+	out.write( '(x,y) = d' )
+
+end
+
+-- #################################################### --
+
+local cg_name = class(Node)
+
+function cg_name:get_help(out)
+	out.write[[TODO]]
+end
+
+function cg_name:new()
+	Node.new(self)
+	self.a = self.add_port(Input('a'))
+	self.x = self.add_port(Output('x'))
+
+end
+
+function cg_name:get_type(port)
+
+	local tx = self.a.get_output().get_type()
+
+	return tx
+end
+
+function cg_name:config(props)
+
+	Node.config(self, props)
+	-- props.delete('Name')
+
+end
+
+function cg_name:gen_code(out, scratch)
+
+	local a  = 'r' .. self.a.get_output().hex()
+
+	out.write( '\t#define r' .. self.x.hex() .. ' ' .. a .. '\n' )
+end
+
+function cg_name:get_tip(out)
+
+	out.write( 'x = d' )
+end
+
+
+-- #################################################### --
+
+local cg_user_const = class(Node)
+
+function cg_user_const:get_help(out)
+	out.write[[TODO]]
+end
+
+function cg_user_const:new()
+	Node.new(self)
+	self.d = self.add_port(Output('d'))
+        self.type_choices = { 'float',
+                              'half',  
+                              'fixed',  
+                              'int',  
+                              'bool',  
+                              'float4',  
+                              'half4',  
+                              'fixed4',  
+                              'int4',  
+                              'bool4',  
+                              'float3',  
+                              'half3',  
+                              'fixed3',  
+                              'int3',  
+                              'bool3',  
+                              'float2',  
+                              'half2',  
+                              'fixed2',  
+                              'int2',  
+                              'bool2',  
+                              'float4x4',  
+                              'half4x4',  
+                              'fixed4x4',  
+                              'int4x4',  
+                              'bool4x4',  
+                              'float4x3',  
+                              'half4x3',  
+                              'fixed4x3',  
+                              'int4x3',  
+                              'bool4x3',  
+                              'float4x2',  
+                              'half4x2',  
+                              'fixed4x2',  
+                              'int4x2',  
+                              'bool4x2',  
+                              'float3x4',  
+                              'half3x4',  
+                              'fixed3x4',  
+                              'int3x4',  
+                              'bool3x4',  
+                              'float3x3',  
+                              'half3x3',  
+                              'fixed3x3',  
+                              'int3x3',  
+                              'bool3x3',  
+                              'float3x2',  
+                              'half3x2',  
+                              'fixed3x2',  
+                              'int3x2',  
+                              'bool3x2',  
+                              'float2x4',  
+                              'half2x4',  
+                              'fixed2x4',  
+                              'int2x4',  
+                              'bool2x4',  
+                              'float2x3',  
+                              'half2x3',  
+                              'fixed2x3',  
+                              'int2x3',  
+                              'bool2x3',  
+                              'float2x2',  
+                              'half2x2',  
+                              'fixed2x2',  
+                              'int2x2',  
+                              'bool2x2' }
+	self.type_ndx = 1
+	self.value = '0'
+	self.name = 'float(0)'
+end
+
+function cg_user_const:get_type(port)
+	return self.type_choices[self.type_ndx]
+end
+
+function cg_user_const:config(props)
+	Node.config(self, props)
+	props.delete('Name')
+
+	props.list(
+		'Type',
+		self.type_choices,
+		function() return self.type_ndx end,
+		function(v) self.name = self.type_choices[v] .. '(' .. self.value .. ')' self.type_ndx = v end
+	)
+	props.text_input(
+		'Value',
+		function() return self.value end,
+		function(v) self.name = self.type_choices[ self.type_ndx ] .. '(' .. v ..')' self.value = v end,
+		function(v) return math.evaluate(v) end
+	)
+
+end
+
+function cg_user_const:gen_code(out, scratch)
+	local v        = math.evaluate(self.value)
+        local type_ndx = self.type_ndx
+        local type     = self.type_choices[ type_ndx ]
+
+	out.write( '\t#define r' .. self.d.hex() .. ' ' .. type .. '(' .. v .. ')\n' )
+end
+
+function cg_user_const:get_tip(out)
+        if ( self.type_choices == nil ) then
+        	return nil
+	end
+        if ( self.type_ndx == nil ) then
+        	return nil
+	end
+
+        local type_ndx = self.type_ndx
+        local type     = self.type_choices[ type_ndx ]
+        local value    = self.value
+
+	out.write( 'Set scalar or splat vector to user value' )
+end
+
+
+-- #################################################### --
+
+
+local cg_user_const_vector2 = class(Node)
+
+function cg_user_const_vector2:get_help(out)
+	out.write[[TODO]]
+end
+
+function cg_user_const_vector2:new()
+	Node.new(self)
+	self.d = self.add_port(Output('d'))
+        self.type_choices = { 'float2',  
+                              'half2',  
+                              'fixed2',  
+                              'int2',  
+                              'bool2' }
+	self.type_ndx = 1
+	self.value_0 = '0'
+	self.value_1 = '0'
+	self.name    = 'float2(0,0)'
+end
+
+function cg_user_const_vector2:get_type(port)
+	return self.type_choices[self.type_ndx]
+end
+
+function cg_user_const_vector2:config(props)
+	Node.config(self, props)
+	props.delete('Name')
+
+	props.list(
+		'Type',
+		self.type_choices,
+		function() return self.type_ndx end,
+		function(v) self.name = self.type_choices[v] .. '(' .. self.value_0 .. ',' .. self.value_1 .. ')' self.type_ndx = v end
+	)
+	props.text_input(
+		'Value (0)',
+		function() return self.value_0 end,
+		function(v) self.name = self.type_choices[ self.type_ndx ] .. '(' .. v .. ',' .. self.value_1 .. ')' self.value_0 = v end,
+		function(v) return math.evaluate(v) end
+	)
+	props.text_input(
+		'Value (1)',
+		function() return self.value_1 end,
+		function(v) self.name = self.type_choices[ self.type_ndx ] .. '(' .. self.value_0 .. ',' .. v .. ')' self.value_1 = v end,
+		function(v) return math.evaluate(v) end
+	)
+
+end
+
+function cg_user_const_vector2:gen_code(out, scratch)
+	local v0       = math.evaluate(self.value_0)
+	local v1       = math.evaluate(self.value_1)
+        local type_ndx = self.type_ndx
+        local type     = self.type_choices[ type_ndx ]
+
+	out.write( '\t#define r' .. self.d.hex() .. ' ' .. type .. '(' .. v0 .. ',' .. v1 .. ')\n' )
+end
+
+function cg_user_const_vector2:get_tip(out)
+
+	out.write( 'Set vector2 to user value' )
+end
+
+-- #################################################### --
+
+
+local cg_user_const_vector4 = class(Node)
+
+function cg_user_const_vector4:get_help(out)
+	out.write[[TODO]]
+end
+
+function cg_user_const_vector4:new()
+	Node.new(self)
+	self.d = self.add_port(Output('d'))
+        self.type_choices = { 'float4',  
+                              'half4',  
+                              'fixed4',  
+                              'int4',  
+                              'bool4' }
+	self.type_ndx = 1
+	self.value_0 = '0'
+	self.value_1 = '0'
+	self.value_2 = '0'
+	self.value_3 = '0'
+	self.name    = 'float4(0,0,0,0)'
+end
+
+function cg_user_const_vector4:get_type(port)
+	return self.type_choices[self.type_ndx]
+end
+
+function cg_user_const_vector4:config(props)
+	Node.config(self, props)
+	props.delete('Name')
+
+	props.list(
+		'Type',
+		self.type_choices,
+		function() return self.type_ndx end,
+		function(v) self.name = self.type_choices[v] .. '(' .. self.value_0 .. ',' .. self.value_1 .. ',' .. self.value_2 .. ',' .. self.value_3 .. ')' self.value_0 = v end
+	)
+	props.text_input(
+		'Value (0)',
+		function() return self.value_0 end,
+		function(v) self.name = self.type_choices[ self.type_ndx ] .. '(' .. v .. ',' .. self.value_1 .. ',' .. self.value_2 .. ',' .. self.value_3 .. ')' self.value_0 = v end,
+		function(v) return math.evaluate(v) end
+	)
+	props.text_input(
+		'Value (1)',
+		function() return self.value_1 end,
+		function(v) self.name = self.type_choices[ self.type_ndx ] .. '(' .. self.value_0 .. ',' .. v .. ',' .. self.value_2 .. ',' .. self.value_3 .. ')' self.value_1 = v end,
+		function(v) return math.evaluate(v) end
+	)
+	props.text_input(
+		'Value (2)',
+		function() return self.value_2 end,
+		function(v) self.name = self.type_choices[ self.type_ndx ] .. '(' .. self.value_0 .. ',' .. self.value_1 .. ',' .. v .. ',' .. self.value_3 .. ')' self.value_2 = v end,
+		function(v) return math.evaluate(v) end
+	)
+	props.text_input(
+		'Value (3)',
+		function() return self.value_3 end,
+		function(v) self.name = self.type_choices[ self.type_ndx ] .. '(' .. self.value_0 .. ',' .. self.value_1 .. ',' .. self.value_2 .. ',' .. v .. ')' self.value_3 = v end,
+		function(v) return math.evaluate(v) end
+	)
+
+end
+
+function cg_user_const_vector4:gen_code(out, scratch)
+	local v0       = math.evaluate(self.value_0)
+	local v1       = math.evaluate(self.value_1)
+	local v2       = math.evaluate(self.value_2)
+	local v3       = math.evaluate(self.value_3)
+        local type_ndx = self.type_ndx
+        local type     = self.type_choices[ type_ndx ]
+
+	out.write( '\t#define r' .. self.d.hex() .. ' ' .. type .. '(' .. v0 .. ',' .. v1 .. ',' .. v2 .. ',' .. v3 .. ')\n' )
+end
+
+function cg_user_const_vector4:get_tip(out)
+
+	out.write( 'Set vector4 to user value' )
+end
+
+-- #################################################### --
+
+
+
+local cg_user_const_vector3 = class(Node)
+
+function cg_user_const_vector3:get_help(out)
+	out.write[[TODO]]
+end
+
+function cg_user_const_vector3:new()
+	Node.new(self)
+	self.d = self.add_port(Output('d'))
+        self.type_choices = { 'float3',  
+                              'half3',  
+                              'fixed3',  
+                              'int3',  
+                              'bool3' }
+	self.type_ndx = 1
+	self.value_0 = '0'
+	self.value_1 = '0'
+	self.value_2 = '0'
+	self.name    = 'float3(0,0,0)'
+end
+
+function cg_user_const_vector3:get_type(port)
+	return self.type_choices[self.type_ndx]
+end
+
+function cg_user_const_vector3:config(props)
+	Node.config(self, props)
+	props.delete('Name')
+
+	props.list(
+		'Type',
+		self.type_choices,
+		function() return self.type_ndx end,
+		function(v) self.name = self.type_choices[v] .. '(' .. self.value_0 .. ',' .. self.value_1 .. ',' .. self.value_2 .. ')' self.value_0 = v end
+	)
+	props.text_input(
+		'Value (0)',
+		function() return self.value_0 end,
+		function(v) self.name = self.type_choices[ self.type_ndx ] .. '(' .. v .. ',' .. self.value_1 .. ',' .. self.value_2 .. ')' self.value_0 = v end,
+		function(v) return math.evaluate(v) end
+	)
+	props.text_input(
+		'Value (1)',
+		function() return self.value_1 end,
+		function(v) self.name = self.type_choices[ self.type_ndx ] .. '(' .. self.value_0 .. ',' .. v .. ',' .. self.value_2 .. ')' self.value_1 = v end,
+		function(v) return math.evaluate(v) end
+	)
+	props.text_input(
+		'Value (2)',
+		function() return self.value_2 end,
+		function(v) self.name = self.type_choices[ self.type_ndx ] .. '(' .. self.value_0 .. ',' .. self.value_1 .. ',' .. v .. ')' self.value_2 = v end,
+		function(v) return math.evaluate(v) end
+	)
+
+end
+
+function cg_user_const_vector3:gen_code(out, scratch)
+	local v0       = math.evaluate(self.value_0)
+	local v1       = math.evaluate(self.value_1)
+	local v2       = math.evaluate(self.value_2)
+        local type_ndx = self.type_ndx
+        local type     = self.type_choices[ type_ndx ]
+
+	out.write( '\t#define r' .. self.d.hex() .. ' ' .. type .. '(' .. v0 .. ',' .. v1 .. ',' .. v2 .. ')\n' )
+end
+
+function cg_user_const_vector3:get_tip(out)
+
+	out.write( 'Set vector3 to user value' )
+end
+
+-- #################################################### --
+
+
+local cg_static_cast = class(Node)
+
+function cg_static_cast:get_help(out)
+	out.write[[TODO]]
+end
+
+function cg_static_cast:new()
+
+	Node.new(self)
+	self.a = self.add_port(Input('a'))
+	self.d = self.add_port(Output('d'))
+        self.type_choices = { 'float',
+                              'half',  
+                              'fixed',  
+                              'int',  
+                              'bool',  
+                              'float4',  
+                              'half4',  
+                              'fixed4',  
+                              'int4',  
+                              'bool4',  
+                              'float3',  
+                              'half3',  
+                              'fixed3',  
+                              'int3',  
+                              'bool3',  
+                              'float2',  
+                              'half2',  
+                              'fixed2',  
+                              'int2',  
+                              'bool2',  
+                              'float4x4',  
+                              'half4x4',  
+                              'fixed4x4',  
+                              'int4x4',  
+                              'bool4x4',  
+                              'float4x3',  
+                              'half4x3',  
+                              'fixed4x3',  
+                              'int4x3',  
+                              'bool4x3',  
+                              'float4x2',  
+                              'half4x2',  
+                              'fixed4x2',  
+                              'int4x2',  
+                              'bool4x2',  
+                              'float3x4',  
+                              'half3x4',  
+                              'fixed3x4',  
+                              'int3x4',  
+                              'bool3x4',  
+                              'float3x3',  
+                              'half3x3',  
+                              'fixed3x3',  
+                              'int3x3',  
+                              'bool3x3',  
+                              'float3x2',  
+                              'half3x2',  
+                              'fixed3x2',  
+                              'int3x2',  
+                              'bool3x2',  
+                              'float2x4',  
+                              'half2x4',  
+                              'fixed2x4',  
+                              'int2x4',  
+                              'bool2x4',  
+                              'float2x3',  
+                              'half2x3',  
+                              'fixed2x3',  
+                              'int2x3',  
+                              'bool2x3',  
+                              'float2x2',  
+                              'half2x2',  
+                              'fixed2x2',  
+                              'int2x2',  
+                              'bool2x2' }
+
+	self.type_ndx = 1
+	self.name = 'Static Cast (float)'
+
+end
+
+function cg_static_cast:get_type(port)
+	return self.type_choices[self.type_ndx]
+end
+
+function cg_static_cast:config(props)
+
+	Node.config(self, props)
+	props.delete('Name')
+	props.list(
+		'Type',
+		self.type_choices,
+		function() self.name = 'Static Cast (' .. self.type_choices[ self.type_ndx ] .. ')' return self.type_ndx end,
+		function(v) self.name = 'Static Cast (' .. self.type_choices[ v ] .. ')' self.type_ndx = v end
+	)
+end
+
+function cg_static_cast:gen_code(out, scratch)
+
+	local x        = 'r' .. self.a.get_output().hex()
+        local type_ndx = self.type_ndx
+        local type     = self.type_choices[ type_ndx ]
+
+	out.write( '\t#define r' .. self.d.hex() .. ' ' .. type .. '(' .. x .. ')\n' )
+end
+
+function cg_static_cast:get_tip(out)
+
+        local type_ndx = self.type_ndx
+        local type     = self.type_choices[ type_ndx ]
+
+	out.write( '#define d ' .. type .. '(a)' )
+
+end
+
+-- #################################################### --
+
+
+local cg_static_cast_force_lvalue = class(Node)
+
+function cg_static_cast_force_lvalue:get_help(out)
+	out.write[[TODO]]
+end
+
+function cg_static_cast_force_lvalue:new()
+
+	Node.new(self)
+	self.a = self.add_port(Input('a'))
+	self.d = self.add_port(Output('d'))
+        self.type_choices = { 'float',
+                              'half',  
+                              'fixed',  
+                              'int',  
+                              'bool',  
+                              'float4',  
+                              'half4',  
+                              'fixed4',  
+                              'int4',  
+                              'bool4',  
+                              'float3',  
+                              'half3',  
+                              'fixed3',  
+                              'int3',  
+                              'bool3',  
+                              'float2',  
+                              'half2',  
+                              'fixed2',  
+                              'int2',  
+                              'bool2',  
+                              'float4x4',  
+                              'half4x4',  
+                              'fixed4x4',  
+                              'int4x4',  
+                              'bool4x4',  
+                              'float4x3',  
+                              'half4x3',  
+                              'fixed4x3',  
+                              'int4x3',  
+                              'bool4x3',  
+                              'float4x2',  
+                              'half4x2',  
+                              'fixed4x2',  
+                              'int4x2',  
+                              'bool4x2',  
+                              'float3x4',  
+                              'half3x4',  
+                              'fixed3x4',  
+                              'int3x4',  
+                              'bool3x4',  
+                              'float3x3',  
+                              'half3x3',  
+                              'fixed3x3',  
+                              'int3x3',  
+                              'bool3x3',  
+                              'float3x2',  
+                              'half3x2',  
+                              'fixed3x2',  
+                              'int3x2',  
+                              'bool3x2',  
+                              'float2x4',  
+                              'half2x4',  
+                              'fixed2x4',  
+                              'int2x4',  
+                              'bool2x4',  
+                              'float2x3',  
+                              'half2x3',  
+                              'fixed2x3',  
+                              'int2x3',  
+                              'bool2x3',  
+                              'float2x2',  
+                              'half2x2',  
+                              'fixed2x2',  
+                              'int2x2',  
+                              'bool2x2' }
+	self.type_ndx = 1
+	self.name = 'Static Cast (force lvalue) (float)'
+
+end
+
+function cg_static_cast_force_lvalue:get_type(port)
+	return self.type_choices[self.type_ndx]
+end
+
+function cg_static_cast_force_lvalue:config(props)
+
+	Node.config(self, props)
+	props.delete('Name')
+	props.list(
+		'Type',
+		self.type_choices,
+		function() self.name = 'Static Cast (force lvalue) (' .. self.type_choices[ self.type_ndx ] .. ')' return self.type_ndx end,
+		function(v) self.name = 'Static Cast (force lvalue) (' .. self.type_choices[ v ] .. ')' self.type_ndx = v end
+	)
+end
+
+function cg_static_cast_force_lvalue:gen_code(out, scratch)
+
+	local x        = 'r' .. self.a.get_output().hex()
+        local type_ndx = self.type_ndx
+        local type     = self.type_choices[ type_ndx ]
+
+	out.write( '\t' .. type .. ' r' .. self.d.hex() .. ' = ' .. type .. '(' .. x .. ');\n' )
+end
+
+function cg_static_cast_force_lvalue:get_tip(out)
+
+        local type_ndx = self.type_ndx
+        local type     = self.type_choices[ type_ndx ]
+
+	out.write( type .. ' d = ' .. type .. '(a)' )
+
+end
+
+-- #################################################### --
+
+
+local cg_common_math_const = class(Node)
+
+function cg_common_math_const:get_help(out)
+	out.write[[TODO]]
+end
+
+function cg_common_math_const:new()
+	Node.new(self)
+	self.d = self.add_port(Output('d'))
+        self.type_choices = { 'float',
+                              'half',  
+                              'fixed',  
+                              'int',  
+                              'bool',  
+                              'float4',  
+                              'half4',  
+                              'fixed4',  
+                              'int4',  
+                              'bool4',  
+                              'float3',  
+                              'half3',  
+                              'fixed3',  
+                              'int3',  
+                              'bool3',  
+                              'float2',  
+                              'half2',  
+                              'fixed2',  
+                              'int2',  
+                              'bool2',  
+                              'float4x4',  
+                              'half4x4',  
+                              'fixed4x4',  
+                              'int4x4',  
+                              'bool4x4',  
+                              'float4x3',  
+                              'half4x3',  
+                              'fixed4x3',  
+                              'int4x3',  
+                              'bool4x3',  
+                              'float4x2',  
+                              'half4x2',  
+                              'fixed4x2',  
+                              'int4x2',  
+                              'bool4x2',  
+                              'float3x4',  
+                              'half3x4',  
+                              'fixed3x4',  
+                              'int3x4',  
+                              'bool3x4',  
+                              'float3x3',  
+                              'half3x3',  
+                              'fixed3x3',  
+                              'int3x3',  
+                              'bool3x3',  
+                              'float3x2',  
+                              'half3x2',  
+                              'fixed3x2',  
+                              'int3x2',  
+                              'bool3x2',  
+                              'float2x4',  
+                              'half2x4',  
+                              'fixed2x4',  
+                              'int2x4',  
+                              'bool2x4',  
+                              'float2x3',  
+                              'half2x3',  
+                              'fixed2x3',  
+                              'int2x3',  
+                              'bool2x3',  
+                              'float2x2',  
+                              'half2x2',  
+                              'fixed2x2',  
+                              'int2x2',  
+                              'bool2x2' }
+
+	self.type_ndx = 1
+        self.value_choices = { 'M_E (e)', 
+                               'M_LOG2E (log_2 e)', 
+                               'M_LOG10E (log_10 e)', 
+                               'M_LN2 (log_e 2)',
+                               'M_LN10 (log_e 10)',
+                               'M_PI (pi)',
+                               'M_2XPI (2*pi)',
+                               'M_PI_2 (pi/2)',
+                               'M_PI_4 (pi/4)',
+                               'M_1_PI (1/pi)',
+                               'M_2_PI (2/pi)',
+                               'M_2_SQRTPI (2/sqrt(pi))',
+                               'M_SQRT2 (sqrt(2))',
+                               'M_SQRT1_2 (1/sqrt(2))',
+                               'M_ZERO (0.0)',
+                               'M_ONE (1.0)',
+                               'M_TWO (2.0)',
+                               'M_PT_FIVE (0.5)',
+                               'M_PT_TWOFIVE (0.25)' }
+
+        self.values        = { '2.71828182845904523540',
+                               '1.44269504088896340740',
+                               '0.43429448190325182765',
+                               '0.69314718055994530942',
+                               '2.30258509299404568402',
+                               '3.14159265358979323846',
+                               '6.28318530717958647692',
+                               '1.57079632679489661923',
+                               '0.78539816339744830962',
+                               '0.31830988618379067154',
+                               '0.63661977236758134308',
+                               '1.12837916709551257390',
+                               '1.41421356237309504880',
+                               '0.70710678118654752440',
+                               '0.00000000000000000000',
+                               '1.00000000000000000000',
+                               '2.00000000000000000000',
+                               '0.50000000000000000000',
+                               '0.25000000000000000000' }
+        self.value_ndx = 1
+        self.name = 'float(M_E (e))'
+end
+
+function cg_common_math_const:get_type(port)
+	return self.type_choices[self.type_ndx]
+end
+
+function cg_common_math_const:config(props)
+	Node.config(self, props)
+	props.delete('Name')
+	props.list(
+		'Type',
+		self.type_choices,
+		function() return self.type_ndx end,
+		function(v) self.name = '(' .. self.type_choices[v] .. ') ' .. self.value_choices[self.value_ndx] self.type_ndx = v end
+	)
+	props.list(
+		'Value',
+		self.value_choices,
+		function() return self.value_ndx end,
+		function(v) self.name = '(' .. self.type_choices[ self.type_ndx ] .. ') ' .. self.value_choices[v] self.value_ndx = v end
+	)
+end
+
+function cg_common_math_const:gen_code(out, scratch)
+        local type_ndx = self.type_ndx
+        local type     = self.type_choices[ type_ndx ]
+        local value_ndx = self.value_ndx
+        local value     = self.values[ value_ndx ]
+
+	out.write( '\t#define r' .. self.d.hex() .. ' ' .. type .. '(' .. value .. ')\n' )
+end
+
+function cg_common_math_const:get_tip(out)
+	out.write( 'd = choice among common math constants' )
+end
+
+-- #################################################### --
+
+local cg_unused_value = class(Node)
+
+function cg_unused_value:get_help(out)
+	out.write[[Mark value as unused - i.e. not using the input value is not an error.]]
+end
+
+function cg_unused_value:new()
+	Node.new(self)
+	self.a = self.add_port(Input('a'))
+end
+
+function cg_unused_value:get_type(port)
+	return nil
+end
+
+function cg_unused_value:config(props)
+	Node.config(self, props)
+	props.delete('Name')
+end
+
+function cg_unused_value:gen_code(out, scratch)
+end
+
+function cg_unused_value:get_tip(out)
+	out.write( 'Mark (a) as unused' )
+end
+
+-- #################################################### --
+
+
+local cg_float3_to_float4 = class(Node)
+
+function cg_float3_to_float4:get_help(out)
+	out.write[[TODO]]
+end
+
+function cg_float3_to_float4:new()
+	Node.new(self)
+	self.a = self.add_port(Input('a'))
+	self.x = self.add_port(Output('x'))
+        self.w = 0
+end
+
+function cg_float3_to_float4:get_type(port)
+
+	local ta = self.a.get_output().get_type()
+
+        if (ta == 'float3') then
+          return 'float4'
+        end
+
+	return nil
+end
+
+function cg_float3_to_float4:config(props)
+
+	Node.config(self, props)
+	props.delete('Name')
+
+	props.text_input(
+		'w',
+		function() return self.w end,
+		function(v) self.w = v end,
+		function(v) return math.evaluate(v) end
+	)
+
+end
+
+function cg_float3_to_float4:gen_code(out, scratch)
+
+	local a  = 'r' .. self.a.get_output().hex()
+	local ax = a .. '.x'
+	local ay = a .. '.y'
+	local az = a .. '.z'
+	local w  = math.evaluate(self.w)
+
+	out.write( '\t#define r' .. self.x.hex() .. ' float4( ' .. ax .. ',' .. ay .. ',' .. az .. ',float(' .. w .. ') )\n' )
+end
+
+function cg_float3_to_float4:get_tip(out)
+
+	out.write( 'x = float4(a.x,a.y,a.z.w)')
+end
+
+-- #################################################### --
+
+local cg_half3_to_half4 = class(Node)
+
+function cg_half3_to_half4:get_help(out)
+	out.write[[TODO]]
+end
+
+function cg_half3_to_half4:new()
+	Node.new(self)
+	self.a = self.add_port(Input('a'))
+	self.x = self.add_port(Output('x'))
+        self.w = 0
+end
+
+function cg_half3_to_half4:get_type(port)
+
+	local ta = self.a.get_output().get_type()
+
+        if (ta == 'half3') then
+          return 'half4'
+        end
+
+	return nil
+end
+
+function cg_half3_to_half4:config(props)
+
+	Node.config(self, props)
+	props.delete('Name')
+
+	props.text_input(
+		'w',
+		function() return self.w end,
+		function(v) self.w = v end,
+		function(v) return math.evaluate(v) end
+	)
+
+end
+
+function cg_half3_to_half4:gen_code(out, scratch)
+
+	local a  = 'r' .. self.a.get_output().hex()
+	local ax = a .. '.x'
+	local ay = a .. '.y'
+	local az = a .. '.z'
+	local w  = math.evaluate(self.w)
+
+	out.write( '\t#define r' .. self.x.hex() .. ' half4( ' .. ax .. ',' .. ay .. ',' .. az .. ',half(' .. w .. ') )\n' )
+end
+
+function cg_half3_to_half4:get_tip(out)
+
+	out.write( 'x = half4(a.x,a.y,a.z.w)')
+end
+
+-- #################################################### --
+
+local cg_half2_to_half3 = class(Node)
+
+function cg_half2_to_half3:get_help(out)
+	out.write[[TODO]]
+end
+
+function cg_half2_to_half3:new()
+	Node.new(self)
+	self.a = self.add_port(Input('a'))
+	self.x = self.add_port(Output('x'))
+        self.z = 0
+end
+
+function cg_half2_to_half3:get_type(port)
+
+	local ta = self.a.get_output().get_type()
+
+        if (ta == 'half2') then
+          return 'half3'
+        end
+
+	return nil
+end
+
+function cg_half2_to_half3:config(props)
+
+	Node.config(self, props)
+	props.delete('Name')
+
+	props.text_input(
+		'z',
+		function() return self.z end,
+		function(v) self.z = v end,
+		function(v) return math.evaluate(v) end
+	)
+
+end
+
+function cg_half2_to_half3:gen_code(out, scratch)
+
+	local a  = 'r' .. self.a.get_output().hex()
+	local ax = a .. '.x'
+	local ay = a .. '.y'
+	local z  = math.evaluate(self.z)
+
+	out.write( '\t#define r' .. self.x.hex() .. ' half3( ' .. ax .. ',' .. ay .. ',half(' .. z .. ') )\n' )
+end
+
+function cg_half2_to_half3:get_tip(out)
+
+	out.write( 'x = half3(a.x,a.y,z)')
+end
+
+-- #################################################### --
+
+local cg_half2_to_half4 = class(Node)
+
+function cg_half2_to_half4:get_help(out)
+	out.write[[TODO]]
+end
+
+function cg_half2_to_half4:new()
+	Node.new(self)
+	self.a = self.add_port(Input('a'))
+	self.x = self.add_port(Output('x'))
+        self.z = 0
+        self.w = 0
+end
+
+function cg_half2_to_half4:get_type(port)
+
+	local ta = self.a.get_output().get_type()
+
+        if (ta == 'half2') then
+          return 'half4'
+        end
+
+	return nil
+end
+
+function cg_half2_to_half4:config(props)
+
+	Node.config(self, props)
+	props.delete('Name')
+
+	props.text_input(
+		'z',
+		function() return self.z end,
+		function(v) self.z = v end,
+		function(v) return math.evaluate(v) end
+	)
+
+	props.text_input(
+		'w',
+		function() return self.w end,
+		function(v) self.w = v end,
+		function(v) return math.evaluate(v) end
+	)
+
+end
+
+function cg_half2_to_half4:gen_code(out, scratch)
+
+	local a  = 'r' .. self.a.get_output().hex()
+	local ax = a .. '.x'
+	local ay = a .. '.y'
+	local z  = math.evaluate(self.z)
+	local w  = math.evaluate(self.w)
+
+	out.write( '\t#define r' .. self.x.hex() .. ' half4( ' .. ax .. ',' .. ay .. ',half(' .. z .. '), half(' .. w ..') )\n' )
+end
+
+function cg_half2_to_half4:get_tip(out)
+
+	out.write( 'x = half4(a.x,a.y,z,w)')
+end
+
+-- #################################################### --
+
+
+local cg_float2_to_float3 = class(Node)
+
+function cg_float2_to_float3:get_help(out)
+	out.write[[TODO]]
+end
+
+function cg_float2_to_float3:new()
+	Node.new(self)
+	self.a = self.add_port(Input('a'))
+	self.x = self.add_port(Output('x'))
+        self.z = 0
+end
+
+function cg_float2_to_float3:get_type(port)
+
+	local ta = self.a.get_output().get_type()
+
+        if (ta == 'float2') then
+          return 'float3'
+        end
+
+	return nil
+end
+
+function cg_float2_to_float3:config(props)
+
+	Node.config(self, props)
+	props.delete('Name')
+
+	props.text_input(
+		'z',
+		function() return self.z end,
+		function(v) self.z = v end,
+		function(v) return math.evaluate(v) end
+	)
+
+end
+
+function cg_float2_to_float3:gen_code(out, scratch)
+
+	local a  = 'r' .. self.a.get_output().hex()
+	local ax = a .. '.x'
+	local ay = a .. '.y'
+	local z  = math.evaluate(self.z)
+
+	out.write( '\t#define r' .. self.x.hex() .. ' float3( ' .. ax .. ',' .. ay .. ',float(' .. z .. ') )\n' )
+end
+
+function cg_float2_to_float3:get_tip(out)
+
+	out.write( 'x = float3(a.x,a.y,z)')
+end
+
+-- #################################################### --
+
+local cg_float2_to_float4 = class(Node)
+
+function cg_float2_to_float4:get_help(out)
+	out.write[[TODO]]
+end
+
+function cg_float2_to_float4:new()
+	Node.new(self)
+	self.a = self.add_port(Input('a'))
+	self.x = self.add_port(Output('x'))
+        self.z = 0
+        self.w = 0
+end
+
+function cg_float2_to_float4:get_type(port)
+
+	local ta = self.a.get_output().get_type()
+
+        if (ta == 'float2') then
+          return 'float4'
+        end
+
+	return nil
+end
+
+function cg_float2_to_float4:config(props)
+
+	Node.config(self, props)
+	props.delete('Name')
+
+	props.text_input(
+		'z',
+		function() return self.z end,
+		function(v) self.z = v end,
+		function(v) return math.evaluate(v) end
+	)
+
+	props.text_input(
+		'w',
+		function() return self.w end,
+		function(v) self.w = v end,
+		function(v) return math.evaluate(v) end
+	)
+
+end
+
+function cg_float2_to_float4:gen_code(out, scratch)
+
+	local a  = 'r' .. self.a.get_output().hex()
+	local ax = a .. '.x'
+	local ay = a .. '.y'
+	local z  = math.evaluate(self.z)
+	local w  = math.evaluate(self.w)
+
+	out.write( '\t#define r' .. self.x.hex() .. ' float4( ' .. ax .. ',' .. ay .. ',float(' .. z .. '), float(' .. w ..') )\n' )
+end
+
+function cg_float2_to_float4:get_tip(out)
+
+	out.write( 'x = float4(a.x,a.y,z,w)')
+end
+
+-- #################################################### --
+
+register {
+  __name = 'Cg [Misc]',
+  __prologue = '',
+  __epilogue = '',
+
+	['Name']                           = cg_name,
+	['Copy, Split']                    = cg_copy,
+	['Constant, User (Splat)']         = cg_user_const,
+	['Constant, User (Vector2)']       = cg_user_const_vector2,
+	['Constant, User (Vector3)']       = cg_user_const_vector3,
+	['Constant, User (Vector4)']       = cg_user_const_vector4,
+	['Constant, Common Math (Splat)']  = cg_common_math_const,
+	['Static Cast']                    = cg_static_cast,
+	['Static Cast (force lvalue)']     = cg_static_cast_force_lvalue,
+	['Convert float3 to float4']       = cg_float3_to_float4,
+	['Convert float2 to float4']       = cg_float2_to_float4,
+	['Convert float2 to float3']       = cg_float2_to_float3,
+	['Convert half3 to half4']         = cg_half3_to_half4,
+	['Convert half2 to half4']         = cg_half2_to_half4,
+	['Convert half2 to half3']         = cg_half2_to_half3,
+	['Unused Value']                   = cg_unused_value,
+}
+

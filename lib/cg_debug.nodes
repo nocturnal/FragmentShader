@@ -1,0 +1,109 @@
+-- #################################################### --
+
+local debug_color_a = class(Node)
+
+function debug_color_a:get_help(out)
+  out.write[[[DEBUG ONLY] color_a]]
+end
+
+function debug_color_a:new()
+  Node.new(self)
+  self.d = self.add_port(Output('d'))
+  self.name = '[IN] (float4) Color A'
+end
+
+function debug_color_a:get_type(port)
+  return 'float4'
+end
+
+function debug_color_a:config(props)
+  Node.config(self, props)
+  props.delete('Name')
+
+end
+
+function debug_color_a:gen_code(out, scratch)
+  out.write( '\t#define r' .. self.d.hex() .. ' color_a\n' )
+end
+
+function debug_color_a:get_tip(out)
+  out.write[[[DEBUG ONLY] color_a]]
+end
+
+-- #################################################### --
+
+local debug_color_b = class(Node)
+
+function debug_color_b:get_help(out)
+  out.write[[[DEBUG ONLY] color_b]]
+end
+
+function debug_color_b:new()
+  Node.new(self)
+  self.d = self.add_port(Output('d'))
+  self.name = '[IN] (float4) Color B'
+end
+
+function debug_color_b:get_type(port)
+  return 'float4'
+end
+
+function debug_color_b:config(props)
+  Node.config(self, props)
+  props.delete('Name')
+
+end
+
+function debug_color_b:gen_code(out, scratch)
+  out.write( '\t#define r' .. self.d.hex() .. ' color_b\n' )
+end
+
+function debug_color_b:get_tip(out)
+  out.write[[[DEBUG ONLY] color_b]]
+end
+
+-- #################################################### --
+
+local debug_color_result = class(Node)
+
+function debug_color_result:get_help(out)
+  out.write[[[DEBUG ONLY] color_result]]
+end
+
+function debug_color_result:new()
+  Node.new(self)
+  self.a = self.add_port(Input('a'))
+  self.name = '[OUT] (float4) Color Result'
+end
+
+function debug_color_result:get_type(port)
+  return 'float4'
+end
+
+function debug_color_result:config(props)
+  Node.config(self, props)
+  props.delete('Name')
+
+end
+
+function debug_color_result:gen_code(out, scratch)
+  local a    = 'r' .. self.a.get_output().hex()
+  out.write( '\tcolor_result = ' .. a .. ';\n' )
+end
+
+function debug_color_result:get_tip(out)
+  out.write[[[DEBUG ONLY] color_result]]
+end
+
+
+-- #################################################### --
+
+register {
+  __name = 'Cg [_Debug]',
+  __prologue = '',
+  __epilogue = '',
+
+  ['[IN] (float4) Color A'] = debug_color_a,
+  ['[IN] (float4) Color B'] = debug_color_b,
+  ['[OUT] (float4) Color Result'] = debug_color_result,
+}

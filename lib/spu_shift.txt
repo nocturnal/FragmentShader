@@ -1,0 +1,10 @@
+NODENAME	SPU [Shift (Left)] 
+shlqbi 	"rt, ra, rb"	Shift Left Quadword by Bits 	rt = ra << (rb.b[3] & 0x07)
+shlqbii 	"rt, ra, u3"	Shift Left Quadword by Bits Immediate 	rt = ra << (u3 & 0x07)
+shlqby 	"rt, ra, rb"	Shift Left Quadword by Bytes 	rt = ra << ((rb.b[3] & 0x1F) * 8)
+shlqbyi 	"rt, ra, u5"	Shift Left Quadword by Bytes Immediate 	rt = ra << ((u5 & 0x1F) * 8)
+shlqbybi 	"rt, ra, rb"	Shift Left Quadword by Bytes from Bit Shift Count 	rt = ra << (rb.b[3] & 0xF8)
+shl 	"rt, ra, rb"	Shift Left Word 	rt.w[n] = ra.w[n] << (rb.w[n] & 0x3F)
+shli 	"rt, ra, u6"	Shift Left Word Immediate 	rt.w[n] = ra.w[n] << (u6 & 0x3F)
+shlh 	"rt, ra, rb"	Shift Left Halfword 	rt.h[n] = ra.h[n] << (rb.h[n] & 0x1F)
+shlhi 	"rt, ra, u5"	Shift Left Halfword Immediate 	rt.h[n] = ra.h[n] << (u5 & 0x1F)

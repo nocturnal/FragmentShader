@@ -1,0 +1,1456 @@
+-- #################################################### --
+
+local cg_sel_lt = class(Node)
+
+function cg_sel_lt:get_help(out)
+    out.write( 'd = if ( x < y ) then a else b' )
+    out.write( '\n' )
+    out.write( 'Supported Types:\n' )
+    out.write( 'float\n' ) 
+    out.write( 'half\n' ) 
+    out.write( 'fixed\n' ) 
+    out.write( 'int\n' ) 
+    out.write( 'float4\n' ) 
+    out.write( 'half4\n' ) 
+    out.write( 'fixed4\n' ) 
+    out.write( 'int4\n' ) 
+    out.write( 'float3\n' ) 
+    out.write( 'half3\n' ) 
+    out.write( 'fixed3\n' ) 
+    out.write( 'int3\n' ) 
+    out.write( 'float2\n' ) 
+    out.write( 'half2\n' ) 
+    out.write( 'fixed2\n' ) 
+    out.write( 'int2\n' ) 
+end
+
+function cg_sel_lt:new()
+    Node.new(self)
+    self.x = self.add_port(Input('x'))
+    self.y = self.add_port(Input('y'))
+    self.a = self.add_port(Input('a'))
+    self.b = self.add_port(Input('b'))
+    self.d = self.add_port(Output('d'))
+end
+
+function cg_sel_lt:get_type(port)
+
+    local tx = self.x.get_output().get_type()
+    local ty = self.y.get_output().get_type()
+    local ta = self.a.get_output().get_type()
+    local tb = self.b.get_output().get_type()
+
+    if (   ( ta == 'float' ) 
+       or ( ta == 'half' ) 
+       or ( ta == 'fixed' ) 
+       or ( ta == 'int' ) 
+       or ( ta == 'float4' ) 
+       or ( ta == 'half4' ) 
+       or ( ta == 'fixed4' ) 
+       or ( ta == 'int4' ) 
+       or ( ta == 'float3' ) 
+       or ( ta == 'half3' ) 
+       or ( ta == 'fixed3' ) 
+       or ( ta == 'int3' ) 
+       or ( ta == 'float2' ) 
+       or ( ta == 'half2' ) 
+       or ( ta == 'fixed2' ) 
+       or ( ta == 'int2' )) then 
+        
+        if ((tx == ty) and (ta == tb)) then
+            return ta
+        end
+    end
+
+    return nil
+end
+
+function cg_sel_lt:config(props)
+    Node.config(self, props)
+    props.delete('Name')
+end
+
+function cg_sel_lt:gen_code(out, scratch)
+    local ta   = self.a.get_output().get_type()
+    local t    = ta
+    local x    = 'r' .. self.x.get_output().hex()
+    local y    = 'r' .. self.y.get_output().hex()
+    local a    = 'r' .. self.a.get_output().hex()
+    local b    = 'r' .. self.b.get_output().hex()
+    local d    = 'r' .. self.d.hex()
+
+    if (   ( ta == 'float' ) 
+       or ( ta == 'half' ) 
+       or ( ta == 'float4' ) 
+       or ( ta == 'float3' ) 
+       or ( ta == 'half3' ) 
+       or ( ta == 'float2' ) 
+       or ( ta == 'half2' )) then 
+        out.write( '	' .. t .. ' ' .. d .. ' = lerp(' .. b .. ', ' .. a .. ', ' .. t .. '(' .. x .. ' < ' .. y .. ') );' .. '\n' );
+    else
+        out.write( '	' .. t .. ' ' .. d .. ' = (' .. t .. '(' .. x .. ' < ' .. y .. ') * ' .. a .. ') ' )
+        out.write( '+ (' .. t .. '(!(' .. x .. ' < ' .. y .. ')) * ' .. b .. ') ' )
+        out.write( ';\n' )
+    end
+end
+
+function cg_sel_lt:get_tip(out)
+    out.write( 'd = if ( x < y ) then a else b' )end
+
+-- #################################################### --
+
+local cg_sel_gt = class(Node)
+
+function cg_sel_gt:get_help(out)
+    out.write( 'd = if ( x > y ) then a else b' )
+    out.write( '\n' )
+    out.write( 'Supported Types:\n' )
+    out.write( 'float\n' ) 
+    out.write( 'half\n' ) 
+    out.write( 'fixed\n' ) 
+    out.write( 'int\n' ) 
+    out.write( 'float4\n' ) 
+    out.write( 'half4\n' ) 
+    out.write( 'fixed4\n' ) 
+    out.write( 'int4\n' ) 
+    out.write( 'float3\n' ) 
+    out.write( 'half3\n' ) 
+    out.write( 'fixed3\n' ) 
+    out.write( 'int3\n' ) 
+    out.write( 'float2\n' ) 
+    out.write( 'half2\n' ) 
+    out.write( 'fixed2\n' ) 
+    out.write( 'int2\n' ) 
+end
+
+function cg_sel_gt:new()
+    Node.new(self)
+    self.x = self.add_port(Input('x'))
+    self.y = self.add_port(Input('y'))
+    self.a = self.add_port(Input('a'))
+    self.b = self.add_port(Input('b'))
+    self.d = self.add_port(Output('d'))
+end
+
+function cg_sel_gt:get_type(port)
+
+    local tx = self.x.get_output().get_type()
+    local ty = self.y.get_output().get_type()
+    local ta = self.a.get_output().get_type()
+    local tb = self.b.get_output().get_type()
+
+    if (   ( ta == 'float' ) 
+       or ( ta == 'half' ) 
+       or ( ta == 'fixed' ) 
+       or ( ta == 'int' ) 
+       or ( ta == 'float4' ) 
+       or ( ta == 'half4' ) 
+       or ( ta == 'fixed4' ) 
+       or ( ta == 'int4' ) 
+       or ( ta == 'float3' ) 
+       or ( ta == 'half3' ) 
+       or ( ta == 'fixed3' ) 
+       or ( ta == 'int3' ) 
+       or ( ta == 'float2' ) 
+       or ( ta == 'half2' ) 
+       or ( ta == 'fixed2' ) 
+       or ( ta == 'int2' )) then 
+        
+        if ((tx == ty) and (ta == tb)) then
+            return ta
+        end
+    end
+
+    return nil
+end
+
+function cg_sel_gt:config(props)
+    Node.config(self, props)
+    props.delete('Name')
+end
+
+function cg_sel_gt:gen_code(out, scratch)
+    local ta   = self.a.get_output().get_type()
+    local t    = ta
+    local x    = 'r' .. self.x.get_output().hex()
+    local y    = 'r' .. self.y.get_output().hex()
+    local a    = 'r' .. self.a.get_output().hex()
+    local b    = 'r' .. self.b.get_output().hex()
+    local d    = 'r' .. self.d.hex()
+
+    if (   ( ta == 'float' ) 
+       or ( ta == 'half' ) 
+       or ( ta == 'float4' ) 
+       or ( ta == 'float3' ) 
+       or ( ta == 'half3' ) 
+       or ( ta == 'float2' ) 
+       or ( ta == 'half2' )) then 
+        out.write( '	' .. t .. ' ' .. d .. ' = lerp(' .. b .. ', ' .. a .. ', ' .. t .. '(' .. x .. ' > ' .. y .. ') );' .. '\n' );
+    else
+        out.write( '	' .. t .. ' ' .. d .. ' = (' .. t .. '(' .. x .. ' > ' .. y .. ') * ' .. a .. ') ' )
+        out.write( '+ (' .. t .. '(!(' .. x .. ' > ' .. y .. ')) * ' .. b .. ') ' )
+        out.write( ';\n' )
+    end
+end
+
+function cg_sel_gt:get_tip(out)
+    out.write( 'd = if ( x > y ) then a else b' )end
+
+-- #################################################### --
+
+local cg_sel_gte = class(Node)
+
+function cg_sel_gte:get_help(out)
+    out.write( 'd = if ( x >= y ) then a else b' )
+    out.write( '\n' )
+    out.write( 'Supported Types:\n' )
+    out.write( 'float\n' ) 
+    out.write( 'half\n' ) 
+    out.write( 'fixed\n' ) 
+    out.write( 'int\n' ) 
+    out.write( 'float4\n' ) 
+    out.write( 'half4\n' ) 
+    out.write( 'fixed4\n' ) 
+    out.write( 'int4\n' ) 
+    out.write( 'float3\n' ) 
+    out.write( 'half3\n' ) 
+    out.write( 'fixed3\n' ) 
+    out.write( 'int3\n' ) 
+    out.write( 'float2\n' ) 
+    out.write( 'half2\n' ) 
+    out.write( 'fixed2\n' ) 
+    out.write( 'int2\n' ) 
+end
+
+function cg_sel_gte:new()
+    Node.new(self)
+    self.x = self.add_port(Input('x'))
+    self.y = self.add_port(Input('y'))
+    self.a = self.add_port(Input('a'))
+    self.b = self.add_port(Input('b'))
+    self.d = self.add_port(Output('d'))
+end
+
+function cg_sel_gte:get_type(port)
+
+    local tx = self.x.get_output().get_type()
+    local ty = self.y.get_output().get_type()
+    local ta = self.a.get_output().get_type()
+    local tb = self.b.get_output().get_type()
+
+    if (   ( ta == 'float' ) 
+       or ( ta == 'half' ) 
+       or ( ta == 'fixed' ) 
+       or ( ta == 'int' ) 
+       or ( ta == 'float4' ) 
+       or ( ta == 'half4' ) 
+       or ( ta == 'fixed4' ) 
+       or ( ta == 'int4' ) 
+       or ( ta == 'float3' ) 
+       or ( ta == 'half3' ) 
+       or ( ta == 'fixed3' ) 
+       or ( ta == 'int3' ) 
+       or ( ta == 'float2' ) 
+       or ( ta == 'half2' ) 
+       or ( ta == 'fixed2' ) 
+       or ( ta == 'int2' )) then 
+        
+        if ((tx == ty) and (ta == tb)) then
+            return ta
+        end
+    end
+
+    return nil
+end
+
+function cg_sel_gte:config(props)
+    Node.config(self, props)
+    props.delete('Name')
+end
+
+function cg_sel_gte:gen_code(out, scratch)
+    local ta   = self.a.get_output().get_type()
+    local t    = ta
+    local x    = 'r' .. self.x.get_output().hex()
+    local y    = 'r' .. self.y.get_output().hex()
+    local a    = 'r' .. self.a.get_output().hex()
+    local b    = 'r' .. self.b.get_output().hex()
+    local d    = 'r' .. self.d.hex()
+
+    if (   ( ta == 'float' ) 
+       or ( ta == 'half' ) 
+       or ( ta == 'float4' ) 
+       or ( ta == 'float3' ) 
+       or ( ta == 'half3' ) 
+       or ( ta == 'float2' ) 
+       or ( ta == 'half2' )) then 
+        out.write( '	' .. t .. ' ' .. d .. ' = lerp(' .. b .. ', ' .. a .. ', ' .. t .. '(' .. x .. ' >= ' .. y .. ') );' .. '\n' );
+    else
+        out.write( '	' .. t .. ' ' .. d .. ' = (' .. t .. '(' .. x .. ' >= ' .. y .. ') * ' .. a .. ') ' )
+        out.write( '+ (' .. t .. '(!(' .. x .. ' >= ' .. y .. ')) * ' .. b .. ') ' )
+        out.write( ';\n' )
+    end
+end
+
+function cg_sel_gte:get_tip(out)
+    out.write( 'd = if ( x >= y ) then a else b' )end
+
+-- #################################################### --
+
+local cg_sel_lte = class(Node)
+
+function cg_sel_lte:get_help(out)
+    out.write( 'd = if ( x <= y ) then a else b' )
+    out.write( '\n' )
+    out.write( 'Supported Types:\n' )
+    out.write( 'float\n' ) 
+    out.write( 'half\n' ) 
+    out.write( 'fixed\n' ) 
+    out.write( 'int\n' ) 
+    out.write( 'float4\n' ) 
+    out.write( 'half4\n' ) 
+    out.write( 'fixed4\n' ) 
+    out.write( 'int4\n' ) 
+    out.write( 'float3\n' ) 
+    out.write( 'half3\n' ) 
+    out.write( 'fixed3\n' ) 
+    out.write( 'int3\n' ) 
+    out.write( 'float2\n' ) 
+    out.write( 'half2\n' ) 
+    out.write( 'fixed2\n' ) 
+    out.write( 'int2\n' ) 
+end
+
+function cg_sel_lte:new()
+    Node.new(self)
+    self.x = self.add_port(Input('x'))
+    self.y = self.add_port(Input('y'))
+    self.a = self.add_port(Input('a'))
+    self.b = self.add_port(Input('b'))
+    self.d = self.add_port(Output('d'))
+end
+
+function cg_sel_lte:get_type(port)
+
+    local tx = self.x.get_output().get_type()
+    local ty = self.y.get_output().get_type()
+    local ta = self.a.get_output().get_type()
+    local tb = self.b.get_output().get_type()
+
+    if (   ( ta == 'float' ) 
+       or ( ta == 'half' ) 
+       or ( ta == 'fixed' ) 
+       or ( ta == 'int' ) 
+       or ( ta == 'float4' ) 
+       or ( ta == 'half4' ) 
+       or ( ta == 'fixed4' ) 
+       or ( ta == 'int4' ) 
+       or ( ta == 'float3' ) 
+       or ( ta == 'half3' ) 
+       or ( ta == 'fixed3' ) 
+       or ( ta == 'int3' ) 
+       or ( ta == 'float2' ) 
+       or ( ta == 'half2' ) 
+       or ( ta == 'fixed2' ) 
+       or ( ta == 'int2' )) then 
+        
+        if ((tx == ty) and (ta == tb)) then
+            return ta
+        end
+    end
+
+    return nil
+end
+
+function cg_sel_lte:config(props)
+    Node.config(self, props)
+    props.delete('Name')
+end
+
+function cg_sel_lte:gen_code(out, scratch)
+    local ta   = self.a.get_output().get_type()
+    local t    = ta
+    local x    = 'r' .. self.x.get_output().hex()
+    local y    = 'r' .. self.y.get_output().hex()
+    local a    = 'r' .. self.a.get_output().hex()
+    local b    = 'r' .. self.b.get_output().hex()
+    local d    = 'r' .. self.d.hex()
+
+    if (   ( ta == 'float' ) 
+       or ( ta == 'half' ) 
+       or ( ta == 'float4' ) 
+       or ( ta == 'float3' ) 
+       or ( ta == 'half3' ) 
+       or ( ta == 'float2' ) 
+       or ( ta == 'half2' )) then 
+        out.write( '	' .. t .. ' ' .. d .. ' = lerp(' .. b .. ', ' .. a .. ', ' .. t .. '(' .. x .. ' <= ' .. y .. ') );' .. '\n' );
+    else
+        out.write( '	' .. t .. ' ' .. d .. ' = (' .. t .. '(' .. x .. ' <= ' .. y .. ') * ' .. a .. ') ' )
+        out.write( '+ (' .. t .. '(!(' .. x .. ' <= ' .. y .. ')) * ' .. b .. ') ' )
+        out.write( ';\n' )
+    end
+end
+
+function cg_sel_lte:get_tip(out)
+    out.write( 'd = if ( x <= y ) then a else b' )end
+
+-- #################################################### --
+
+local cg_sel_eq = class(Node)
+
+function cg_sel_eq:get_help(out)
+    out.write( 'd = if ( x == y ) then a else b' )
+    out.write( '\n' )
+    out.write( 'Supported Types:\n' )
+    out.write( 'float\n' ) 
+    out.write( 'half\n' ) 
+    out.write( 'fixed\n' ) 
+    out.write( 'int\n' ) 
+    out.write( 'float4\n' ) 
+    out.write( 'half4\n' ) 
+    out.write( 'fixed4\n' ) 
+    out.write( 'int4\n' ) 
+    out.write( 'float3\n' ) 
+    out.write( 'half3\n' ) 
+    out.write( 'fixed3\n' ) 
+    out.write( 'int3\n' ) 
+    out.write( 'float2\n' ) 
+    out.write( 'half2\n' ) 
+    out.write( 'fixed2\n' ) 
+    out.write( 'int2\n' ) 
+end
+
+function cg_sel_eq:new()
+    Node.new(self)
+    self.x = self.add_port(Input('x'))
+    self.y = self.add_port(Input('y'))
+    self.a = self.add_port(Input('a'))
+    self.b = self.add_port(Input('b'))
+    self.d = self.add_port(Output('d'))
+end
+
+function cg_sel_eq:get_type(port)
+
+    local tx = self.x.get_output().get_type()
+    local ty = self.y.get_output().get_type()
+    local ta = self.a.get_output().get_type()
+    local tb = self.b.get_output().get_type()
+
+    if (   ( ta == 'float' ) 
+       or ( ta == 'half' ) 
+       or ( ta == 'fixed' ) 
+       or ( ta == 'int' ) 
+       or ( ta == 'float4' ) 
+       or ( ta == 'half4' ) 
+       or ( ta == 'fixed4' ) 
+       or ( ta == 'int4' ) 
+       or ( ta == 'float3' ) 
+       or ( ta == 'half3' ) 
+       or ( ta == 'fixed3' ) 
+       or ( ta == 'int3' ) 
+       or ( ta == 'float2' ) 
+       or ( ta == 'half2' ) 
+       or ( ta == 'fixed2' ) 
+       or ( ta == 'int2' )) then 
+        
+        if ((tx == ty) and (ta == tb)) then
+            return ta
+        end
+    end
+
+    return nil
+end
+
+function cg_sel_eq:config(props)
+    Node.config(self, props)
+    props.delete('Name')
+end
+
+function cg_sel_eq:gen_code(out, scratch)
+    local ta   = self.a.get_output().get_type()
+    local t    = ta
+    local x    = 'r' .. self.x.get_output().hex()
+    local y    = 'r' .. self.y.get_output().hex()
+    local a    = 'r' .. self.a.get_output().hex()
+    local b    = 'r' .. self.b.get_output().hex()
+    local d    = 'r' .. self.d.hex()
+
+    if (   ( ta == 'float' ) 
+       or ( ta == 'half' ) 
+       or ( ta == 'float4' ) 
+       or ( ta == 'float3' ) 
+       or ( ta == 'half3' ) 
+       or ( ta == 'float2' ) 
+       or ( ta == 'half2' )) then 
+        out.write( '	' .. t .. ' ' .. d .. ' = lerp(' .. b .. ', ' .. a .. ', ' .. t .. '(' .. x .. ' == ' .. y .. ') );' .. '\n' );
+    else
+        out.write( '	' .. t .. ' ' .. d .. ' = (' .. t .. '(' .. x .. ' == ' .. y .. ') * ' .. a .. ') ' )
+        out.write( '+ (' .. t .. '(!(' .. x .. ' == ' .. y .. ')) * ' .. b .. ') ' )
+        out.write( ';\n' )
+    end
+end
+
+function cg_sel_eq:get_tip(out)
+    out.write( 'd = if ( x == y ) then a else b' )end
+
+-- #################################################### --
+
+local cg_sel_neq = class(Node)
+
+function cg_sel_neq:get_help(out)
+    out.write( 'd = if ( x != y ) then a else b' )
+    out.write( '\n' )
+    out.write( 'Supported Types:\n' )
+    out.write( 'float\n' ) 
+    out.write( 'half\n' ) 
+    out.write( 'fixed\n' ) 
+    out.write( 'int\n' ) 
+    out.write( 'float4\n' ) 
+    out.write( 'half4\n' ) 
+    out.write( 'fixed4\n' ) 
+    out.write( 'int4\n' ) 
+    out.write( 'float3\n' ) 
+    out.write( 'half3\n' ) 
+    out.write( 'fixed3\n' ) 
+    out.write( 'int3\n' ) 
+    out.write( 'float2\n' ) 
+    out.write( 'half2\n' ) 
+    out.write( 'fixed2\n' ) 
+    out.write( 'int2\n' ) 
+end
+
+function cg_sel_neq:new()
+    Node.new(self)
+    self.x = self.add_port(Input('x'))
+    self.y = self.add_port(Input('y'))
+    self.a = self.add_port(Input('a'))
+    self.b = self.add_port(Input('b'))
+    self.d = self.add_port(Output('d'))
+end
+
+function cg_sel_neq:get_type(port)
+
+    local tx = self.x.get_output().get_type()
+    local ty = self.y.get_output().get_type()
+    local ta = self.a.get_output().get_type()
+    local tb = self.b.get_output().get_type()
+
+    if (   ( ta == 'float' ) 
+       or ( ta == 'half' ) 
+       or ( ta == 'fixed' ) 
+       or ( ta == 'int' ) 
+       or ( ta == 'float4' ) 
+       or ( ta == 'half4' ) 
+       or ( ta == 'fixed4' ) 
+       or ( ta == 'int4' ) 
+       or ( ta == 'float3' ) 
+       or ( ta == 'half3' ) 
+       or ( ta == 'fixed3' ) 
+       or ( ta == 'int3' ) 
+       or ( ta == 'float2' ) 
+       or ( ta == 'half2' ) 
+       or ( ta == 'fixed2' ) 
+       or ( ta == 'int2' )) then 
+        
+        if ((tx == ty) and (ta == tb)) then
+            return ta
+        end
+    end
+
+    return nil
+end
+
+function cg_sel_neq:config(props)
+    Node.config(self, props)
+    props.delete('Name')
+end
+
+function cg_sel_neq:gen_code(out, scratch)
+    local ta   = self.a.get_output().get_type()
+    local t    = ta
+    local x    = 'r' .. self.x.get_output().hex()
+    local y    = 'r' .. self.y.get_output().hex()
+    local a    = 'r' .. self.a.get_output().hex()
+    local b    = 'r' .. self.b.get_output().hex()
+    local d    = 'r' .. self.d.hex()
+
+    if (   ( ta == 'float' ) 
+       or ( ta == 'half' ) 
+       or ( ta == 'float4' ) 
+       or ( ta == 'float3' ) 
+       or ( ta == 'half3' ) 
+       or ( ta == 'float2' ) 
+       or ( ta == 'half2' )) then 
+        out.write( '	' .. t .. ' ' .. d .. ' = lerp(' .. b .. ', ' .. a .. ', ' .. t .. '(' .. x .. ' != ' .. y .. ') );' .. '\n' );
+    else
+        out.write( '	' .. t .. ' ' .. d .. ' = (' .. t .. '(' .. x .. ' != ' .. y .. ') * ' .. a .. ') ' )
+        out.write( '+ (' .. t .. '(!(' .. x .. ' != ' .. y .. ')) * ' .. b .. ') ' )
+        out.write( ';\n' )
+    end
+end
+
+function cg_sel_neq:get_tip(out)
+    out.write( 'd = if ( x != y ) then a else b' )end
+
+-- #################################################### --
+
+local cg_cmp_lt = class(Node)
+
+function cg_cmp_lt:get_help(out)
+    out.write( 'd = if ( x < y ) then (1) else (0)' )
+    out.write( '\n' )
+    out.write( 'Supported Types:\n' )
+    out.write( 'float\n' ) 
+    out.write( 'half\n' ) 
+    out.write( 'fixed\n' ) 
+    out.write( 'int\n' ) 
+    out.write( 'float4\n' ) 
+    out.write( 'half4\n' ) 
+    out.write( 'fixed4\n' ) 
+    out.write( 'int4\n' ) 
+    out.write( 'float3\n' ) 
+    out.write( 'half3\n' ) 
+    out.write( 'fixed3\n' ) 
+    out.write( 'int3\n' ) 
+    out.write( 'float2\n' ) 
+    out.write( 'half2\n' ) 
+    out.write( 'fixed2\n' ) 
+    out.write( 'int2\n' ) 
+end
+
+function cg_cmp_lt:new()
+    Node.new(self)
+    self.x = self.add_port(Input('x'))
+    self.y = self.add_port(Input('y'))
+    self.d = self.add_port(Output('d'))
+        self.type_choices = { 'float',
+                              'half',  
+                              'fixed',  
+                              'int',  
+                              'bool',  
+                              'float4',  
+                              'half4',  
+                              'fixed4',  
+                              'int4',  
+                              'bool4',  
+                              'float3',  
+                              'half3',  
+                              'fixed3',  
+                              'int3',  
+                              'bool3',  
+                              'float2',  
+                              'half2',  
+                              'fixed2',  
+                              'int2',  
+                              'bool2' }
+        self.type_ndx = 1
+end
+
+function cg_cmp_lt:get_type(port)
+    return self.type_choices[self.type_ndx]
+end
+
+function cg_cmp_lt:config(props)
+    Node.config(self, props)
+    props.delete('Name')
+
+    props.list(
+    'Type',
+    self.type_choices,
+    function() return self.type_ndx end,
+    function(v) self.type_ndx = v end
+    )
+end
+
+function cg_cmp_lt:gen_code(out, scratch)
+    local ta   = self.type_choices[self.type_ndx]
+    local t    = ta
+    local x    = 'r' .. self.x.get_output().hex()
+    local y    = 'r' .. self.y.get_output().hex()
+    local a    = ta .. '(1)'
+    local b    = ta .. '(0)'
+    local d    = 'r' .. self.d.hex()
+
+    out.write( '	' .. t .. ' ' .. d .. ' = ' .. t .. '(' .. x .. ' < ' .. y .. ');\n')
+end
+
+function cg_cmp_lt:get_tip(out)
+    out.write( 'd = if ( x < y ) then (1) else (0)' )end
+
+-- #################################################### --
+
+local cg_cmp_gt = class(Node)
+
+function cg_cmp_gt:get_help(out)
+    out.write( 'd = if ( x > y ) then (1) else (0)' )
+    out.write( '\n' )
+    out.write( 'Supported Types:\n' )
+    out.write( 'float\n' ) 
+    out.write( 'half\n' ) 
+    out.write( 'fixed\n' ) 
+    out.write( 'int\n' ) 
+    out.write( 'float4\n' ) 
+    out.write( 'half4\n' ) 
+    out.write( 'fixed4\n' ) 
+    out.write( 'int4\n' ) 
+    out.write( 'float3\n' ) 
+    out.write( 'half3\n' ) 
+    out.write( 'fixed3\n' ) 
+    out.write( 'int3\n' ) 
+    out.write( 'float2\n' ) 
+    out.write( 'half2\n' ) 
+    out.write( 'fixed2\n' ) 
+    out.write( 'int2\n' ) 
+end
+
+function cg_cmp_gt:new()
+    Node.new(self)
+    self.x = self.add_port(Input('x'))
+    self.y = self.add_port(Input('y'))
+    self.d = self.add_port(Output('d'))
+        self.type_choices = { 'float',
+                              'half',  
+                              'fixed',  
+                              'int',  
+                              'bool',  
+                              'float4',  
+                              'half4',  
+                              'fixed4',  
+                              'int4',  
+                              'bool4',  
+                              'float3',  
+                              'half3',  
+                              'fixed3',  
+                              'int3',  
+                              'bool3',  
+                              'float2',  
+                              'half2',  
+                              'fixed2',  
+                              'int2',  
+                              'bool2' }
+        self.type_ndx = 1
+end
+
+function cg_cmp_gt:get_type(port)
+    return self.type_choices[self.type_ndx]
+end
+
+function cg_cmp_gt:config(props)
+    Node.config(self, props)
+    props.delete('Name')
+
+    props.list(
+    'Type',
+    self.type_choices,
+    function() return self.type_ndx end,
+    function(v) self.type_ndx = v end
+    )
+end
+
+function cg_cmp_gt:gen_code(out, scratch)
+    local ta   = self.type_choices[self.type_ndx]
+    local t    = ta
+    local x    = 'r' .. self.x.get_output().hex()
+    local y    = 'r' .. self.y.get_output().hex()
+    local a    = ta .. '(1)'
+    local b    = ta .. '(0)'
+    local d    = 'r' .. self.d.hex()
+
+    out.write( '	' .. t .. ' ' .. d .. ' = ' .. t .. '(' .. x .. ' > ' .. y .. ');\n')
+end
+
+function cg_cmp_gt:get_tip(out)
+    out.write( 'd = if ( x > y ) then (1) else (0)' )end
+
+-- #################################################### --
+
+local cg_cmp_gte = class(Node)
+
+function cg_cmp_gte:get_help(out)
+    out.write( 'd = if ( x >= y ) then (1) else (0)' )
+    out.write( '\n' )
+    out.write( 'Supported Types:\n' )
+    out.write( 'float\n' ) 
+    out.write( 'half\n' ) 
+    out.write( 'fixed\n' ) 
+    out.write( 'int\n' ) 
+    out.write( 'float4\n' ) 
+    out.write( 'half4\n' ) 
+    out.write( 'fixed4\n' ) 
+    out.write( 'int4\n' ) 
+    out.write( 'float3\n' ) 
+    out.write( 'half3\n' ) 
+    out.write( 'fixed3\n' ) 
+    out.write( 'int3\n' ) 
+    out.write( 'float2\n' ) 
+    out.write( 'half2\n' ) 
+    out.write( 'fixed2\n' ) 
+    out.write( 'int2\n' ) 
+end
+
+function cg_cmp_gte:new()
+    Node.new(self)
+    self.x = self.add_port(Input('x'))
+    self.y = self.add_port(Input('y'))
+    self.d = self.add_port(Output('d'))
+        self.type_choices = { 'float',
+                              'half',  
+                              'fixed',  
+                              'int',  
+                              'bool',  
+                              'float4',  
+                              'half4',  
+                              'fixed4',  
+                              'int4',  
+                              'bool4',  
+                              'float3',  
+                              'half3',  
+                              'fixed3',  
+                              'int3',  
+                              'bool3',  
+                              'float2',  
+                              'half2',  
+                              'fixed2',  
+                              'int2',  
+                              'bool2' }
+        self.type_ndx = 1
+end
+
+function cg_cmp_gte:get_type(port)
+    return self.type_choices[self.type_ndx]
+end
+
+function cg_cmp_gte:config(props)
+    Node.config(self, props)
+    props.delete('Name')
+
+    props.list(
+    'Type',
+    self.type_choices,
+    function() return self.type_ndx end,
+    function(v) self.type_ndx = v end
+    )
+end
+
+function cg_cmp_gte:gen_code(out, scratch)
+    local ta   = self.type_choices[self.type_ndx]
+    local t    = ta
+    local x    = 'r' .. self.x.get_output().hex()
+    local y    = 'r' .. self.y.get_output().hex()
+    local a    = ta .. '(1)'
+    local b    = ta .. '(0)'
+    local d    = 'r' .. self.d.hex()
+
+    out.write( '	' .. t .. ' ' .. d .. ' = ' .. t .. '(' .. x .. ' >= ' .. y .. ');\n')
+end
+
+function cg_cmp_gte:get_tip(out)
+    out.write( 'd = if ( x >= y ) then (1) else (0)' )end
+
+-- #################################################### --
+
+local cg_cmp_lte = class(Node)
+
+function cg_cmp_lte:get_help(out)
+    out.write( 'd = if ( x <= y ) then (1) else (0)' )
+    out.write( '\n' )
+    out.write( 'Supported Types:\n' )
+    out.write( 'float\n' ) 
+    out.write( 'half\n' ) 
+    out.write( 'fixed\n' ) 
+    out.write( 'int\n' ) 
+    out.write( 'float4\n' ) 
+    out.write( 'half4\n' ) 
+    out.write( 'fixed4\n' ) 
+    out.write( 'int4\n' ) 
+    out.write( 'float3\n' ) 
+    out.write( 'half3\n' ) 
+    out.write( 'fixed3\n' ) 
+    out.write( 'int3\n' ) 
+    out.write( 'float2\n' ) 
+    out.write( 'half2\n' ) 
+    out.write( 'fixed2\n' ) 
+    out.write( 'int2\n' ) 
+end
+
+function cg_cmp_lte:new()
+    Node.new(self)
+    self.x = self.add_port(Input('x'))
+    self.y = self.add_port(Input('y'))
+    self.d = self.add_port(Output('d'))
+        self.type_choices = { 'float',
+                              'half',  
+                              'fixed',  
+                              'int',  
+                              'bool',  
+                              'float4',  
+                              'half4',  
+                              'fixed4',  
+                              'int4',  
+                              'bool4',  
+                              'float3',  
+                              'half3',  
+                              'fixed3',  
+                              'int3',  
+                              'bool3',  
+                              'float2',  
+                              'half2',  
+                              'fixed2',  
+                              'int2',  
+                              'bool2' }
+        self.type_ndx = 1
+end
+
+function cg_cmp_lte:get_type(port)
+    return self.type_choices[self.type_ndx]
+end
+
+function cg_cmp_lte:config(props)
+    Node.config(self, props)
+    props.delete('Name')
+
+    props.list(
+    'Type',
+    self.type_choices,
+    function() return self.type_ndx end,
+    function(v) self.type_ndx = v end
+    )
+end
+
+function cg_cmp_lte:gen_code(out, scratch)
+    local ta   = self.type_choices[self.type_ndx]
+    local t    = ta
+    local x    = 'r' .. self.x.get_output().hex()
+    local y    = 'r' .. self.y.get_output().hex()
+    local a    = ta .. '(1)'
+    local b    = ta .. '(0)'
+    local d    = 'r' .. self.d.hex()
+
+    out.write( '	' .. t .. ' ' .. d .. ' = ' .. t .. '(' .. x .. ' <= ' .. y .. ');\n')
+end
+
+function cg_cmp_lte:get_tip(out)
+    out.write( 'd = if ( x <= y ) then (1) else (0)' )end
+
+-- #################################################### --
+
+local cg_cmp_eq = class(Node)
+
+function cg_cmp_eq:get_help(out)
+    out.write( 'd = if ( x == y ) then (1) else (0)' )
+    out.write( '\n' )
+    out.write( 'Supported Types:\n' )
+    out.write( 'float\n' ) 
+    out.write( 'half\n' ) 
+    out.write( 'fixed\n' ) 
+    out.write( 'int\n' ) 
+    out.write( 'float4\n' ) 
+    out.write( 'half4\n' ) 
+    out.write( 'fixed4\n' ) 
+    out.write( 'int4\n' ) 
+    out.write( 'float3\n' ) 
+    out.write( 'half3\n' ) 
+    out.write( 'fixed3\n' ) 
+    out.write( 'int3\n' ) 
+    out.write( 'float2\n' ) 
+    out.write( 'half2\n' ) 
+    out.write( 'fixed2\n' ) 
+    out.write( 'int2\n' ) 
+end
+
+function cg_cmp_eq:new()
+    Node.new(self)
+    self.x = self.add_port(Input('x'))
+    self.y = self.add_port(Input('y'))
+    self.d = self.add_port(Output('d'))
+        self.type_choices = { 'float',
+                              'half',  
+                              'fixed',  
+                              'int',  
+                              'bool',  
+                              'float4',  
+                              'half4',  
+                              'fixed4',  
+                              'int4',  
+                              'bool4',  
+                              'float3',  
+                              'half3',  
+                              'fixed3',  
+                              'int3',  
+                              'bool3',  
+                              'float2',  
+                              'half2',  
+                              'fixed2',  
+                              'int2',  
+                              'bool2' }
+        self.type_ndx = 1
+end
+
+function cg_cmp_eq:get_type(port)
+    return self.type_choices[self.type_ndx]
+end
+
+function cg_cmp_eq:config(props)
+    Node.config(self, props)
+    props.delete('Name')
+
+    props.list(
+    'Type',
+    self.type_choices,
+    function() return self.type_ndx end,
+    function(v) self.type_ndx = v end
+    )
+end
+
+function cg_cmp_eq:gen_code(out, scratch)
+    local ta   = self.type_choices[self.type_ndx]
+    local t    = ta
+    local x    = 'r' .. self.x.get_output().hex()
+    local y    = 'r' .. self.y.get_output().hex()
+    local a    = ta .. '(1)'
+    local b    = ta .. '(0)'
+    local d    = 'r' .. self.d.hex()
+
+    out.write( '	' .. t .. ' ' .. d .. ' = ' .. t .. '(' .. x .. ' == ' .. y .. ');\n')
+end
+
+function cg_cmp_eq:get_tip(out)
+    out.write( 'd = if ( x == y ) then (1) else (0)' )end
+
+-- #################################################### --
+
+local cg_cmp_neq = class(Node)
+
+function cg_cmp_neq:get_help(out)
+    out.write( 'd = if ( x != y ) then (1) else (0)' )
+    out.write( '\n' )
+    out.write( 'Supported Types:\n' )
+    out.write( 'float\n' ) 
+    out.write( 'half\n' ) 
+    out.write( 'fixed\n' ) 
+    out.write( 'int\n' ) 
+    out.write( 'float4\n' ) 
+    out.write( 'half4\n' ) 
+    out.write( 'fixed4\n' ) 
+    out.write( 'int4\n' ) 
+    out.write( 'float3\n' ) 
+    out.write( 'half3\n' ) 
+    out.write( 'fixed3\n' ) 
+    out.write( 'int3\n' ) 
+    out.write( 'float2\n' ) 
+    out.write( 'half2\n' ) 
+    out.write( 'fixed2\n' ) 
+    out.write( 'int2\n' ) 
+end
+
+function cg_cmp_neq:new()
+    Node.new(self)
+    self.x = self.add_port(Input('x'))
+    self.y = self.add_port(Input('y'))
+    self.d = self.add_port(Output('d'))
+        self.type_choices = { 'float',
+                              'half',  
+                              'fixed',  
+                              'int',  
+                              'bool',  
+                              'float4',  
+                              'half4',  
+                              'fixed4',  
+                              'int4',  
+                              'bool4',  
+                              'float3',  
+                              'half3',  
+                              'fixed3',  
+                              'int3',  
+                              'bool3',  
+                              'float2',  
+                              'half2',  
+                              'fixed2',  
+                              'int2',  
+                              'bool2' }
+        self.type_ndx = 1
+end
+
+function cg_cmp_neq:get_type(port)
+    return self.type_choices[self.type_ndx]
+end
+
+function cg_cmp_neq:config(props)
+    Node.config(self, props)
+    props.delete('Name')
+
+    props.list(
+    'Type',
+    self.type_choices,
+    function() return self.type_ndx end,
+    function(v) self.type_ndx = v end
+    )
+end
+
+function cg_cmp_neq:gen_code(out, scratch)
+    local ta   = self.type_choices[self.type_ndx]
+    local t    = ta
+    local x    = 'r' .. self.x.get_output().hex()
+    local y    = 'r' .. self.y.get_output().hex()
+    local a    = ta .. '(1)'
+    local b    = ta .. '(0)'
+    local d    = 'r' .. self.d.hex()
+
+    out.write( '	' .. t .. ' ' .. d .. ' = ' .. t .. '(' .. x .. ' != ' .. y .. ');\n')
+end
+
+function cg_cmp_neq:get_tip(out)
+    out.write( 'd = if ( x != y ) then (1) else (0)' )end
+
+-- #################################################### --
+
+local cg_cmp_ltz = class(Node)
+
+function cg_cmp_ltz:get_help(out)
+    out.write( 'd = if ( x < 0 ) then (1) else (0)' )
+    out.write( '\n' )
+    out.write( 'Supported Types:\n' )
+    out.write( 'float\n' ) 
+    out.write( 'half\n' ) 
+    out.write( 'fixed\n' ) 
+    out.write( 'int\n' ) 
+    out.write( 'float4\n' ) 
+    out.write( 'half4\n' ) 
+    out.write( 'fixed4\n' ) 
+    out.write( 'int4\n' ) 
+    out.write( 'float3\n' ) 
+    out.write( 'half3\n' ) 
+    out.write( 'fixed3\n' ) 
+    out.write( 'int3\n' ) 
+    out.write( 'float2\n' ) 
+    out.write( 'half2\n' ) 
+    out.write( 'fixed2\n' ) 
+    out.write( 'int2\n' ) 
+end
+
+function cg_cmp_ltz:new()
+    Node.new(self)
+    self.x = self.add_port(Input('x'))
+    self.d = self.add_port(Output('d'))
+        self.type_choices = { 'float',
+                              'half',  
+                              'fixed',  
+                              'int',  
+                              'bool',  
+                              'float4',  
+                              'half4',  
+                              'fixed4',  
+                              'int4',  
+                              'bool4',  
+                              'float3',  
+                              'half3',  
+                              'fixed3',  
+                              'int3',  
+                              'bool3',  
+                              'float2',  
+                              'half2',  
+                              'fixed2',  
+                              'int2',  
+                              'bool2' }
+        self.type_ndx = 1
+end
+
+function cg_cmp_ltz:get_type(port)
+    return self.type_choices[self.type_ndx]
+end
+
+function cg_cmp_ltz:config(props)
+    Node.config(self, props)
+    props.delete('Name')
+
+    props.list(
+    'Type',
+    self.type_choices,
+    function() return self.type_ndx end,
+    function(v) self.type_ndx = v end
+    )
+end
+
+function cg_cmp_ltz:gen_code(out, scratch)
+    local ta   = self.type_choices[self.type_ndx]
+    local t    = ta
+    local x    = 'r' .. self.x.get_output().hex()
+    local tx   = self.x.get_output().get_type()
+    local d    = 'r' .. self.d.hex()
+
+    out.write( '	' .. t .. ' ' .. d .. ' = ' .. t .. '(' .. x .. ' < ' .. tx  .. '(0));\n')
+end
+
+function cg_cmp_ltz:get_tip(out)
+    out.write( 'd = if ( x < 0 ) then (1) else (0)' )end
+
+-- #################################################### --
+
+local cg_cmp_gtz = class(Node)
+
+function cg_cmp_gtz:get_help(out)
+    out.write( 'd = if ( x > 0 ) then (1) else (0)' )
+    out.write( '\n' )
+    out.write( 'Supported Types:\n' )
+    out.write( 'float\n' ) 
+    out.write( 'half\n' ) 
+    out.write( 'fixed\n' ) 
+    out.write( 'int\n' ) 
+    out.write( 'float4\n' ) 
+    out.write( 'half4\n' ) 
+    out.write( 'fixed4\n' ) 
+    out.write( 'int4\n' ) 
+    out.write( 'float3\n' ) 
+    out.write( 'half3\n' ) 
+    out.write( 'fixed3\n' ) 
+    out.write( 'int3\n' ) 
+    out.write( 'float2\n' ) 
+    out.write( 'half2\n' ) 
+    out.write( 'fixed2\n' ) 
+    out.write( 'int2\n' ) 
+end
+
+function cg_cmp_gtz:new()
+    Node.new(self)
+    self.x = self.add_port(Input('x'))
+    self.d = self.add_port(Output('d'))
+        self.type_choices = { 'float',
+                              'half',  
+                              'fixed',  
+                              'int',  
+                              'bool',  
+                              'float4',  
+                              'half4',  
+                              'fixed4',  
+                              'int4',  
+                              'bool4',  
+                              'float3',  
+                              'half3',  
+                              'fixed3',  
+                              'int3',  
+                              'bool3',  
+                              'float2',  
+                              'half2',  
+                              'fixed2',  
+                              'int2',  
+                              'bool2' }
+        self.type_ndx = 1
+end
+
+function cg_cmp_gtz:get_type(port)
+    return self.type_choices[self.type_ndx]
+end
+
+function cg_cmp_gtz:config(props)
+    Node.config(self, props)
+    props.delete('Name')
+
+    props.list(
+    'Type',
+    self.type_choices,
+    function() return self.type_ndx end,
+    function(v) self.type_ndx = v end
+    )
+end
+
+function cg_cmp_gtz:gen_code(out, scratch)
+    local ta   = self.type_choices[self.type_ndx]
+    local t    = ta
+    local x    = 'r' .. self.x.get_output().hex()
+    local tx   = self.x.get_output().get_type()
+    local d    = 'r' .. self.d.hex()
+
+    out.write( '	' .. t .. ' ' .. d .. ' = ' .. t .. '(' .. x .. ' > ' .. tx  .. '(0));\n')
+end
+
+function cg_cmp_gtz:get_tip(out)
+    out.write( 'd = if ( x > 0 ) then (1) else (0)' )end
+
+-- #################################################### --
+
+local cg_cmp_gtez = class(Node)
+
+function cg_cmp_gtez:get_help(out)
+    out.write( 'd = if ( x >= 0 ) then (1) else (0)' )
+    out.write( '\n' )
+    out.write( 'Supported Types:\n' )
+    out.write( 'float\n' ) 
+    out.write( 'half\n' ) 
+    out.write( 'fixed\n' ) 
+    out.write( 'int\n' ) 
+    out.write( 'float4\n' ) 
+    out.write( 'half4\n' ) 
+    out.write( 'fixed4\n' ) 
+    out.write( 'int4\n' ) 
+    out.write( 'float3\n' ) 
+    out.write( 'half3\n' ) 
+    out.write( 'fixed3\n' ) 
+    out.write( 'int3\n' ) 
+    out.write( 'float2\n' ) 
+    out.write( 'half2\n' ) 
+    out.write( 'fixed2\n' ) 
+    out.write( 'int2\n' ) 
+end
+
+function cg_cmp_gtez:new()
+    Node.new(self)
+    self.x = self.add_port(Input('x'))
+    self.d = self.add_port(Output('d'))
+        self.type_choices = { 'float',
+                              'half',  
+                              'fixed',  
+                              'int',  
+                              'bool',  
+                              'float4',  
+                              'half4',  
+                              'fixed4',  
+                              'int4',  
+                              'bool4',  
+                              'float3',  
+                              'half3',  
+                              'fixed3',  
+                              'int3',  
+                              'bool3',  
+                              'float2',  
+                              'half2',  
+                              'fixed2',  
+                              'int2',  
+                              'bool2' }
+        self.type_ndx = 1
+end
+
+function cg_cmp_gtez:get_type(port)
+    return self.type_choices[self.type_ndx]
+end
+
+function cg_cmp_gtez:config(props)
+    Node.config(self, props)
+    props.delete('Name')
+
+    props.list(
+    'Type',
+    self.type_choices,
+    function() return self.type_ndx end,
+    function(v) self.type_ndx = v end
+    )
+end
+
+function cg_cmp_gtez:gen_code(out, scratch)
+    local ta   = self.type_choices[self.type_ndx]
+    local t    = ta
+    local x    = 'r' .. self.x.get_output().hex()
+    local tx   = self.x.get_output().get_type()
+    local d    = 'r' .. self.d.hex()
+
+    out.write( '	' .. t .. ' ' .. d .. ' = ' .. t .. '(' .. x .. ' >= ' .. tx  .. '(0));\n')
+end
+
+function cg_cmp_gtez:get_tip(out)
+    out.write( 'd = if ( x >= 0 ) then (1) else (0)' )end
+
+-- #################################################### --
+
+local cg_cmp_ltez = class(Node)
+
+function cg_cmp_ltez:get_help(out)
+    out.write( 'd = if ( x <= 0 ) then (1) else (0)' )
+    out.write( '\n' )
+    out.write( 'Supported Types:\n' )
+    out.write( 'float\n' ) 
+    out.write( 'half\n' ) 
+    out.write( 'fixed\n' ) 
+    out.write( 'int\n' ) 
+    out.write( 'float4\n' ) 
+    out.write( 'half4\n' ) 
+    out.write( 'fixed4\n' ) 
+    out.write( 'int4\n' ) 
+    out.write( 'float3\n' ) 
+    out.write( 'half3\n' ) 
+    out.write( 'fixed3\n' ) 
+    out.write( 'int3\n' ) 
+    out.write( 'float2\n' ) 
+    out.write( 'half2\n' ) 
+    out.write( 'fixed2\n' ) 
+    out.write( 'int2\n' ) 
+end
+
+function cg_cmp_ltez:new()
+    Node.new(self)
+    self.x = self.add_port(Input('x'))
+    self.d = self.add_port(Output('d'))
+        self.type_choices = { 'float',
+                              'half',  
+                              'fixed',  
+                              'int',  
+                              'bool',  
+                              'float4',  
+                              'half4',  
+                              'fixed4',  
+                              'int4',  
+                              'bool4',  
+                              'float3',  
+                              'half3',  
+                              'fixed3',  
+                              'int3',  
+                              'bool3',  
+                              'float2',  
+                              'half2',  
+                              'fixed2',  
+                              'int2',  
+                              'bool2' }
+        self.type_ndx = 1
+end
+
+function cg_cmp_ltez:get_type(port)
+    return self.type_choices[self.type_ndx]
+end
+
+function cg_cmp_ltez:config(props)
+    Node.config(self, props)
+    props.delete('Name')
+
+    props.list(
+    'Type',
+    self.type_choices,
+    function() return self.type_ndx end,
+    function(v) self.type_ndx = v end
+    )
+end
+
+function cg_cmp_ltez:gen_code(out, scratch)
+    local ta   = self.type_choices[self.type_ndx]
+    local t    = ta
+    local x    = 'r' .. self.x.get_output().hex()
+    local tx   = self.x.get_output().get_type()
+    local d    = 'r' .. self.d.hex()
+
+    out.write( '	' .. t .. ' ' .. d .. ' = ' .. t .. '(' .. x .. ' <= ' .. tx  .. '(0));\n')
+end
+
+function cg_cmp_ltez:get_tip(out)
+    out.write( 'd = if ( x <= 0 ) then (1) else (0)' )end
+
+-- #################################################### --
+
+register {
+  __name = 'Cg [Select]',
+  __prologue = '',
+  __epilogue = '',
+  ['Select Less Than'] = cg_sel_lt,
+  ['Select Greater Than'] = cg_sel_gt,
+  ['Select Greater Than Equal'] = cg_sel_gte,
+  ['Select Less Than Equal'] = cg_sel_lte,
+  ['Select Equal'] = cg_sel_eq,
+  ['Select Not Equal'] = cg_sel_neq,
+  ['Compare Less Than'] = cg_cmp_lt,
+  ['Compare Greater Than'] = cg_cmp_gt,
+  ['Compare Greater Than Equal'] = cg_cmp_gte,
+  ['Compare Less Than Equal'] = cg_cmp_lte,
+  ['Compare Equal'] = cg_cmp_eq,
+  ['Compare Not Equal'] = cg_cmp_neq,
+  ['Compare Less Than Zero'] = cg_cmp_ltz,
+  ['Compare Greater Than Zero'] = cg_cmp_gtz,
+  ['Compare Greater Than Equal Zero'] = cg_cmp_gtez,
+  ['Compare Less Than Equal Zero'] = cg_cmp_ltez,
+}
+

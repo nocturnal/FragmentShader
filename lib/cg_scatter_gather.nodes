@@ -1,0 +1,1631 @@
+
+-- #################################################### --
+
+local cg_gather_vector4 = class(Node)
+
+function cg_gather_vector4:get_help(out)
+	out.write[[TODO]]
+end
+
+function cg_gather_vector4:new()
+	Node.new(self)
+	self.x = self.add_port(Input('x'))
+	self.y = self.add_port(Input('y'))
+	self.z = self.add_port(Input('z'))
+	self.w = self.add_port(Input('w'))
+	self.d = self.add_port(Output('d'))
+end
+
+function cg_gather_vector4:get_type(port)
+	local tx = self.x.get_output().get_type()
+	local ty = self.y.get_output().get_type()
+	local tz = self.z.get_output().get_type()
+	local tw = self.w.get_output().get_type()
+
+        if ( ( tx == 'float' ) or ( tx == 'half' ) or ( tx == 'fixed' ) or ( tx == 'bool' ) or ( tx == 'int' ) ) then
+	    if ((tx == ty) and (tx == tz) and (tx == tw)) then
+		    return tx .. '4'
+	    end
+	end
+
+	return nil
+end
+
+function cg_gather_vector4:config(props)
+	Node.config(self, props)
+	props.delete('Name')
+end
+
+function cg_gather_vector4:gen_code(out, scratch)
+	local tx   = self.x.get_output().get_type()
+
+	local t    = tx .. '4'
+	local x    = 'r' .. self.x.get_output().hex()
+	local y    = 'r' .. self.y.get_output().hex()
+	local z    = 'r' .. self.z.get_output().hex()
+	local w    = 'r' .. self.w.get_output().hex()
+	local d    = 'r' .. self.d.hex()
+
+	out.write( '\t' .. t .. ' ' .. d .. ' = ' .. t .. '( ' .. x .. ', ' .. y .. ', ' .. z .. ', ' .. w .. ' );\n' )
+end
+
+function cg_gather_vector4:get_tip(out)
+	out.write( 'd = vector4(x,y,z,w)' )
+end
+
+-- #################################################### --
+
+local cg_scatter_vector4 = class(Node)
+
+function cg_scatter_vector4:get_help(out)
+	out.write[[TODO]]
+end
+
+function cg_scatter_vector4:new()
+	Node.new(self)
+	self.a = self.add_port(Input('a'))
+	self.x = self.add_port(Output('x'))
+	self.y = self.add_port(Output('y'))
+	self.z = self.add_port(Output('z'))
+	self.w = self.add_port(Output('w'))
+end
+
+function cg_scatter_vector4:get_type(port)
+	local ta = self.a.get_output().get_type()
+        
+        if (ta == 'float4') then
+		return 'float'
+	elseif (ta == 'half4') then
+		return 'half'
+	elseif (ta == 'fixed4') then
+		return 'fixed'
+	elseif (ta == 'bool4') then
+		return 'bool'
+	elseif (ta == 'int4') then
+		return 'int'
+	end
+
+	return nil
+end
+
+function cg_scatter_vector4:config(props)
+	Node.config(self, props)
+	props.delete('Name')
+end
+
+function cg_scatter_vector4:gen_code(out, scratch)
+	local ta = self.a.get_output().get_type()
+	local type = nil
+
+	local a    = 'r' .. self.a.get_output().hex()
+	local x    = 'r' .. self.x.hex()
+	local y    = 'r' .. self.y.hex()
+	local z    = 'r' .. self.z.hex()
+	local w    = 'r' .. self.w.hex()
+
+	out.write( '\t#define ' .. x .. ' ' .. a .. '.x\n' )
+	out.write( '\t#define ' .. y .. ' ' .. a .. '.y\n' )
+	out.write( '\t#define ' .. z .. ' ' .. a .. '.z\n' )
+	out.write( '\t#define ' .. w .. ' ' .. a .. '.w\n' )
+end
+
+function cg_scatter_vector4:get_tip(out)
+	out.write( 'x,y,z,w = vector4(a)' )
+end
+
+-- #################################################### --
+
+local cg_gather_vector3 = class(Node)
+
+function cg_gather_vector3:get_help(out)
+	out.write[[TODO]]
+end
+
+function cg_gather_vector3:new()
+	Node.new(self)
+	self.x = self.add_port(Input('x'))
+	self.y = self.add_port(Input('y'))
+	self.z = self.add_port(Input('z'))
+	self.d = self.add_port(Output('d'))
+end
+
+function cg_gather_vector3:get_type(port)
+	local tx = self.x.get_output().get_type()
+	local ty = self.y.get_output().get_type()
+	local tz = self.z.get_output().get_type()
+
+        if ( ( tx == 'float' ) or ( tx == 'half' ) or ( tx == 'fixed' ) or ( tx == 'bool' ) or ( tx == 'int' ) ) then
+	    if ((tx == ty) and (tx == tz)) then
+		    return tx .. '3'
+	    end
+	end
+
+	return nil
+end
+
+function cg_gather_vector3:config(props)
+	Node.config(self, props)
+	props.delete('Name')
+end
+
+function cg_gather_vector3:gen_code(out, scratch)
+	local tx   = self.x.get_output().get_type()
+
+	local t    = tx .. '3'
+	local x    = 'r' .. self.x.get_output().hex()
+	local y    = 'r' .. self.y.get_output().hex()
+	local z    = 'r' .. self.z.get_output().hex()
+	local d    = 'r' .. self.d.hex()
+
+	out.write( '\t' .. t .. ' ' .. d .. ' = ' .. t .. '( ' .. x .. ', ' .. y .. ', ' .. z .. ' );\n' )
+end
+
+function cg_gather_vector3:get_tip(out)
+	out.write( 'd = vector3(x,y,z)' )
+end
+
+-- #################################################### --
+
+local cg_scatter_vector3 = class(Node)
+
+function cg_scatter_vector3:get_help(out)
+	out.write[[TODO]]
+end
+
+function cg_scatter_vector3:new()
+	Node.new(self)
+	self.a = self.add_port(Input('a'))
+	self.x = self.add_port(Output('x'))
+	self.y = self.add_port(Output('y'))
+	self.z = self.add_port(Output('z'))
+end
+
+function cg_scatter_vector3:get_type(port)
+	local ta = self.a.get_output().get_type()
+        
+        if (ta == 'float3') then
+		return 'float'
+	elseif (ta == 'half3') then
+		return 'half'
+	elseif (ta == 'fixed3') then
+		return 'fixed'
+	elseif (ta == 'bool3') then
+		return 'bool'
+	elseif (ta == 'int3') then
+		return 'int'
+	end
+
+	return nil
+end
+
+function cg_scatter_vector3:config(props)
+	Node.config(self, props)
+	props.delete('Name')
+end
+
+function cg_scatter_vector3:gen_code(out, scratch)
+	local ta = self.a.get_output().get_type()
+	local type = nil
+
+	local a    = 'r' .. self.a.get_output().hex()
+	local x    = 'r' .. self.x.hex()
+	local y    = 'r' .. self.y.hex()
+	local z    = 'r' .. self.z.hex()
+
+	out.write( '\t#define ' .. x .. ' ' .. a .. '.x\n' )
+	out.write( '\t#define ' .. y .. ' ' .. a .. '.y\n' )
+	out.write( '\t#define ' .. z .. ' ' .. a .. '.z\n' )
+end
+
+function cg_scatter_vector3:get_tip(out)
+	out.write( 'x,y,z = vector3(a)' )
+end
+
+-- #################################################### --
+
+local cg_gather_vector2 = class(Node)
+
+function cg_gather_vector2:get_help(out)
+	out.write[[TODO]]
+end
+
+function cg_gather_vector2:new()
+	Node.new(self)
+	self.x = self.add_port(Input('x'))
+	self.y = self.add_port(Input('y'))
+	self.d = self.add_port(Output('d'))
+end
+
+function cg_gather_vector2:get_type(port)
+	local tx = self.x.get_output().get_type()
+	local ty = self.y.get_output().get_type()
+
+        if ( ( tx == 'float' ) or ( tx == 'half' ) or ( tx == 'fixed' ) or ( tx == 'bool' ) or ( tx == 'int' ) ) then
+	    if ((tx == ty)) then
+		    return tx .. '2'
+	    end
+	end
+
+	return nil
+end
+
+function cg_gather_vector2:config(props)
+	Node.config(self, props)
+	props.delete('Name')
+end
+
+function cg_gather_vector2:gen_code(out, scratch)
+	local tx   = self.x.get_output().get_type()
+
+	local t    = tx .. '2'
+	local x    = 'r' .. self.x.get_output().hex()
+	local y    = 'r' .. self.y.get_output().hex()
+	local d    = 'r' .. self.d.hex()
+
+	out.write( '\t' .. t .. ' ' .. d .. ' = ' .. t .. '( ' .. x .. ', ' .. y .. ' );\n' )
+end
+
+function cg_gather_vector2:get_tip(out)
+	out.write( 'd = vector2(x,y)' )
+end
+
+-- #################################################### --
+
+local cg_scatter_vector2 = class(Node)
+
+function cg_scatter_vector2:get_help(out)
+	out.write[[TODO]]
+end
+
+function cg_scatter_vector2:new()
+	Node.new(self)
+	self.a = self.add_port(Input('a'))
+	self.x = self.add_port(Output('x'))
+	self.y = self.add_port(Output('y'))
+end
+
+function cg_scatter_vector2:get_type(port)
+	local ta = self.a.get_output().get_type()
+        
+        if (ta == 'float2') then
+		return 'float'
+	elseif (ta == 'half2') then
+		return 'half'
+	elseif (ta == 'fixed2') then
+		return 'fixed'
+	elseif (ta == 'bool2') then
+		return 'bool'
+	elseif (ta == 'int2') then
+		return 'int'
+	end
+
+	return nil
+end
+
+function cg_scatter_vector2:config(props)
+	Node.config(self, props)
+	props.delete('Name')
+end
+
+function cg_scatter_vector2:gen_code(out, scratch)
+	local ta = self.a.get_output().get_type()
+	local type = nil
+
+	local a    = 'r' .. self.a.get_output().hex()
+	local x    = 'r' .. self.x.hex()
+	local y    = 'r' .. self.y.hex()
+
+	out.write( '\t#define ' .. x .. ' ' .. a .. '.x\n' )
+	out.write( '\t#define ' .. y .. ' ' .. a .. '.y\n' )
+end
+
+function cg_scatter_vector2:get_tip(out)
+	out.write( 'x,y = vector2(a)' )
+end
+
+-- #################################################### --
+
+local cg_gather_vector4x4 = class(Node)
+
+function cg_gather_vector4x4:get_help(out)
+	out.write[[TODO]]
+end
+
+function cg_gather_vector4x4:new()
+	Node.new(self)
+	self.x = self.add_port(Input('x'))
+	self.y = self.add_port(Input('y'))
+	self.z = self.add_port(Input('z'))
+	self.w = self.add_port(Input('w'))
+	self.d = self.add_port(Output('d'))
+end
+
+function cg_gather_vector4x4:get_type(port)
+	local tx = self.x.get_output().get_type()
+	local ty = self.y.get_output().get_type()
+	local tz = self.z.get_output().get_type()
+	local tw = self.w.get_output().get_type()
+
+        if ( ( tx == 'float4' ) or ( tx == 'half4' ) or ( tx == 'fixed4' ) or ( tx == 'bool4' ) or ( tx == 'int4' ) ) then
+	    if ((tx == ty) and (tx == tz) and (tx == tw)) then
+		    return tx .. 'x4'
+	    end
+	end
+
+	return nil
+end
+
+function cg_gather_vector4x4:config(props)
+	Node.config(self, props)
+	props.delete('Name')
+end
+
+function cg_gather_vector4x4:gen_code(out, scratch)
+	local tx   = self.x.get_output().get_type()
+
+	local t    = tx .. 'x4'
+	local x    = 'r' .. self.x.get_output().hex()
+	local y    = 'r' .. self.y.get_output().hex()
+	local z    = 'r' .. self.z.get_output().hex()
+	local w    = 'r' .. self.w.get_output().hex()
+	local d    = 'r' .. self.d.hex()
+
+	out.write( '\t' .. t .. ' ' .. d .. ' = ' .. t .. '( ' .. x .. ', ' .. y .. ', ' .. z .. ', ' .. w .. ' );\n' )
+end
+
+function cg_gather_vector4x4:get_tip(out)
+	out.write( 'd = vector4x4(x,y,z,w)' )
+end
+
+-- #################################################### --
+
+local cg_gather_vector4x3 = class(Node)
+
+function cg_gather_vector4x3:get_help(out)
+	out.write[[TODO]]
+end
+
+function cg_gather_vector4x3:new()
+	Node.new(self)
+	self.x = self.add_port(Input('x'))
+	self.y = self.add_port(Input('y'))
+	self.z = self.add_port(Input('z'))
+	self.d = self.add_port(Output('d'))
+end
+
+function cg_gather_vector4x3:get_type(port)
+	local tx = self.x.get_output().get_type()
+	local ty = self.y.get_output().get_type()
+	local tz = self.z.get_output().get_type()
+
+        if ( ( tx == 'float4' ) or ( tx == 'half4' ) or ( tx == 'fixed4' ) or ( tx == 'bool4' ) or ( tx == 'int4' ) ) then
+	    if ((tx == ty) and (tx == tz)) then
+		    return tx .. 'x3'
+	    end
+	end
+
+	return nil
+end
+
+function cg_gather_vector4x3:config(props)
+	Node.config(self, props)
+	props.delete('Name')
+end
+
+function cg_gather_vector4x3:gen_code(out, scratch)
+	local tx   = self.x.get_output().get_type()
+
+	local t    = tx .. 'x3'
+	local x    = 'r' .. self.x.get_output().hex()
+	local y    = 'r' .. self.y.get_output().hex()
+	local z    = 'r' .. self.z.get_output().hex()
+	local d    = 'r' .. self.d.hex()
+
+	out.write( '\t' .. t .. ' ' .. d .. ' = ' .. t .. '( ' .. x .. ', ' .. y .. ', ' .. z .. ' );\n' )
+end
+
+function cg_gather_vector4x3:get_tip(out)
+	out.write( 'd = vector4x3(x,y,z)' )
+end
+
+-- #################################################### --
+
+local cg_gather_vector4x2 = class(Node)
+
+function cg_gather_vector4x2:get_help(out)
+	out.write[[TODO]]
+end
+
+function cg_gather_vector4x2:new()
+	Node.new(self)
+	self.x = self.add_port(Input('x'))
+	self.y = self.add_port(Input('y'))
+	self.d = self.add_port(Output('d'))
+end
+
+function cg_gather_vector4x2:get_type(port)
+	local tx = self.x.get_output().get_type()
+	local ty = self.y.get_output().get_type()
+	local tz = self.z.get_output().get_type()
+
+        if ( ( tx == 'float4' ) or ( tx == 'half4' ) or ( tx == 'fixed4' ) or ( tx == 'bool4' ) or ( tx == 'int4' ) ) then
+	    if ((tx == ty)) then
+		    return tx .. 'x2'
+	    end
+	end
+
+	return nil
+end
+
+function cg_gather_vector4x2:config(props)
+	Node.config(self, props)
+	props.delete('Name')
+end
+
+function cg_gather_vector4x2:gen_code(out, scratch)
+	local tx   = self.x.get_output().get_type()
+
+	local t    = tx .. 'x2'
+	local x    = 'r' .. self.x.get_output().hex()
+	local y    = 'r' .. self.y.get_output().hex()
+	local d    = 'r' .. self.d.hex()
+
+	out.write( '\t' .. t .. ' ' .. d .. ' = ' .. t .. '( ' .. x .. ', ' .. y .. ' );\n' )
+end
+
+function cg_gather_vector4x2:get_tip(out)
+	out.write( 'd = vector4x2(x,y)' )
+end
+
+-- #################################################### --
+
+local cg_gather_vector3x4 = class(Node)
+
+function cg_gather_vector3x4:get_help(out)
+	out.write[[TODO]]
+end
+
+function cg_gather_vector3x4:new()
+	Node.new(self)
+	self.x = self.add_port(Input('x'))
+	self.y = self.add_port(Input('y'))
+	self.z = self.add_port(Input('z'))
+	self.w = self.add_port(Input('w'))
+	self.d = self.add_port(Output('d'))
+end
+
+function cg_gather_vector3x4:get_type(port)
+	local tx = self.x.get_output().get_type()
+	local ty = self.y.get_output().get_type()
+	local tz = self.z.get_output().get_type()
+	local tw = self.w.get_output().get_type()
+
+        if ( ( tx == 'float3' ) or ( tx == 'half3' ) or ( tx == 'fixed3' ) or ( tx == 'bool3' ) or ( tx == 'int3' ) ) then
+	    if ((tx == ty) and (tx == tz) and (tx == tw)) then
+		    return tx .. 'x4'
+	    end
+	end
+
+	return nil
+end
+
+function cg_gather_vector3x4:config(props)
+	Node.config(self, props)
+	props.delete('Name')
+end
+
+function cg_gather_vector3x4:gen_code(out, scratch)
+	local tx   = self.x.get_output().get_type()
+
+	local t    = tx .. 'x4'
+	local x    = 'r' .. self.x.get_output().hex()
+	local y    = 'r' .. self.y.get_output().hex()
+	local z    = 'r' .. self.z.get_output().hex()
+	local w    = 'r' .. self.w.get_output().hex()
+	local d    = 'r' .. self.d.hex()
+
+	out.write( '\t' .. t .. ' ' .. d .. ' = ' .. t .. '( ' .. x .. ', ' .. y .. ', ' .. z .. ', ' .. w .. ' );\n' )
+end
+
+function cg_gather_vector3x4:get_tip(out)
+	out.write( 'd = vector3x4(x,y,z,w)' )
+end
+
+-- #################################################### --
+
+local cg_gather_vector3x3 = class(Node)
+
+function cg_gather_vector3x3:get_help(out)
+	out.write[[TODO]]
+end
+
+function cg_gather_vector3x3:new()
+	Node.new(self)
+	self.x = self.add_port(Input('x'))
+	self.y = self.add_port(Input('y'))
+	self.z = self.add_port(Input('z'))
+	self.d = self.add_port(Output('d'))
+end
+
+function cg_gather_vector3x3:get_type(port)
+	local tx = self.x.get_output().get_type()
+	local ty = self.y.get_output().get_type()
+	local tz = self.z.get_output().get_type()
+
+        if ( ( tx == 'float3' ) or ( tx == 'half3' ) or ( tx == 'fixed3' ) or ( tx == 'bool3' ) or ( tx == 'int3' ) ) then
+	    if ((tx == ty) and (tx == tz)) then
+		    return tx .. 'x3'
+	    end
+	end
+
+	return nil
+end
+
+function cg_gather_vector3x3:config(props)
+	Node.config(self, props)
+	props.delete('Name')
+end
+
+function cg_gather_vector3x3:gen_code(out, scratch)
+	local tx   = self.x.get_output().get_type()
+
+	local t    = tx .. 'x3'
+	local x    = 'r' .. self.x.get_output().hex()
+	local y    = 'r' .. self.y.get_output().hex()
+	local z    = 'r' .. self.z.get_output().hex()
+	local d    = 'r' .. self.d.hex()
+
+	out.write( '\t' .. t .. ' ' .. d .. ' = ' .. t .. '( ' .. x .. ', ' .. y .. ', ' .. z .. ' );\n' )
+end
+
+function cg_gather_vector3x3:get_tip(out)
+	out.write( 'd = vector3x3(x,y,z)' )
+end
+
+-- #################################################### --
+
+local cg_gather_vector3x2 = class(Node)
+
+function cg_gather_vector3x2:get_help(out)
+	out.write[[TODO]]
+end
+
+function cg_gather_vector3x2:new()
+	Node.new(self)
+	self.x = self.add_port(Input('x'))
+	self.y = self.add_port(Input('y'))
+	self.d = self.add_port(Output('d'))
+end
+
+function cg_gather_vector3x2:get_type(port)
+	local tx = self.x.get_output().get_type()
+	local ty = self.y.get_output().get_type()
+	local tz = self.z.get_output().get_type()
+
+        if ( ( tx == 'float3' ) or ( tx == 'half3' ) or ( tx == 'fixed3' ) or ( tx == 'bool3' ) or ( tx == 'int3' ) ) then
+	    if ((tx == ty)) then
+		    return tx .. 'x2'
+	    end
+	end
+
+	return nil
+end
+
+function cg_gather_vector3x2:config(props)
+	Node.config(self, props)
+	props.delete('Name')
+end
+
+function cg_gather_vector3x2:gen_code(out, scratch)
+	local tx   = self.x.get_output().get_type()
+
+	local t    = tx .. 'x2'
+	local x    = 'r' .. self.x.get_output().hex()
+	local y    = 'r' .. self.y.get_output().hex()
+	local d    = 'r' .. self.d.hex()
+
+	out.write( '\t' .. t .. ' ' .. d .. ' = ' .. t .. '( ' .. x .. ', ' .. y .. ' );\n' )
+end
+
+function cg_gather_vector3x2:get_tip(out)
+	out.write( 'd = vector3x2(x,y)' )
+end
+
+-- #################################################### --
+
+local cg_gather_vector2x4 = class(Node)
+
+function cg_gather_vector2x4:get_help(out)
+	out.write[[TODO]]
+end
+
+function cg_gather_vector2x4:new()
+	Node.new(self)
+	self.x = self.add_port(Input('x'))
+	self.y = self.add_port(Input('y'))
+	self.z = self.add_port(Input('z'))
+	self.w = self.add_port(Input('w'))
+	self.d = self.add_port(Output('d'))
+end
+
+function cg_gather_vector2x4:get_type(port)
+	local tx = self.x.get_output().get_type()
+	local ty = self.y.get_output().get_type()
+	local tz = self.z.get_output().get_type()
+	local tw = self.w.get_output().get_type()
+
+        if ( ( tx == 'float2' ) or ( tx == 'half2' ) or ( tx == 'fixed2' ) or ( tx == 'bool2' ) or ( tx == 'int2' ) ) then
+	    if ((tx == ty) and (tx == tz) and (tx == tw)) then
+		    return tx .. 'x4'
+	    end
+	end
+
+	return nil
+end
+
+function cg_gather_vector2x4:config(props)
+	Node.config(self, props)
+	props.delete('Name')
+end
+
+function cg_gather_vector2x4:gen_code(out, scratch)
+	local tx   = self.x.get_output().get_type()
+
+	local t    = tx .. 'x4'
+	local x    = 'r' .. self.x.get_output().hex()
+	local y    = 'r' .. self.y.get_output().hex()
+	local z    = 'r' .. self.z.get_output().hex()
+	local w    = 'r' .. self.w.get_output().hex()
+	local d    = 'r' .. self.d.hex()
+
+	out.write( '\t' .. t .. ' ' .. d .. ' = ' .. t .. '( ' .. x .. ', ' .. y .. ', ' .. z .. ', ' .. w .. ' );\n' )
+end
+
+function cg_gather_vector2x4:get_tip(out)
+	out.write( 'd = vector2x4(x,y,z,w)' )
+end
+
+-- #################################################### --
+
+local cg_gather_vector2x3 = class(Node)
+
+function cg_gather_vector2x3:get_help(out)
+	out.write[[TODO]]
+end
+
+function cg_gather_vector2x3:new()
+	Node.new(self)
+	self.x = self.add_port(Input('x'))
+	self.y = self.add_port(Input('y'))
+	self.z = self.add_port(Input('z'))
+	self.d = self.add_port(Output('d'))
+end
+
+function cg_gather_vector2x3:get_type(port)
+	local tx = self.x.get_output().get_type()
+	local ty = self.y.get_output().get_type()
+	local tz = self.z.get_output().get_type()
+
+        if ( ( tx == 'float2' ) or ( tx == 'half2' ) or ( tx == 'fixed2' ) or ( tx == 'bool2' ) or ( tx == 'int2' ) ) then
+	    if ((tx == ty) and (tx == tz)) then
+		    return tx .. 'x3'
+	    end
+	end
+
+	return nil
+end
+
+function cg_gather_vector2x3:config(props)
+	Node.config(self, props)
+	props.delete('Name')
+end
+
+function cg_gather_vector2x3:gen_code(out, scratch)
+	local tx   = self.x.get_output().get_type()
+
+	local t    = tx .. 'x3'
+	local x    = 'r' .. self.x.get_output().hex()
+	local y    = 'r' .. self.y.get_output().hex()
+	local z    = 'r' .. self.z.get_output().hex()
+	local d    = 'r' .. self.d.hex()
+
+	out.write( '\t' .. t .. ' ' .. d .. ' = ' .. t .. '( ' .. x .. ', ' .. y .. ', ' .. z .. ' );\n' )
+end
+
+function cg_gather_vector2x3:get_tip(out)
+	out.write( 'd = vector2x3(x,y,z)' )
+end
+
+-- #################################################### --
+
+local cg_gather_vector2x2 = class(Node)
+
+function cg_gather_vector2x2:get_help(out)
+	out.write[[TODO]]
+end
+
+function cg_gather_vector2x2:new()
+	Node.new(self)
+	self.x = self.add_port(Input('x'))
+	self.y = self.add_port(Input('y'))
+	self.d = self.add_port(Output('d'))
+end
+
+function cg_gather_vector2x2:get_type(port)
+	local tx = self.x.get_output().get_type()
+	local ty = self.y.get_output().get_type()
+	local tz = self.z.get_output().get_type()
+
+        if ( ( tx == 'float2' ) or ( tx == 'half2' ) or ( tx == 'fixed2' ) or ( tx == 'bool2' ) or ( tx == 'int2' ) ) then
+	    if ((tx == ty)) then
+		    return tx .. 'x2'
+	    end
+	end
+
+	return nil
+end
+
+function cg_gather_vector2x2:config(props)
+	Node.config(self, props)
+	props.delete('Name')
+end
+
+function cg_gather_vector2x2:gen_code(out, scratch)
+	local tx   = self.x.get_output().get_type()
+
+	local t    = tx .. 'x2'
+	local x    = 'r' .. self.x.get_output().hex()
+	local y    = 'r' .. self.y.get_output().hex()
+	local d    = 'r' .. self.d.hex()
+
+	out.write( '\t' .. t .. ' ' .. d .. ' = ' .. t .. '( ' .. x .. ', ' .. y .. ' );\n' )
+end
+
+function cg_gather_vector2x2:get_tip(out)
+	out.write( 'd = vector2x2(x,y)' )
+end
+
+-- #################################################### --
+
+local cg_scatter_vector4x4 = class(Node)
+
+function cg_scatter_vector4x4:get_help(out)
+	out.write[[TODO]]
+end
+
+function cg_scatter_vector4x4:new()
+	Node.new(self)
+	self.a = self.add_port(Input('a'))
+	self.x = self.add_port(Output('x'))
+	self.y = self.add_port(Output('y'))
+	self.z = self.add_port(Output('z'))
+	self.w = self.add_port(Output('w'))
+end
+
+function cg_scatter_vector4x4:get_type(port)
+	local ta = self.a.get_output().get_type()
+        
+        if (ta == 'float4x4') then
+		return 'float4'
+	elseif (ta == 'half4x4') then
+		return 'half4'
+	elseif (ta == 'fixed4x4') then
+		return 'fixed4'
+	elseif (ta == 'bool4x4') then
+		return 'bool4'
+	elseif (ta == 'int4x4') then
+		return 'int4'
+	end
+
+	return nil
+end
+
+function cg_scatter_vector4x4:config(props)
+	Node.config(self, props)
+	props.delete('Name')
+end
+
+function cg_scatter_vector4x4:gen_code(out, scratch)
+	local ta = self.a.get_output().get_type()
+	local type = nil
+
+	local a    = 'r' .. self.a.get_output().hex()
+	local x    = 'r' .. self.x.hex()
+	local y    = 'r' .. self.y.hex()
+	local z    = 'r' .. self.z.hex()
+	local w    = 'r' .. self.w.hex()
+
+	out.write( '\t#define ' .. x .. ' ' .. a .. '[0]\n' )
+	out.write( '\t#define ' .. y .. ' ' .. a .. '[1]\n' )
+	out.write( '\t#define ' .. z .. ' ' .. a .. '[2]\n' )
+	out.write( '\t#define ' .. w .. ' ' .. a .. '[3]\n' )
+end
+
+function cg_scatter_vector4x4:get_tip(out)
+	out.write( 'x,y,z,w = vector4x4(a)' )
+end
+
+-- #################################################### --
+
+local cg_gather_vector4x3 = class(Node)
+
+function cg_gather_vector4x3:get_help(out)
+	out.write[[TODO]]
+end
+
+function cg_gather_vector4x3:new()
+	Node.new(self)
+	self.x = self.add_port(Input('x'))
+	self.y = self.add_port(Input('y'))
+	self.z = self.add_port(Input('z'))
+	self.d = self.add_port(Output('d'))
+end
+
+function cg_gather_vector4x3:get_type(port)
+	local tx = self.x.get_output().get_type()
+	local ty = self.y.get_output().get_type()
+	local tz = self.z.get_output().get_type()
+
+        if ( ( tx == 'float4' ) or ( tx == 'half4' ) or ( tx == 'fixed4' ) or ( tx == 'bool4' ) or ( tx == 'int4' ) ) then
+	    if ((tx == ty) and (tx == tz)) then
+		    return tx .. 'x3'
+	    end
+	end
+
+	return nil
+end
+
+function cg_gather_vector4x3:config(props)
+	Node.config(self, props)
+	props.delete('Name')
+end
+
+function cg_gather_vector4x3:gen_code(out, scratch)
+	local tx   = self.x.get_output().get_type()
+
+	local t    = tx .. 'x3'
+	local x    = 'r' .. self.x.get_output().hex()
+	local y    = 'r' .. self.y.get_output().hex()
+	local z    = 'r' .. self.z.get_output().hex()
+	local d    = 'r' .. self.d.hex()
+
+	out.write( '\t' .. t .. ' ' .. d .. ' = ' .. t .. '( ' .. x .. ', ' .. y .. ', ' .. z .. ' );\n' )
+end
+
+function cg_gather_vector4x3:get_tip(out)
+	out.write( 'd = vector4x3(x,y,z)' )
+end
+
+-- #################################################### --
+
+local cg_scatter_vector4x3 = class(Node)
+
+function cg_scatter_vector4x3:get_help(out)
+	out.write[[TODO]]
+end
+
+function cg_scatter_vector4x3:new()
+	Node.new(self)
+	self.a = self.add_port(Input('a'))
+	self.x = self.add_port(Output('x'))
+	self.y = self.add_port(Output('y'))
+	self.z = self.add_port(Output('z'))
+end
+
+function cg_scatter_vector4x3:get_type(port)
+	local ta = self.a.get_output().get_type()
+        
+        if (ta == 'float4x3') then
+		return 'float4'
+	elseif (ta == 'half4x3') then
+		return 'half4'
+	elseif (ta == 'fixed4x3') then
+		return 'fixed4'
+	elseif (ta == 'bool4x3') then
+		return 'bool4'
+	elseif (ta == 'int4x3') then
+		return 'int4'
+	end
+
+	return nil
+end
+
+function cg_scatter_vector4x3:config(props)
+	Node.config(self, props)
+	props.delete('Name')
+end
+
+function cg_scatter_vector4x3:gen_code(out, scratch)
+	local ta = self.a.get_output().get_type()
+	local type = nil
+
+	local a    = 'r' .. self.a.get_output().hex()
+	local x    = 'r' .. self.x.hex()
+	local y    = 'r' .. self.y.hex()
+	local z    = 'r' .. self.z.hex()
+
+	out.write( '\t#define ' .. x .. ' ' .. a .. '[0]\n' )
+	out.write( '\t#define ' .. y .. ' ' .. a .. '[1]\n' )
+	out.write( '\t#define ' .. z .. ' ' .. a .. '[2]\n' )
+end
+
+function cg_scatter_vector4x3:get_tip(out)
+	out.write( 'x,y,z = vector4x3(a)' )
+end
+
+-- #################################################### --
+
+local cg_gather_vector4x2 = class(Node)
+
+function cg_gather_vector4x2:get_help(out)
+	out.write[[TODO]]
+end
+
+function cg_gather_vector4x2:new()
+	Node.new(self)
+	self.x = self.add_port(Input('x'))
+	self.y = self.add_port(Input('y'))
+	self.d = self.add_port(Output('d'))
+end
+
+function cg_gather_vector4x2:get_type(port)
+	local tx = self.x.get_output().get_type()
+	local ty = self.y.get_output().get_type()
+
+        if ( ( tx == 'float4' ) or ( tx == 'half4' ) or ( tx == 'fixed4' ) or ( tx == 'bool4' ) or ( tx == 'int4' ) ) then
+	    if ((tx == ty)) then
+		    return tx .. 'x2'
+	    end
+	end
+
+	return nil
+end
+
+function cg_gather_vector4x2:config(props)
+	Node.config(self, props)
+	props.delete('Name')
+end
+
+function cg_gather_vector4x2:gen_code(out, scratch)
+	local tx   = self.x.get_output().get_type()
+
+	local t    = tx .. 'x2'
+	local x    = 'r' .. self.x.get_output().hex()
+	local y    = 'r' .. self.y.get_output().hex()
+	local d    = 'r' .. self.d.hex()
+
+	out.write( '\t' .. t .. ' ' .. d .. ' = ' .. t .. '( ' .. x .. ', ' .. y .. ' );\n' )
+end
+
+function cg_gather_vector4x2:get_tip(out)
+	out.write( 'd = vector4x2(x,y)' )
+end
+
+-- #################################################### --
+
+local cg_scatter_vector4x2 = class(Node)
+
+function cg_scatter_vector4x2:get_help(out)
+	out.write[[TODO]]
+end
+
+function cg_scatter_vector4x2:new()
+	Node.new(self)
+	self.a = self.add_port(Input('a'))
+	self.x = self.add_port(Output('x'))
+	self.y = self.add_port(Output('y'))
+end
+
+function cg_scatter_vector4x2:get_type(port)
+	local ta = self.a.get_output().get_type()
+        
+        if (ta == 'float4x2') then
+		return 'float4'
+	elseif (ta == 'half4x2') then
+		return 'half4'
+	elseif (ta == 'fixed4x2') then
+		return 'fixed4'
+	elseif (ta == 'bool4x2') then
+		return 'bool4'
+	elseif (ta == 'int4x2') then
+		return 'int4'
+	end
+
+	return nil
+end
+
+function cg_scatter_vector4x2:config(props)
+	Node.config(self, props)
+	props.delete('Name')
+end
+
+function cg_scatter_vector4x2:gen_code(out, scratch)
+	local ta = self.a.get_output().get_type()
+	local type = nil
+
+	local a    = 'r' .. self.a.get_output().hex()
+	local x    = 'r' .. self.x.hex()
+	local y    = 'r' .. self.y.hex()
+
+	out.write( '\t#define ' .. x .. ' ' .. a .. '[0]\n' )
+	out.write( '\t#define ' .. y .. ' ' .. a .. '[1]\n' )
+end
+
+function cg_scatter_vector4x2:get_tip(out)
+	out.write( 'x,y = vector4x2(a)' )
+end
+
+-- #################################################### --
+
+
+local cg_scatter_vector2x4 = class(Node)
+
+function cg_scatter_vector2x4:get_help(out)
+	out.write[[TODO]]
+end
+
+function cg_scatter_vector2x4:new()
+	Node.new(self)
+	self.a = self.add_port(Input('a'))
+	self.x = self.add_port(Output('x'))
+	self.y = self.add_port(Output('y'))
+	self.z = self.add_port(Output('z'))
+	self.w = self.add_port(Output('w'))
+end
+
+function cg_scatter_vector2x4:get_type(port)
+	local ta = self.a.get_output().get_type()
+        
+        if (ta == 'float2x4') then
+		return 'float2'
+	elseif (ta == 'half2x4') then
+		return 'half2'
+	elseif (ta == 'fixed2x4') then
+		return 'fixed2'
+	elseif (ta == 'bool2x4') then
+		return 'bool2'
+	elseif (ta == 'int2x4') then
+		return 'int2'
+	end
+
+	return nil
+end
+
+function cg_scatter_vector2x4:config(props)
+	Node.config(self, props)
+	props.delete('Name')
+end
+
+function cg_scatter_vector2x4:gen_code(out, scratch)
+	local ta = self.a.get_output().get_type()
+	local type = nil
+
+	local a    = 'r' .. self.a.get_output().hex()
+	local x    = 'r' .. self.x.hex()
+	local y    = 'r' .. self.y.hex()
+	local z    = 'r' .. self.z.hex()
+	local w    = 'r' .. self.w.hex()
+
+	out.write( '\t#define ' .. x .. ' ' .. a .. '[0]\n' )
+	out.write( '\t#define ' .. y .. ' ' .. a .. '[1]\n' )
+	out.write( '\t#define ' .. z .. ' ' .. a .. '[2]\n' )
+	out.write( '\t#define ' .. w .. ' ' .. a .. '[3]\n' )
+end
+
+function cg_scatter_vector2x4:get_tip(out)
+	out.write( 'x,y,z,w = vector2x4(a)' )
+end
+
+-- #################################################### --
+
+local cg_gather_vector2x3 = class(Node)
+
+function cg_gather_vector2x3:get_help(out)
+	out.write[[TODO]]
+end
+
+function cg_gather_vector2x3:new()
+	Node.new(self)
+	self.x = self.add_port(Input('x'))
+	self.y = self.add_port(Input('y'))
+	self.z = self.add_port(Input('z'))
+	self.d = self.add_port(Output('d'))
+end
+
+function cg_gather_vector2x3:get_type(port)
+	local tx = self.x.get_output().get_type()
+	local ty = self.y.get_output().get_type()
+	local tz = self.z.get_output().get_type()
+
+        if ( ( tx == 'float2' ) or ( tx == 'half2' ) or ( tx == 'fixed2' ) or ( tx == 'bool2' ) or ( tx == 'int2' ) ) then
+	    if ((tx == ty) and (tx == tz)) then
+		    return tx .. 'x3'
+	    end
+	end
+
+	return nil
+end
+
+function cg_gather_vector2x3:config(props)
+	Node.config(self, props)
+	props.delete('Name')
+end
+
+function cg_gather_vector2x3:gen_code(out, scratch)
+	local tx   = self.x.get_output().get_type()
+
+	local t    = tx .. 'x3'
+	local x    = 'r' .. self.x.get_output().hex()
+	local y    = 'r' .. self.y.get_output().hex()
+	local z    = 'r' .. self.z.get_output().hex()
+	local d    = 'r' .. self.d.hex()
+
+	out.write( '\t' .. t .. ' ' .. d .. ' = ' .. t .. '( ' .. x .. ', ' .. y .. ', ' .. z .. ' );\n' )
+end
+
+function cg_gather_vector2x3:get_tip(out)
+	out.write( 'd = vector2x3(x,y,z)' )
+end
+
+-- #################################################### --
+
+local cg_scatter_vector2x3 = class(Node)
+
+function cg_scatter_vector2x3:get_help(out)
+	out.write[[TODO]]
+end
+
+function cg_scatter_vector2x3:new()
+	Node.new(self)
+	self.a = self.add_port(Input('a'))
+	self.x = self.add_port(Output('x'))
+	self.y = self.add_port(Output('y'))
+	self.z = self.add_port(Output('z'))
+end
+
+function cg_scatter_vector2x3:get_type(port)
+	local ta = self.a.get_output().get_type()
+        
+        if (ta == 'float2x3') then
+		return 'float2'
+	elseif (ta == 'half2x3') then
+		return 'half2'
+	elseif (ta == 'fixed2x3') then
+		return 'fixed2'
+	elseif (ta == 'bool2x3') then
+		return 'bool2'
+	elseif (ta == 'int2x3') then
+		return 'int2'
+	end
+
+	return nil
+end
+
+function cg_scatter_vector2x3:config(props)
+	Node.config(self, props)
+	props.delete('Name')
+end
+
+function cg_scatter_vector2x3:gen_code(out, scratch)
+	local ta = self.a.get_output().get_type()
+	local type = nil
+
+	local a    = 'r' .. self.a.get_output().hex()
+	local x    = 'r' .. self.x.hex()
+	local y    = 'r' .. self.y.hex()
+	local z    = 'r' .. self.z.hex()
+
+	out.write( '\t#define ' .. x .. ' ' .. a .. '[0]\n' )
+	out.write( '\t#define ' .. y .. ' ' .. a .. '[1]\n' )
+	out.write( '\t#define ' .. z .. ' ' .. a .. '[2]\n' )
+end
+
+function cg_scatter_vector2x3:get_tip(out)
+	out.write( 'x,y,z = vector2x3(a)' )
+end
+
+-- #################################################### --
+
+local cg_gather_vector2x2 = class(Node)
+
+function cg_gather_vector2x2:get_help(out)
+	out.write[[TODO]]
+end
+
+function cg_gather_vector2x2:new()
+	Node.new(self)
+	self.x = self.add_port(Input('x'))
+	self.y = self.add_port(Input('y'))
+	self.d = self.add_port(Output('d'))
+end
+
+function cg_gather_vector2x2:get_type(port)
+	local tx = self.x.get_output().get_type()
+	local ty = self.y.get_output().get_type()
+
+        if ( ( tx == 'float2' ) or ( tx == 'half2' ) or ( tx == 'fixed2' ) or ( tx == 'bool2' ) or ( tx == 'int2' ) ) then
+	    if ((tx == ty)) then
+		    return tx .. 'x2'
+	    end
+	end
+
+	return nil
+end
+
+function cg_gather_vector2x2:config(props)
+	Node.config(self, props)
+	props.delete('Name')
+end
+
+function cg_gather_vector2x2:gen_code(out, scratch)
+	local tx   = self.x.get_output().get_type()
+
+	local t    = tx .. 'x2'
+	local x    = 'r' .. self.x.get_output().hex()
+	local y    = 'r' .. self.y.get_output().hex()
+	local d    = 'r' .. self.d.hex()
+
+	out.write( '\t' .. t .. ' ' .. d .. ' = ' .. t .. '( ' .. x .. ', ' .. y .. ' );\n' )
+end
+
+function cg_gather_vector2x2:get_tip(out)
+	out.write( 'd = vector2x2(x,y)' )
+end
+
+-- #################################################### --
+
+local cg_scatter_vector2x2 = class(Node)
+
+function cg_scatter_vector2x2:get_help(out)
+	out.write[[TODO]]
+end
+
+function cg_scatter_vector2x2:new()
+	Node.new(self)
+	self.a = self.add_port(Input('a'))
+	self.x = self.add_port(Output('x'))
+	self.y = self.add_port(Output('y'))
+end
+
+function cg_scatter_vector2x2:get_type(port)
+	local ta = self.a.get_output().get_type()
+        
+        if (ta == 'float2x2') then
+		return 'float2'
+	elseif (ta == 'half2x2') then
+		return 'half2'
+	elseif (ta == 'fixed2x2') then
+		return 'fixed2'
+	elseif (ta == 'bool2x2') then
+		return 'bool2'
+	elseif (ta == 'int2x2') then
+		return 'int2'
+	end
+
+	return nil
+end
+
+function cg_scatter_vector2x2:config(props)
+	Node.config(self, props)
+	props.delete('Name')
+end
+
+function cg_scatter_vector2x2:gen_code(out, scratch)
+	local ta = self.a.get_output().get_type()
+	local type = nil
+
+	local a    = 'r' .. self.a.get_output().hex()
+	local x    = 'r' .. self.x.hex()
+	local y    = 'r' .. self.y.hex()
+
+	out.write( '\t#define ' .. x .. ' ' .. a .. '[0]\n' )
+	out.write( '\t#define ' .. y .. ' ' .. a .. '[1]\n' )
+end
+
+function cg_scatter_vector2x2:get_tip(out)
+	out.write( 'x,y = vector2x2(a)' )
+end
+
+-- #################################################### --
+
+
+
+local cg_scatter_vector3x4 = class(Node)
+
+function cg_scatter_vector3x4:get_help(out)
+	out.write[[TODO]]
+end
+
+function cg_scatter_vector3x4:new()
+	Node.new(self)
+	self.a = self.add_port(Input('a'))
+	self.x = self.add_port(Output('x'))
+	self.y = self.add_port(Output('y'))
+	self.z = self.add_port(Output('z'))
+	self.w = self.add_port(Output('w'))
+end
+
+function cg_scatter_vector3x4:get_type(port)
+	local ta = self.a.get_output().get_type()
+        
+        if (ta == 'float3x4') then
+		return 'float3'
+	elseif (ta == 'half3x4') then
+		return 'half3'
+	elseif (ta == 'fixed3x4') then
+		return 'fixed3'
+	elseif (ta == 'bool3x4') then
+		return 'bool3'
+	elseif (ta == 'int3x4') then
+		return 'int3'
+	end
+
+	return nil
+end
+
+function cg_scatter_vector3x4:config(props)
+	Node.config(self, props)
+	props.delete('Name')
+end
+
+function cg_scatter_vector3x4:gen_code(out, scratch)
+	local ta = self.a.get_output().get_type()
+	local type = nil
+
+	local a    = 'r' .. self.a.get_output().hex()
+	local x    = 'r' .. self.x.hex()
+	local y    = 'r' .. self.y.hex()
+	local z    = 'r' .. self.z.hex()
+	local w    = 'r' .. self.w.hex()
+
+	out.write( '\t#define ' .. x .. ' ' .. a .. '[0]\n' )
+	out.write( '\t#define ' .. y .. ' ' .. a .. '[1]\n' )
+	out.write( '\t#define ' .. z .. ' ' .. a .. '[2]\n' )
+	out.write( '\t#define ' .. w .. ' ' .. a .. '[3]\n' )
+end
+
+function cg_scatter_vector3x4:get_tip(out)
+	out.write( 'x,y,z,w = vector3x4(a)' )
+end
+
+-- #################################################### --
+
+local cg_gather_vector3x3 = class(Node)
+
+function cg_gather_vector3x3:get_help(out)
+	out.write[[TODO]]
+end
+
+function cg_gather_vector3x3:new()
+	Node.new(self)
+	self.x = self.add_port(Input('x'))
+	self.y = self.add_port(Input('y'))
+	self.z = self.add_port(Input('z'))
+	self.d = self.add_port(Output('d'))
+end
+
+function cg_gather_vector3x3:get_type(port)
+	local tx = self.x.get_output().get_type()
+	local ty = self.y.get_output().get_type()
+	local tz = self.z.get_output().get_type()
+
+        if ( ( tx == 'float3' ) or ( tx == 'half3' ) or ( tx == 'fixed3' ) or ( tx == 'bool3' ) or ( tx == 'int3' ) ) then
+	    if ((tx == ty) and (tx == tz)) then
+		    return tx .. 'x3'
+	    end
+	end
+
+	return nil
+end
+
+function cg_gather_vector3x3:config(props)
+	Node.config(self, props)
+	props.delete('Name')
+end
+
+function cg_gather_vector3x3:gen_code(out, scratch)
+	local tx   = self.x.get_output().get_type()
+
+	local t    = tx .. 'x3'
+	local x    = 'r' .. self.x.get_output().hex()
+	local y    = 'r' .. self.y.get_output().hex()
+	local z    = 'r' .. self.z.get_output().hex()
+	local d    = 'r' .. self.d.hex()
+
+	out.write( '\t' .. t .. ' ' .. d .. ' = ' .. t .. '( ' .. x .. ', ' .. y .. ', ' .. z .. ' );\n' )
+end
+
+function cg_gather_vector3x3:get_tip(out)
+	out.write( 'd = vector3x3(x,y,z)' )
+end
+
+-- #################################################### --
+
+local cg_scatter_vector3x3 = class(Node)
+
+function cg_scatter_vector3x3:get_help(out)
+	out.write[[TODO]]
+end
+
+function cg_scatter_vector3x3:new()
+	Node.new(self)
+	self.a = self.add_port(Input('a'))
+	self.x = self.add_port(Output('x'))
+	self.y = self.add_port(Output('y'))
+	self.z = self.add_port(Output('z'))
+end
+
+function cg_scatter_vector3x3:get_type(port)
+	local ta = self.a.get_output().get_type()
+        
+        if (ta == 'float3x3') then
+		return 'float3'
+	elseif (ta == 'half3x3') then
+		return 'half3'
+	elseif (ta == 'fixed3x3') then
+		return 'fixed3'
+	elseif (ta == 'bool3x3') then
+		return 'bool3'
+	elseif (ta == 'int3x3') then
+		return 'int3'
+	end
+
+	return nil
+end
+
+function cg_scatter_vector3x3:config(props)
+	Node.config(self, props)
+	props.delete('Name')
+end
+
+function cg_scatter_vector3x3:gen_code(out, scratch)
+	local ta = self.a.get_output().get_type()
+	local type = nil
+
+	local a    = 'r' .. self.a.get_output().hex()
+	local x    = 'r' .. self.x.hex()
+	local y    = 'r' .. self.y.hex()
+	local z    = 'r' .. self.z.hex()
+
+	out.write( '\t#define ' .. x .. ' ' .. a .. '[0]\n' )
+	out.write( '\t#define ' .. y .. ' ' .. a .. '[1]\n' )
+	out.write( '\t#define ' .. z .. ' ' .. a .. '[2]\n' )
+end
+
+function cg_scatter_vector3x3:get_tip(out)
+	out.write( 'x,y,z = vector3x3(a)' )
+end
+
+-- #################################################### --
+
+local cg_gather_vector3x2 = class(Node)
+
+function cg_gather_vector3x2:get_help(out)
+	out.write[[TODO]]
+end
+
+function cg_gather_vector3x2:new()
+	Node.new(self)
+	self.x = self.add_port(Input('x'))
+	self.y = self.add_port(Input('y'))
+	self.d = self.add_port(Output('d'))
+end
+
+function cg_gather_vector3x2:get_type(port)
+	local tx = self.x.get_output().get_type()
+	local ty = self.y.get_output().get_type()
+
+        if ( ( tx == 'float3' ) or ( tx == 'half3' ) or ( tx == 'fixed3' ) or ( tx == 'bool3' ) or ( tx == 'int3' ) ) then
+	    if ((tx == ty)) then
+		    return tx .. 'x2'
+	    end
+	end
+
+	return nil
+end
+
+function cg_gather_vector3x2:config(props)
+	Node.config(self, props)
+	props.delete('Name')
+end
+
+function cg_gather_vector3x2:gen_code(out, scratch)
+	local tx   = self.x.get_output().get_type()
+
+	local t    = tx .. 'x2'
+	local x    = 'r' .. self.x.get_output().hex()
+	local y    = 'r' .. self.y.get_output().hex()
+	local d    = 'r' .. self.d.hex()
+
+	out.write( '\t' .. t .. ' ' .. d .. ' = ' .. t .. '( ' .. x .. ', ' .. y .. ' );\n' )
+end
+
+function cg_gather_vector3x2:get_tip(out)
+	out.write( 'd = vector3x2(x,y)' )
+end
+
+-- #################################################### --
+
+local cg_scatter_vector3x2 = class(Node)
+
+function cg_scatter_vector3x2:get_help(out)
+	out.write[[TODO]]
+end
+
+function cg_scatter_vector3x2:new()
+	Node.new(self)
+	self.a = self.add_port(Input('a'))
+	self.x = self.add_port(Output('x'))
+	self.y = self.add_port(Output('y'))
+end
+
+function cg_scatter_vector3x2:get_type(port)
+	local ta = self.a.get_output().get_type()
+        
+        if (ta == 'float3x2') then
+		return 'float3'
+	elseif (ta == 'half3x2') then
+		return 'half3'
+	elseif (ta == 'fixed3x2') then
+		return 'fixed3'
+	elseif (ta == 'bool3x2') then
+		return 'bool3'
+	elseif (ta == 'int3x2') then
+		return 'int3'
+	end
+
+	return nil
+end
+
+function cg_scatter_vector3x2:config(props)
+	Node.config(self, props)
+	props.delete('Name')
+end
+
+function cg_scatter_vector3x2:gen_code(out, scratch)
+	local ta = self.a.get_output().get_type()
+	local type = nil
+
+	local a    = 'r' .. self.a.get_output().hex()
+	local x    = 'r' .. self.x.hex()
+	local y    = 'r' .. self.y.hex()
+
+	out.write( '\t#define ' .. x .. ' ' .. a .. '[0]\n' )
+	out.write( '\t#define ' .. y .. ' ' .. a .. '[1]\n' )
+end
+
+function cg_scatter_vector3x2:get_tip(out)
+	out.write( 'x,y = vector3x2(a)' )
+end
+
+-- #################################################### --
+
+register {
+  __name = 'Cg [Swizzle]',
+  __prologue = '',
+  __epilogue = '',
+	['Gather Vector4']    = cg_gather_vector4,
+	['Gather Vector3']    = cg_gather_vector3,
+	['Gather Vector2']    = cg_gather_vector2,
+	['Gather Vector4x4']  = cg_gather_vector4x4,
+	['Gather Vector4x3']  = cg_gather_vector4x3,
+	['Gather Vector4x2']  = cg_gather_vector4x2,
+	['Gather Vector3x4']  = cg_gather_vector3x4,
+	['Gather Vector3x3']  = cg_gather_vector3x3,
+	['Gather Vector3x2']  = cg_gather_vector3x2,
+	['Gather Vector2x4']  = cg_gather_vector2x4,
+	['Gather Vector2x3']  = cg_gather_vector2x3,
+	['Gather Vector2x2']  = cg_gather_vector2x2,
+	['Scatter Vector4']   = cg_scatter_vector4,
+	['Scatter Vector3']   = cg_scatter_vector3,
+	['Scatter Vector2']   = cg_scatter_vector2,
+	['Scatter Vector4x4'] = cg_scatter_vector4x4,
+	['Scatter Vector4x3'] = cg_scatter_vector4x3,
+	['Scatter Vector4x2'] = cg_scatter_vector4x2,
+	['Scatter Vector3x4'] = cg_scatter_vector3x4,
+	['Scatter Vector3x3'] = cg_scatter_vector3x3,
+	['Scatter Vector3x2'] = cg_scatter_vector3x2,
+	['Scatter Vector2x4'] = cg_scatter_vector2x4,
+	['Scatter Vector2x3'] = cg_scatter_vector2x3,
+	['Scatter Vector2x2'] = cg_scatter_vector2x2,
+}

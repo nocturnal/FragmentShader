@@ -1,0 +1,26 @@
+TARGET  = igfsc
+LUA_TOP = ../../lua-5.1.2
+
+
+C_SOURCES   = expr.c shaderc.c
+CPP_SOURCES = 
+OBJECTS     = $(C_SOURCES:.c=.o) $(CPP_SOURCES:.cpp=.o)
+CPP_FLAGS   = -g -O3 -I$(LUA_TOP)/src
+C_FLAGS     = -g -O3 -I$(LUA_TOP)/src
+LN_FLAGS    = -mconsole -lmingw32 -lrpcrt4 -loleaut32 -lole32 -luuid -lwinspool -lwinmm -lshell32 -lcomctl32 -lcomdlg32 -lctl3d32 -ladvapi32 -lwsock32 -lgdi32 -lrpcrt4 -loleaut32 -lole32 -luuid -lwinspool -lwinmm -lshell32 -lcomctl32 -lcomdlg32 -lctl3d32 -ladvapi32 -lwsock32 -lgdi32  -L$(LUA_TOP)/src -llua
+
+CC          = gcc
+LN          = g++
+
+$(TARGET): $(OBJECTS)
+	$(LN) $(OBJECTS) -o $(TARGET) $(LN_FLAGS)
+
+.cpp.o :
+	$(CC) $(CPP_FLAGS) -c $< -o $@
+
+.c.o :
+	$(CC) $(C_FLAGS) -c $< -o $@
+
+depend:
+	makedepend -- $(FLAGS) -- $(SRCS)
+

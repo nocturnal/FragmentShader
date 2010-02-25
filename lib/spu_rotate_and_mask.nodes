@@ -1,0 +1,413 @@
+-- #################################################### --
+
+local si_rotqmbi = class(Node)
+
+function si_rotqmbi:get_help(out)
+  out.write[[ Rotate and Mask Quadword by Bits  
+
+ rt = ra >> (-(rb.b[3] & 0x07)) ]]
+end
+
+function si_rotqmbi:new()
+  Node.new(self)
+  self.ra = self.add_port(Input('ra'))
+  self.rb = self.add_port(Input('rb'))
+  self.rt = self.add_port(Output('rt'))
+end
+
+function si_rotqmbi:config(props)
+  Node.config(self, props)
+  props.delete('Name')
+end
+
+function si_rotqmbi:gen_code(out, scratch)
+  local rt = 'r' .. self.rt.hex()
+  local ra = 'r' .. self.ra.get_output().hex()
+  local rb = 'r' .. self.rb.get_output().hex()
+  out.write( '\t .reg ' .. rt .. '\n')
+  out.write( '\t rotqmbi ' .. rt .. ', ' .. ra .. ', ' .. rb .. '\n' )
+end
+
+function si_rotqmbi:get_tip(out)
+  out.write('Rotate and Mask Quadword by Bits ')
+end
+
+function si_rotqmbi:get_type(port)
+  return 'qword'
+end
+
+-- #################################################### --
+
+local si_rotqmbii = class(Node)
+
+function si_rotqmbii:get_help(out)
+  out.write[[ Rotate and Mask Quadword by Bits Immediate  
+
+ rt = ra >> (-s3 & 0x07) ]]
+end
+
+function si_rotqmbii:new()
+  Node.new(self)
+  self.ra  = self.add_port(Input('ra'))
+  self.rt  = self.add_port(Output('rt'))
+  self.s3 = 0
+end
+
+function si_rotqmbii:config(props)
+  Node.config(self, props)
+  props.delete('Name')
+  props.text_input(
+                    's3',
+                    function() return self.s3 end,
+                    function(v) self.s3 = v end,
+                    function(v) return math.evaluate(v) end
+                  )
+end
+
+function si_rotqmbii:gen_code(out, scratch)
+  local rt  = 'r' .. self.rt.hex()
+  local ra  = 'r' .. self.ra.get_output().hex()
+  local s3 = math.evaluate(self.s3)
+  out.write( '\t .reg ' .. rt .. '\n')
+  out.write( '\t rotqmbii ' .. rt .. ', ' .. ra .. ', ' .. s3 .. '\n' )
+end
+
+function si_rotqmbii:get_tip(out)
+  out.write('Rotate and Mask Quadword by Bits Immediate ')
+end
+
+function si_rotqmbii:get_type(port)
+  return 'qword'
+end
+
+-- #################################################### --
+
+local si_rotqmby = class(Node)
+
+function si_rotqmby:get_help(out)
+  out.write[[ Rotate and Mask Quadword by Bytes  
+
+ rt = ra >> ((-rb.b[3] & 0x1F) * 8) ]]
+end
+
+function si_rotqmby:new()
+  Node.new(self)
+  self.ra = self.add_port(Input('ra'))
+  self.rb = self.add_port(Input('rb'))
+  self.rt = self.add_port(Output('rt'))
+end
+
+function si_rotqmby:config(props)
+  Node.config(self, props)
+  props.delete('Name')
+end
+
+function si_rotqmby:gen_code(out, scratch)
+  local rt = 'r' .. self.rt.hex()
+  local ra = 'r' .. self.ra.get_output().hex()
+  local rb = 'r' .. self.rb.get_output().hex()
+  out.write( '\t .reg ' .. rt .. '\n')
+  out.write( '\t rotqmby ' .. rt .. ', ' .. ra .. ', ' .. rb .. '\n' )
+end
+
+function si_rotqmby:get_tip(out)
+  out.write('Rotate and Mask Quadword by Bytes ')
+end
+
+function si_rotqmby:get_type(port)
+  return 'qword'
+end
+
+-- #################################################### --
+
+local si_rotqmbybi = class(Node)
+
+function si_rotqmbybi:get_help(out)
+  out.write[[ Rotate and Mask Quadword Bytes from Bit Shift Count 
+
+ rt = ra >> (-(rb.b[3] & 0xF8) & 0xF8) ]]
+end
+
+function si_rotqmbybi:new()
+  Node.new(self)
+  self.ra = self.add_port(Input('ra'))
+  self.rb = self.add_port(Input('rb'))
+  self.rt = self.add_port(Output('rt'))
+end
+
+function si_rotqmbybi:config(props)
+  Node.config(self, props)
+  props.delete('Name')
+end
+
+function si_rotqmbybi:gen_code(out, scratch)
+  local rt = 'r' .. self.rt.hex()
+  local ra = 'r' .. self.ra.get_output().hex()
+  local rb = 'r' .. self.rb.get_output().hex()
+  out.write( '\t .reg ' .. rt .. '\n')
+  out.write( '\t rotqmbybi ' .. rt .. ', ' .. ra .. ', ' .. rb .. '\n' )
+end
+
+function si_rotqmbybi:get_tip(out)
+  out.write('Rotate and Mask Quadword Bytes from Bit Shift Count')
+end
+
+function si_rotqmbybi:get_type(port)
+  return 'qword'
+end
+
+-- #################################################### --
+
+local si_rotm = class(Node)
+
+function si_rotm:get_help(out)
+  out.write[[ Rotate and Mask Word  
+
+ rt.w[n] = ra.w[n] >> (rb.w[n] & 0x3F) ]]
+end
+
+function si_rotm:new()
+  Node.new(self)
+  self.ra = self.add_port(Input('ra'))
+  self.rb = self.add_port(Input('rb'))
+  self.rt = self.add_port(Output('rt'))
+end
+
+function si_rotm:config(props)
+  Node.config(self, props)
+  props.delete('Name')
+end
+
+function si_rotm:gen_code(out, scratch)
+  local rt = 'r' .. self.rt.hex()
+  local ra = 'r' .. self.ra.get_output().hex()
+  local rb = 'r' .. self.rb.get_output().hex()
+  out.write( '\t .reg ' .. rt .. '\n')
+  out.write( '\t rotm ' .. rt .. ', ' .. ra .. ', ' .. rb .. '\n' )
+end
+
+function si_rotm:get_tip(out)
+  out.write('Rotate and Mask Word ')
+end
+
+function si_rotm:get_type(port)
+  return 'qword'
+end
+
+-- #################################################### --
+
+local si_rotmi = class(Node)
+
+function si_rotmi:get_help(out)
+  out.write[[ Rotate and Mask Word Immediate  
+
+ rt.w[n] = ra.w[n] >> (-s7 & 0x3F) ]]
+end
+
+function si_rotmi:new()
+  Node.new(self)
+  self.ra  = self.add_port(Input('ra'))
+  self.rt  = self.add_port(Output('rt'))
+  self.s7 = 0
+end
+
+function si_rotmi:config(props)
+  Node.config(self, props)
+  props.delete('Name')
+  props.text_input(
+                    's7',
+                    function() return self.s7 end,
+                    function(v) self.s7 = v end,
+                    function(v) return math.evaluate(v) end
+                  )
+end
+
+function si_rotmi:gen_code(out, scratch)
+  local rt  = 'r' .. self.rt.hex()
+  local ra  = 'r' .. self.ra.get_output().hex()
+  local s7 = math.evaluate(self.s7)
+  out.write( '\t .reg ' .. rt .. '\n')
+  out.write( '\t rotmi ' .. rt .. ', ' .. ra .. ', ' .. s7 .. '\n' )
+end
+
+function si_rotmi:get_tip(out)
+  out.write('Rotate and Mask Word Immediate ')
+end
+
+function si_rotmi:get_type(port)
+  return 'qword'
+end
+
+-- #################################################### --
+
+local si_rothm = class(Node)
+
+function si_rothm:get_help(out)
+  out.write[[ Rotate and Mask Halfword  
+
+ rt.h[n] = ra.h[n] >> (-rb.h[n] & 0x1F) ]]
+end
+
+function si_rothm:new()
+  Node.new(self)
+  self.ra = self.add_port(Input('ra'))
+  self.rb = self.add_port(Input('rb'))
+  self.rt = self.add_port(Output('rt'))
+end
+
+function si_rothm:config(props)
+  Node.config(self, props)
+  props.delete('Name')
+end
+
+function si_rothm:gen_code(out, scratch)
+  local rt = 'r' .. self.rt.hex()
+  local ra = 'r' .. self.ra.get_output().hex()
+  local rb = 'r' .. self.rb.get_output().hex()
+  out.write( '\t .reg ' .. rt .. '\n')
+  out.write( '\t rothm ' .. rt .. ', ' .. ra .. ', ' .. rb .. '\n' )
+end
+
+function si_rothm:get_tip(out)
+  out.write('Rotate and Mask Halfword ')
+end
+
+function si_rothm:get_type(port)
+  return 'qword'
+end
+
+-- #################################################### --
+
+local si_rotma = class(Node)
+
+function si_rotma:get_help(out)
+  out.write[[ Rotate and Mask Algebraic Word  
+
+ rt.w[n] = ra.w[n] >> (-rb.w[n] & 0x3F) ]]
+end
+
+function si_rotma:new()
+  Node.new(self)
+  self.ra = self.add_port(Input('ra'))
+  self.rb = self.add_port(Input('rb'))
+  self.rt = self.add_port(Output('rt'))
+end
+
+function si_rotma:config(props)
+  Node.config(self, props)
+  props.delete('Name')
+end
+
+function si_rotma:gen_code(out, scratch)
+  local rt = 'r' .. self.rt.hex()
+  local ra = 'r' .. self.ra.get_output().hex()
+  local rb = 'r' .. self.rb.get_output().hex()
+  out.write( '\t .reg ' .. rt .. '\n')
+  out.write( '\t rotma ' .. rt .. ', ' .. ra .. ', ' .. rb .. '\n' )
+end
+
+function si_rotma:get_tip(out)
+  out.write('Rotate and Mask Algebraic Word ')
+end
+
+function si_rotma:get_type(port)
+  return 'qword'
+end
+
+-- #################################################### --
+
+local si_rotmai = class(Node)
+
+function si_rotmai:get_help(out)
+  out.write[[ Rotate and Mask Algebraic Word Immediate  
+
+ rt.w[n] = ra.w[n] >> (-s7 & 0x3F) ]]
+end
+
+function si_rotmai:new()
+  Node.new(self)
+  self.ra  = self.add_port(Input('ra'))
+  self.rt  = self.add_port(Output('rt'))
+  self.s7 = 0
+end
+
+function si_rotmai:config(props)
+  Node.config(self, props)
+  props.delete('Name')
+  props.text_input(
+                    's7',
+                    function() return self.s7 end,
+                    function(v) self.s7 = v end,
+                    function(v) return math.evaluate(v) end
+                  )
+end
+
+function si_rotmai:gen_code(out, scratch)
+  local rt  = 'r' .. self.rt.hex()
+  local ra  = 'r' .. self.ra.get_output().hex()
+  local s7 = math.evaluate(self.s7)
+  out.write( '\t .reg ' .. rt .. '\n')
+  out.write( '\t rotmai ' .. rt .. ', ' .. ra .. ', ' .. s7 .. '\n' )
+end
+
+function si_rotmai:get_tip(out)
+  out.write('Rotate and Mask Algebraic Word Immediate ')
+end
+
+function si_rotmai:get_type(port)
+  return 'qword'
+end
+
+-- #################################################### --
+
+local si_rotmah = class(Node)
+
+function si_rotmah:get_help(out)
+  out.write[[ Rotate and Mask Algebraic Halfword  
+
+ rt.h[n] = ra.h[n] >> (-rb.h[n] & 0x1F) ]]
+end
+
+function si_rotmah:new()
+  Node.new(self)
+  self.ra = self.add_port(Input('ra'))
+  self.rb = self.add_port(Input('rb'))
+  self.rt = self.add_port(Output('rt'))
+end
+
+function si_rotmah:config(props)
+  Node.config(self, props)
+  props.delete('Name')
+end
+
+function si_rotmah:gen_code(out, scratch)
+  local rt = 'r' .. self.rt.hex()
+  local ra = 'r' .. self.ra.get_output().hex()
+  local rb = 'r' .. self.rb.get_output().hex()
+  out.write( '\t .reg ' .. rt .. '\n')
+  out.write( '\t rotmah ' .. rt .. ', ' .. ra .. ', ' .. rb .. '\n' )
+end
+
+function si_rotmah:get_tip(out)
+  out.write('Rotate and Mask Algebraic Halfword ')
+end
+
+function si_rotmah:get_type(port)
+  return 'qword'
+end
+
+register {
+  __name = 'SPU [Rotate and Mask (Shift Right)]',
+  __prologue = '',
+  __epilogue = '',
+  ['rotqmbi'] = si_rotqmbi,
+  ['rotqmbii'] = si_rotqmbii,
+  ['rotqmby'] = si_rotqmby,
+  ['rotqmbybi'] = si_rotqmbybi,
+  ['rotm'] = si_rotm,
+  ['rotmi'] = si_rotmi,
+  ['rothm'] = si_rothm,
+  ['rotma'] = si_rotma,
+  ['rotmai'] = si_rotmai,
+  ['rotmah'] = si_rotmah,
+}

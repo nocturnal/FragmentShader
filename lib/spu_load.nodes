@@ -1,0 +1,433 @@
+-- #################################################### --
+
+local si_ila = class(Node)
+
+function si_ila:get_help(out)
+  out.write[[ Immediate Load Address  
+
+ rt.w[n] = u18 ]]
+end
+
+function si_ila:new()
+  Node.new(self)
+  self.rt  = self.add_port(Output('rt'))
+  self.u18 = 0
+end
+
+function si_ila:config(props)
+  Node.config(self, props)
+  props.delete('Name')
+  props.text_input(
+                    'u18',
+                    function() return self.u18 end,
+                    function(v) self.u18 = v end,
+                    function(v) return math.evaluate(v) end
+                  )
+end
+
+function si_ila:gen_code(out, scratch)
+  local rt  = 'r' .. self.rt.hex()
+  local u18 = math.evaluate(self.u18)
+  out.write( '\t .reg ' .. rt .. '\n')
+  out.write( '\t ila ' .. rt .. ', ' .. u18 .. '\n' )
+end
+
+function si_ila:get_tip(out)
+  out.write('Immediate Load Address ')
+end
+
+function si_ila:get_type(port)
+  return 'qword'
+end
+
+-- #################################################### --
+
+local si_il = class(Node)
+
+function si_il:get_help(out)
+  out.write[[ Immediate Load Word  
+
+ rt.w[n] = ext(s16) ]]
+end
+
+function si_il:new()
+  Node.new(self)
+  self.rt  = self.add_port(Output('rt'))
+  self.s16 = 0
+end
+
+function si_il:config(props)
+  Node.config(self, props)
+  props.delete('Name')
+  props.text_input(
+                    's16',
+                    function() return self.s16 end,
+                    function(v) self.s16 = v end,
+                    function(v) return math.evaluate(v) end
+                  )
+end
+
+function si_il:gen_code(out, scratch)
+  local rt  = 'r' .. self.rt.hex()
+  local s16 = math.evaluate(self.s16)
+  out.write( '\t .reg ' .. rt .. '\n')
+  out.write( '\t il ' .. rt .. ', ' .. s16 .. '\n' )
+end
+
+function si_il:get_tip(out)
+  out.write('Immediate Load Word ')
+end
+
+function si_il:get_type(port)
+  return 'qword'
+end
+
+-- #################################################### --
+
+local si_ilh = class(Node)
+
+function si_ilh:get_help(out)
+  out.write[[ Immediate Load Halfword  
+
+ rt.h[n] = u16 ]]
+end
+
+function si_ilh:new()
+  Node.new(self)
+  self.rt  = self.add_port(Output('rt'))
+  self.u16 = 0
+end
+
+function si_ilh:config(props)
+  Node.config(self, props)
+  props.delete('Name')
+  props.text_input(
+                    'u16',
+                    function() return self.u16 end,
+                    function(v) self.u16 = v end,
+                    function(v) return math.evaluate(v) end
+                  )
+end
+
+function si_ilh:gen_code(out, scratch)
+  local rt  = 'r' .. self.rt.hex()
+  local u16 = math.evaluate(self.u16)
+  out.write( '\t .reg ' .. rt .. '\n')
+  out.write( '\t ilh ' .. rt .. ', ' .. u16 .. '\n' )
+end
+
+function si_ilh:get_tip(out)
+  out.write('Immediate Load Halfword ')
+end
+
+function si_ilh:get_type(port)
+  return 'qword'
+end
+
+-- #################################################### --
+
+local si_ilhu = class(Node)
+
+function si_ilhu:get_help(out)
+  out.write[[ Immediate Load Halfword Upper  
+
+ rt.w[n] = u16 << 16 ]]
+end
+
+function si_ilhu:new()
+  Node.new(self)
+  self.rt  = self.add_port(Output('rt'))
+  self.u16 = 0
+end
+
+function si_ilhu:config(props)
+  Node.config(self, props)
+  props.delete('Name')
+  props.text_input(
+                    'u16',
+                    function() return self.u16 end,
+                    function(v) self.u16 = v end,
+                    function(v) return math.evaluate(v) end
+                  )
+end
+
+function si_ilhu:gen_code(out, scratch)
+  local rt  = 'r' .. self.rt.hex()
+  local u16 = math.evaluate(self.u16)
+  out.write( '\t .reg ' .. rt .. '\n')
+  out.write( '\t ilhu ' .. rt .. ', ' .. u16 .. '\n' )
+end
+
+function si_ilhu:get_tip(out)
+  out.write('Immediate Load Halfword Upper ')
+end
+
+function si_ilhu:get_type(port)
+  return 'qword'
+end
+
+-- #################################################### --
+
+local si_lqa = class(Node)
+
+function si_lqa:get_help(out)
+  out.write[[ Load Quadword (a-form)  
+
+ rt = *(s18) ]]
+end
+
+function si_lqa:new()
+  Node.new(self)
+  self.rt  = self.add_port(Output('rt'))
+  self.s18 = 0
+end
+
+function si_lqa:config(props)
+  Node.config(self, props)
+  props.delete('Name')
+  props.text_input(
+                    's18',
+                    function() return self.s18 end,
+                    function(v) self.s18 = v end,
+                    function(v) return math.evaluate(v) end
+                  )
+end
+
+function si_lqa:gen_code(out, scratch)
+  local rt  = 'r' .. self.rt.hex()
+  local s18 = math.evaluate(self.s18)
+  out.write( '\t .reg ' .. rt .. '\n')
+  out.write( '\t lqa ' .. rt .. ', ' .. s18 .. '\n' )
+end
+
+function si_lqa:get_tip(out)
+  out.write('Load Quadword (a-form) ')
+end
+
+function si_lqa:get_type(port)
+  return 'qword'
+end
+
+-- #################################################### --
+
+local si_lqa_literal = class(Node)
+
+function si_lqa_literal:get_help(out)
+  out.write[[ Load Quadword (a-form)  
+
+ rt = *(s18) ]]
+end
+
+function si_lqa_literal:new()
+  Node.new(self)
+  self.rt  = self.add_port(Output('rt'))
+  self.s18 = 0
+end
+
+function si_lqa_literal:config(props)
+  Node.config(self, props)
+  props.delete('Name')
+  props.text_input(
+                    's18',
+                    function() return self.s18 end,
+                    function(v) self.s18 = v end,
+                    function(v) return v end
+                  )
+end
+
+function si_lqa_literal:gen_code(out, scratch)
+  local rt  = 'r' .. self.rt.hex()
+  local s18 = self.s18
+  out.write( '\t .reg ' .. rt .. '\n')
+  out.write( '\t lqa ' .. rt .. ', ' .. s18 .. '\n' )
+end
+
+function si_lqa_literal:get_tip(out)
+  out.write('Load Quadword (a-form) ')
+end
+
+function si_lqa_literal:get_type(port)
+  return 'qword'
+end
+
+-- #################################################### --
+
+local si_lqd = class(Node)
+
+function si_lqd:get_help(out)
+  out.write[[ Load Quadword (d-form)  
+
+ rt = *(s14 + ra) ]]
+end
+
+function si_lqd:new()
+  Node.new(self)
+  self.ra  = self.add_port(Input('ra'))
+  self.rt  = self.add_port(Output('rt'))
+  self.s14 = 0
+end
+
+function si_lqd:config(props)
+  Node.config(self, props)
+  props.delete('Name')
+  props.text_input(
+                    's14',
+                    function() return self.s14 end,
+                    function(v) self.s14 = v end,
+                    function(v) return math.evaluate(v) end
+                  )
+end
+
+function si_lqd:gen_code(out, scratch)
+  local rt  = 'r' .. self.rt.hex()
+  local ra  = 'r' .. self.ra.get_output().hex()
+  local s14 = math.evaluate(self.s14)
+  out.write( '\t .reg ' .. rt .. '\n')
+  out.write( '\t lqd ' .. rt .. ', ' .. s14 .. '(' .. ra .. ')\n' )
+end
+
+function si_lqd:get_tip(out)
+  out.write('Load Quadword (d-form) ')
+end
+
+function si_lqd:get_type(port)
+  return 'qword'
+end
+
+-- #################################################### --
+
+local si_lqr = class(Node)
+
+function si_lqr:get_help(out)
+  out.write[[ Load Quadword Instruction Relative (a-form)  
+
+ rt = *(s18) ]]
+end
+
+function si_lqr:new()
+  Node.new(self)
+  self.rt  = self.add_port(Output('rt'))
+  self.s18 = 0
+end
+
+function si_lqr:config(props)
+  Node.config(self, props)
+  props.delete('Name')
+  props.text_input(
+                    's18',
+                    function() return self.s18 end,
+                    function(v) self.s18 = v end,
+                    function(v) return math.evaluate(v) end
+                  )
+end
+
+function si_lqr:gen_code(out, scratch)
+  local rt  = 'r' .. self.rt.hex()
+  local s18 = math.evaluate(self.s18)
+  out.write( '\t .reg ' .. rt .. '\n')
+  out.write( '\t lqr ' .. rt .. ', ' .. s18 .. '\n' )
+end
+
+function si_lqr:get_tip(out)
+  out.write('Load Quadword Instruction Relative (a-form) ')
+end
+
+function si_lqr:get_type(port)
+  return 'qword'
+end
+
+-- #################################################### --
+
+local si_lqr_literal = class(Node)
+
+function si_lqr_literal:get_help(out)
+  out.write[[ Load Quadword Instruction Relative (a-form)  
+
+ rt = *(s18) ]]
+end
+
+function si_lqr_literal:new()
+  Node.new(self)
+  self.rt  = self.add_port(Output('rt'))
+  self.s18 = 0
+end
+
+function si_lqr_literal:config(props)
+  Node.config(self, props)
+  props.delete('Name')
+  props.text_input(
+                    's18',
+                    function() return self.s18 end,
+                    function(v) self.s18 = v end,
+                    function(v) return v end
+                  )
+end
+
+function si_lqr_literal:gen_code(out, scratch)
+  local rt  = 'r' .. self.rt.hex()
+  local s18 = self.s18
+  out.write( '\t .reg ' .. rt .. '\n')
+  out.write( '\t lqr ' .. rt .. ', ' .. s18 .. '\n' )
+end
+
+function si_lqr_literal:get_tip(out)
+  out.write('Load Quadword Instruction Relative (a-form) ')
+end
+
+function si_lqr_literal:get_type(port)
+  return 'qword'
+end
+
+-- #################################################### --
+
+local si_lqx = class(Node)
+
+function si_lqx:get_help(out)
+  out.write[[ Load Quadword (x-form)  
+
+ rt = *(ra+rb) ]]
+end
+
+function si_lqx:new()
+  Node.new(self)
+  self.ra = self.add_port(Input('ra'))
+  self.rb = self.add_port(Input('rb'))
+  self.rt = self.add_port(Output('rt'))
+end
+
+function si_lqx:config(props)
+  Node.config(self, props)
+  props.delete('Name')
+end
+
+function si_lqx:gen_code(out, scratch)
+  local rt = 'r' .. self.rt.hex()
+  local ra = 'r' .. self.ra.get_output().hex()
+  local rb = 'r' .. self.rb.get_output().hex()
+  out.write( '\t .reg ' .. rt .. '\n')
+  out.write( '\t lqx ' .. rt .. ', ' .. ra .. ', ' .. rb .. '\n' )
+end
+
+function si_lqx:get_tip(out)
+  out.write('Load Quadword (x-form) ')
+end
+
+function si_lqx:get_type(port)
+  return 'qword'
+end
+
+register {
+  __name = 'SPU [Load]',
+  __prologue = '',
+  __epilogue = '',
+  ['ila'] = si_ila,
+  ['il'] = si_il,
+  ['ilh'] = si_ilh,
+  ['ilhu'] = si_ilhu,
+  ['lqa'] = si_lqa,
+  ['lqa_literal'] = si_lqa_literal,
+  ['lqd'] = si_lqd,
+  ['lqr'] = si_lqr,
+  ['lqr_literal'] = si_lqr_literal,
+  ['lqx'] = si_lqx,
+}

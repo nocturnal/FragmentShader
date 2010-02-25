@@ -1,0 +1,3 @@
+NODENAME	SPU [Integer to Float]
+csflt 	"rt, ra, scale7"	Convert Signed Integer to Floating 	TODO
+cuflt 	"rt, ra, scale7"	Convert Unsigned Integer to Floating 	TODO

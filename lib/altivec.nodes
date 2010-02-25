@@ -1,0 +1,894 @@
+local vuc, vsc, vbc = 'vector unsigned char', 'vector signed char', 'vector bool char'
+local vus, vss, vbs = 'vector unsigned short', 'vector signed short', 'vector bool short'
+local vui, vsi, vbi = 'vector unsigned int', 'vector signed int', 'vector bool int'
+local vf = 'vector float'
+
+local UnaryOp = class(Node)
+
+function UnaryOp:new()
+	Node.new(self)
+	self.a = self.add_port(Input('a'))
+	self.d = self.add_port(Output('d'))
+end
+
+function UnaryOp:pattern()
+	error('Must implement the pattern() method in class ' .. self.class_name())
+end
+
+function UnaryOp:gen_code(out, scratch)
+	local a = self.a.get_output().hex()
+	local code = string.gsub(self.pattern(scratch), '%%d', self.d.hex())
+	code = string.gsub(code, '%%a', a)
+	code = string.gsub(code, '%%t', self.get_type())
+	out.write(code)
+end
+
+function UnaryOp:add_type(a, d)
+	if not self.types then
+		self.types = {}
+	end
+	self.types[a] = d
+end
+
+function UnaryOp:get_type(port)
+	local a = self.a.get_output().get_type()
+	local t = self.types
+	if t then
+		return t[a]
+	end
+	return nil
+end
+
+local BinaryOp = class(Node)
+
+function BinaryOp:new()
+	Node.new(self)
+	self.a = self.add_port(Input('a'))
+	self.b = self.add_port(Input('b'))
+	self.d = self.add_port(Output('d'))
+	self.comment = ''
+end
+
+function BinaryOp:pattern()
+	error('Must implement the pattern() method in class ' .. self.class_name())
+end
+
+function BinaryOp:gen_code(out, scratch)
+	local a = self.a.get_output().hex()
+	local b = self.b.get_output().hex()
+	local code = string.gsub(self.pattern(scratch), '%%d', self.d.hex())
+	code = string.gsub(code, '%%a', a)
+	code = string.gsub(code, '%%b', b)
+	code = string.gsub(code, '%%t', self.get_type())
+	out.write(code)
+end
+
+function BinaryOp:add_type(a, b, d)
+	if not self.types then
+		self.types = {}
+	end
+	if not self.types[a] then
+		self.types[a] = {}
+	end
+	self.types[a][b] = d
+end
+
+function BinaryOp:get_type(port)
+	local a = self.a.get_output().get_type()
+	local b = self.b.get_output().get_type()
+	local t = self.types
+	if t and t[a] then
+		return t[a][b]
+	end
+	return nil
+end
+
+local Add = class(BinaryOp)
+
+function Add:get_help(out)
+	out.write[[
+Vector Add
+
+d = vec_add(a,b)
+
+. Integer add:
+
+n = number of elements
+do i=0 to n-1
+	d[i] = a[i] + b[i]
+end
+
+. Floating-point add:
+
+do i=0 to 3
+	d[i] = a[i] +[fp] b[i]
+end
+
+Each element of a is added to the corresponding element of b. Each sum is placed in the corresponding element of d.
+
+For vector float argument types, if VSCR[NJ] = 1, every denormalized operand element is truncated to a 0 of the same sign before the operation is carried out, and each denormalized result element is truncated to a 0 of the same sign.]]
+end
+
+function Add:new()
+	BinaryOp.new(self)
+	self.add_type(vuc, vuc, vuc)
+	self.add_type(vuc, vbc, vuc)
+	self.add_type(vbc, vuc, vuc)
+	self.add_type(vsc, vsc, vsc)
+	self.add_type(vsc, vbc, vsc)
+	self.add_type(vbc, vsc, vsc)
+	self.add_type(vus, vus, vus)
+	self.add_type(vus, vbs, vus)
+	self.add_type(vbs, vus, vus)
+	self.add_type(vss, vss, vss)
+	self.add_type(vss, vbs, vss)
+	self.add_type(vbs, vss, vss)
+	self.add_type(vui, vui, vui)
+	self.add_type(vui, vbi, vui)
+	self.add_type(vbi, vui, vui)
+	self.add_type(vsi, vsi, vsi)
+	self.add_type(vsi, vbi, vsi)
+	self.add_type(vbi, vsi, vsi)
+	self.add_type(vf, vf, vf)
+end
+
+function Add:pattern()
+	return '\t%t v%d = vec_add(v%a, v%b);\n'
+end
+
+function Add:get_tip(out)
+	out.write('d = vec_add(a,b) // d = a + b')
+end
+
+local Mul = class(BinaryOp)
+
+function Mul:get_help(out)
+	out.write[[
+Vector Multiply
+
+d = vec_mul(a,b,c) ( d = vec_madd(a,b,0) )
+
+do i=0 to 3
+	d[i] = RndToFPNearest(a[i] * b[i])
+end
+
+Each element of the result is the product of the corresponding elements of a and b.
+
+If VSCR[NJ] = 1, every denormalized operand element is truncated to a 0 of the same sign before the operation is carried out, and each denormalized result element truncates to a 0 of the same sign.]]
+end
+
+function Mul:new()
+	BinaryOp.new(self)
+	self.add_type(vf, vf, vf)
+end
+
+function Mul:pattern(scratch)
+	if scratch[0] then
+		return '\t%t v%d = vec_madd(%a, %b, (vector float)' .. scratch[0] .. ');\n'
+	end
+	scratch[0] = 't' .. self.d.hex()
+	return '\tvector unsigned int t%d = vec_splat_u32(0);\n\t%t v%d = vec_madd(%a, %b, (vector float)t%d);\n'
+end
+
+function Mul:get_tip(out)
+	out.write('d = vec_madd(a,b,0) // d = a * b')
+end
+
+local Pack = class(BinaryOp)
+
+function Pack:get_help(out)
+	out.write[[
+Vector Pack
+
+d = vec_pack(a,b)
+
+n = number of elements in a
+s = element size in d (64/n)
+do i=0 to n-1
+	d[i] = UIToUImod(a[i],s)
+	d[i+n] = UIToUImod(b[i],s)
+end
+
+Each high element of the result is the truncation of the corresponding wider element of a.
+
+Each low element of the result is the truncation of the corresponding wider element of b.]]
+end
+
+function Pack:new()
+	BinaryOp.new(self)
+	self.add_type(vus, vus, vuc)
+	self.add_type(vss, vss, vsc)
+	self.add_type(vbs, vbs, vbc)
+	self.add_type(vui, vui, vus)
+	self.add_type(vsi, vsi, vss)
+	self.add_type(vbi, vbi, vbs)
+end
+
+function Pack:pattern()
+	return '\t%t v%d = vec_pack(v%a, v%b);\n'
+end
+
+function Pack:get_tip(out)
+	out.write('d = vec_pack(a,b)')
+end
+
+local And = class(BinaryOp)
+
+function And:get_help(out)
+	out.write[[
+Vector Logical AND
+
+d = vec_and(a,b)
+
+d = a & b
+
+Each bit of the result is the logical AND of the corresponding bits of a and b.]]
+end
+
+function And:new()
+	BinaryOp.new(self)
+	self.add_type(vuc, vuc, vuc)
+	self.add_type(vuc, vbc, vuc)
+	self.add_type(vbc, vuc, vuc)
+	self.add_type(vsc, vsc, vsc)
+	self.add_type(vsc, vbc, vsc)
+	self.add_type(vbc, vsc, vsc)
+	self.add_type(vbc, vbc, vbc)
+	self.add_type(vus, vus, vus)
+	self.add_type(vus, vbs, vus)
+	self.add_type(vbs, vus, vus)
+	self.add_type(vss, vss, vss)
+	self.add_type(vss, vbs, vss)
+	self.add_type(vbs, vss, vss)
+	self.add_type(vbs,vbs, vbs)
+	self.add_type(vui, vui, vui)
+	self.add_type(vui, vbi, vui)
+	self.add_type(vbi, vui, vui)
+	self.add_type(vsi, vsi, vsi)
+	self.add_type(vsi, vbi, vsi)
+	self.add_type(vbi, vsi, vsi)
+	self.add_type(vbi, vbi, vbi)
+	self.add_type(vbi, vf, vf)
+	self.add_type(vf, vbi, vf)
+	self.add_type(vf, vf, vf)
+end
+
+function And:pattern()
+	return '\t%t v%d = vec_and(v%a, v%b);\n'
+end
+
+function And:get_tip(out)
+	out.write('d = vec_and(a,b) // d = a & b')
+end
+
+local AndC = class(And)
+
+function AndC:get_help(out)
+	out.write[[
+Vector Logical AND with Complement
+
+d = vec_andc(a,b)
+
+d = a & ~b
+
+Each bit of the result is the logical AND of the corresponding bit of a and the one’s complement of the corresponding bit of b.]]
+end
+
+function AndC:pattern()
+	return '\t%t v%d = vec_andc(v%a, v%b);\n'
+end
+
+function AndC:get_tip(out)
+	out.write('d = vec_andc(a,b) // d = a & ~b')
+end
+
+local Or = class(And)
+
+function Or:get_help(out)
+	out.write[[
+Vector Logical OR
+
+d = vec_or(a,b)
+
+d = a | b
+
+Each bit of the result is the logical OR of the corresponding bits of a and b.]]
+end
+
+function Or:pattern()
+	return '\t%t v%d = vec_or(v%a, v%b);\n'
+end
+
+function Or:get_tip(out)
+	out.write('d = vec_or(a,b) // d = a | b')
+end
+
+local Max = class(Add)
+
+function Max:get_help(out)
+	out.write[[
+Vector Maximum
+
+d = vec_max(a,b)
+
+n = number of elements
+do i=0 to n-1
+	d[i] = MAX(a[i],b[i])
+end
+
+Each element of the result is the larger of the corresponding elements of a and b.
+
+For vector float argument types, if VSCR[NJ] is set, every denormalized operand element is truncated to a 0 of the same sign before the operation is carried out, and each denormalized result element truncates to a 0 of the same sign. The maximum of +0.0 and -0.0 is +0.0. The maximum of any value and a NaN is a QNaN.]]
+end
+
+function Max:pattern()
+	return '\t%t v%d = vec_max(v%a, v%b);\n'
+end
+
+function Max:get_tip(out)
+	out.write('d = vec_max(a,b)')
+end
+
+local RotateLeft = class(BinaryOp)
+
+function RotateLeft:get_help(out)
+	out.write[[
+Vector Rotate Left
+
+d = vec_rl(a,b)
+
+n = number of elements
+
+do i=0 to n-1
+	d[i] = ROTL(a[i], b[i])
+end
+
+Each element of the result is the result of rotating left the corresponding element of a by the number of bits indicated by the corresponding element of b.]]
+end
+
+function RotateLeft:new()
+	BinaryOp.new(self)
+	self.add_type(vuc, vuc, vuc)
+	self.add_type(vsc, vuc, vsc)
+	self.add_type(vus, vus, vus)
+	self.add_type(vss, vus, vus)
+	self.add_type(vui, vui, vui)
+	self.add_type(vsi, vui, vsi)
+end
+
+function RotateLeft:pattern()
+	return '\t%t v%d = vec_rl(v%a, v%b);\n'
+end
+
+function RotateLeft:get_tip(out)
+	out.write('d = vec_rl(a,b) // d = a << b | a >> (element size - b)')
+end
+
+local Reciprocal = class(UnaryOp)
+
+function Reciprocal:get_help(out)
+	out.write[[
+Vector Reciprocal Estimate
+
+d = vec_re(a)
+
+do i=0 to 3
+	d[i] = FPRecipEst(a[i])
+end
+
+Each element of the result d is an estimate of the reciprocal to the corresponding element of a. For results that are not a +0, -0, +INF, -INF, or QNaN, the estimate has a relative error in precision no greater than one part in 4096, that is:
+
+|[estimate-(1/x)]/(1/x)| <= 1/4096
+
+where x is the value of the element in a. Note that the value placed into the element of d may vary between implementations, and between different executions on the same implementation.
+
+Operation with various special values of the element in a is summarized below.
+
+	a	d
+	-INF	-0
+	-0	-INF
+	+0	+INF
+	+INF	+0
+	NaN	QNaN
+
+If VSCR[NJ] = 1, every denormalized operand element is truncated to a 0 of the same sign before the operation is carried out, and each denormalized result element truncates to a 0 of the same sign.]]
+end
+
+function Reciprocal:new()
+	UnaryOp.new(self)
+	self.add_type(vf, vf)
+end
+
+function Reciprocal:pattern()
+	return '\t%t v%d = vec_re(v%a);\n'
+end
+
+function Reciprocal:get_tip(out)
+	out.write('d = vec_re(a) // d = 1 / a')
+end
+
+local Round = class(Reciprocal)
+
+function Round:get_help(out)
+	out.write[[
+Vector Round
+
+d = vec_round(a)
+
+do i=0 to 3
+	d[i] = RndToFPINear(a[i])
+end
+
+Each element of the result is the nearest representable single-precision ßoating-point integer to the corresponding element of a, using IEEE Round-to-Nearest mode. If the integers are equally near, rounding is to the even integer.
+
+The operation is independent of VSCR[NJ].]]
+end
+
+function Round:pattern(scratch)
+	return '\t%t v%d = vec_round(v%a);\n'
+end
+
+function Round:get_tip(out)
+	out.write('d = vec_round(a) // d = |a|')
+end
+
+local Conv2Uint = class(UnaryOp)
+
+function Conv2Uint:get_help(out)
+	out.write[[
+Vector Convert to Unsigned Fixed-Point Word Saturated
+
+d = vec_ctu(a,b)
+
+do i=0 to 3
+	d[i] = Saturate(a[i] * 2^b)
+end
+
+Each element of the result is the saturated unsigned value obtained after truncating the number obtained by multiplying the corresponding element of a by 2 to the power of b.
+
+If VSCR[NJ] = 1, every denormalized ßoating-point operand element is truncated to 0 before the operation.
+
+If saturation occurs, VSCR[SAT] is set.]]
+end
+
+function Conv2Uint:new()
+	UnaryOp.new(self)
+	self.add_type(vf, vui)
+end
+
+function Conv2Uint:pattern(scratch)
+	return '\t%t v%d = vec_ctu(v%a);\n'
+end
+
+function Conv2Uint:get_tip(out)
+	out.write('d = vec_ctu(a)')
+end
+
+local MulAdd = class(Node)
+
+function MulAdd:get_help(out)
+	out.write[[
+Vector Multiply Add
+
+d = vec_madd(a,b,c)
+
+do i=0 to 3
+	d[i] = RndToFPNearest(a[i] * b[i] + c[i])
+end
+
+Each element of the result is the sum of the corresponding element of c and the product of the corresponding elements of a and b.
+
+If VSCR[NJ] = 1, every denormalized operand element is truncated to a 0 of the same sign before the operation is carried out, and each denormalized result element truncates to a 0 of the same sign.]]
+end
+
+function MulAdd:new()
+	Node.new(self)
+	self.a = self.add_port(Input('a'))
+	self.b = self.add_port(Input('b'))
+	self.c = self.add_port(Input('c'))
+	self.d = self.add_port(Output('d'))
+end
+
+function MulAdd:get_type(port)
+	local a = self.a.get_output().get_type()
+	local b = self.b.get_output().get_type()
+	local c = self.c.get_output().get_type()
+	if a == vf and b == vf and c == vf then
+		return vf
+	end
+end
+
+function MulAdd:gen_code(out, scratch)
+	local a = self.a.get_output().hex()
+	local b = self.b.get_output().hex()
+	local c = self.c.get_output().hex()
+	out.write('\tvector float v', self.d.hex(), ' = vec_madd(v', a, ', v', b, ', v', c, ');\n')
+end
+
+function MulAdd:get_tip(out)
+	out.write('d = vac_madd(a,b,c) // d = a * b + c')
+end
+
+local Compare = class(Node)
+
+function Compare:get_help(out)
+	out.write[[TODO]]
+end
+
+function Compare:new()
+	Node.new(self)
+	self.a = self.add_port(Input('a'))
+	self.b = self.add_port(Input('b'))
+	self.d = self.add_port(Output('d'))
+	self.choices = { '=', '>', '<', '>=', '<=' }
+	self.sufixes = { 'eq', 'gt', 'lt', 'ge', 'le' }
+	self.op = 1
+end
+
+function Compare:get_type(port)
+	local a = self.a.get_output().get_type()
+	local b = self.b.get_output().get_type()
+	if (self.op == 4 or self.op == 5) and (a ~= vf or b ~= vf) then
+		return nil
+	elseif (a == vuc and b == vuc) or (a == vsc and b == vsc) then
+		return vbc
+	elseif (a == vus and b == vus) or (a == vss and b == vss) then
+		return vbs
+	elseif (a == vui and b == vui) or (a == vsi and b == vsi) then
+		return vbi
+	elseif a == vf and b == vf then
+		return vbi
+	end
+end
+
+function Compare:config(props)
+	Node.config(self, props)
+	props.list(
+		'Operator',
+		self.choices,
+		function() return self.op end,
+		function(v) self.op = v end
+	)
+end
+
+function Compare:gen_code(out, scratch)
+	local a = self.a.get_output().hex()
+	local b = self.b.get_output().hex()
+	out.write('\t', self.get_type(), ' v', self.d.hex(), ' = vec_cmp', self.sufixes[self.op],'(v', a, ', v', b, ');\n')
+end
+
+function Compare:get_tip(out)
+	out.write('d = vec_cmp', self.sufixes[self.op], '(a,b) // d = a ', self.choices[self.op], ' b')
+end
+
+local Const = class(Node)
+
+function Const:get_help(out)
+	out.write[[TODO]]
+end
+
+function Const:new()
+	Node.new(self)
+	self.name = '0'
+	self.d = self.add_port(Output('d'))
+	self.choices = { 'signed char', 'unsigned char', 'signed short', 'unsigned short', 'signed int', 'unsigned int', 'float' }
+	self.op = 7
+end
+
+function Const:get_type(port)
+	return 'vector ' .. self.choices[self.op]
+end
+
+function Const:config(props)
+	Node.config(self, props)
+	props.delete('Name')
+	props.list(
+		'Type',
+		self.choices,
+		function() return self.op end,
+		function(v) self.op = v end
+	)
+	props.text_input(
+		'Value',
+		function() return self.name end,
+		function(v) self.name = v end,
+		function(v) return math.evaluate(v) end
+	)
+end
+
+function Const:gen_code(out, scratch)
+	local v = math.evaluate(self.name)
+	local typ = self.choices[self.op]
+	if v == 0 then
+		if scratch['(' .. typ .. ')0'] then
+			out.write('\t#define v', self.d.hex(), ' ', scratch['(' .. typ .. ')0'], '\n')
+		elseif scratch['0'] then
+			out.write('\t#define v', self.d.hex(), ' ((vector ', typ, ')', scratch['0'], ')\n')
+			scratch['(' .. typ .. ')0'] = 'v' .. self.d.hex()
+		else
+			scratch['0'] = 't' .. self.d.hex()
+			scratch['(' .. typ .. ')0'] = 'v' .. self.d.hex()
+			out.write('\tstatic const unsigned int t', self.d.hex(), '[4] __attribute__ ((aligned (16))) = { 0, 0, 0, 0 };\n')
+			out.write('\tvector ', typ, ' v', self.d.hex(), ' = vec_ld(0, (', typ, ' *)t', self.d.hex(), ');\n')
+		end
+		return
+	end
+	if scratch['(' .. typ .. ')' .. v] then
+		out.write('\t#define v', self.d.hex(), ' ', scratch['(' .. typ .. ')' .. v], '\n')
+		return
+	end
+	scratch['(' .. typ .. ')' .. v] = 'v' .. self.d.hex()
+	if self.op == 7 then
+		out.write('\tstatic const float t', self.d.hex(), '[4] __attribute__ ((aligned (16))) = { ')
+		for i = 1, 4 do
+			if i ~= 1 then
+				out.write(', ')
+			end
+			out.write(self.name)
+		end
+		out.write(' };\n\tvector float v', self.d.hex(), ' = vec_ld(0, t', self.d.hex(), ');\n')
+	else
+		if v > 15 then
+			if self.op == 2 then
+				v = v - 256
+			elseif self.op == 4 then
+				v = v - 65536
+			elseif self.op == 6 then
+				v = v - 4294967296
+			end
+		end
+		local sufix = { 's8', 'u8', 's16', 'u16', 's32', 'u32' }; sufix = sufix[self.op]
+		if v >= -16 and v <= 15 then
+			out.write('\tvector ', typ, ' v', self.d.hex(), ' = vec_splat_', sufix, '(', v, ');\n')
+		elseif v >= -32 and v <= 30 then
+			out.write('\tvector ', typ, ' v', self.d.hex(), ' = vec_add(vec_splat_', sufix, '(', (v < 0) and -16 or 15, '), vec_splat_', sufix, '(', (v < 0) and (v + 16) or (v - 15), '));\n')
+		else
+			local count = { 16, 16, 8, 8, 4, 4 }; count = count[self.op]
+			out.write('\tstatic const ', typ, ' t', self.d.hex(), '[4] __attribute__ ((aligned (16))) = { ')
+			for i = 1, count do
+				if i ~= 1 then
+					out.write(', ')
+				end
+				out.write(self.name)
+			end
+			out.write(' };\n\tvector ', typ, ' v', self.d.hex(), ' = vec_ld(0, t', self.d.hex(), ');\n')
+		end
+	end
+end
+
+function Const:get_tip(out)
+	out.write('d = ', self.name)
+end
+
+local LoadVector = class(Node)
+
+function LoadVector:get_help(out)
+	out.write[[
+Vector Load Indexed
+
+d = vec_ld(a,b)
+
+EA = BoundAlign(a+b,16)
+d = MEM(EA,16)
+
+Each operation performs a 16-byte load at a 16-byte aligned address. The a is taken to be an integer value, while b is a pointer. BoundAlign(a+b,16) is the largest value less than or equal to a + b that is a multiple of 16. This load is the one that is generated for a loading dereference of a pointer to a vector type. The b type may also be a pointer to a const-qualified type. Plain char * is excluded in the mapping for b.]]
+end
+
+function LoadVector:new()
+	Node.new(self)
+	self.d = self.add_port(Output('d'))
+	self.choices = { 'signed char', 'unsigned char', 'signed short', 'unsigned short', 'signed int', 'unsigned int', 'float' }
+	self.op = 1
+	self.offset = '0'
+end
+
+function LoadVector:get_type(port)
+	return 'vector ' .. self.choices[self.op]
+end
+
+function LoadVector:config(props)
+	Node.config(self, props)
+	props.delete('Name')
+	props.list(
+		'Type',
+		self.choices,
+		function() return self.op end,
+		function(v) self.op = v end
+	)
+	props.text_input(
+		'Argument',
+		function() return self.name end,
+		function(v) self.name = v end,
+		function(v) return #v ~= 0 end
+	)
+	props.text_input(
+		'Offset',
+		function() return self.offset end,
+		function(v) self.offset = v end,
+		function(v) return tonumber(v) and math.fmod(v + 0, 16) == 0 end
+	)
+end
+
+function LoadVector:gen_code(out, scratch)
+	local index = self.arg .. '/' .. self.offset .. '/' .. self.op
+	if scratch[index] then
+		out.write('\t#define v', self.d.hex(), ' ', scratch[index], '\n')
+	else
+		scratch[index] = 'v' .. self.d.hex()
+		out.write('\tvector ', self.choices[self.op], ' v', self.d.hex(), ' = vec_ld(', self.offset, ', ', self.offset, ');\n')
+	end
+end
+
+function LoadVector:get_tip(out)
+	out.write('d = vec_ld(', self.offset, ', ', self.name, ')')
+end
+
+local Argument = class(Node)
+
+function Argument:get_help(out)
+	out.write[[TODO]]
+end
+
+function Argument:new()
+	Node.new(self)
+	self.d = self.add_port(Output('d'))
+	self.choices = { vsc, vuc, vss, vus, vsi, vui, vf }
+	self.op = 1
+end
+
+function Argument:get_type(port)
+	return self.choices[self.op]
+end
+
+function Argument:config(props)
+	Node.config(self, props)
+	props.delete('Name')
+	props.list(
+		'Type',
+		self.choices,
+		function() return self.op end,
+		function(v) self.op = v end
+	)
+	props.text_input(
+		'Argument',
+		function() return self.name end,
+		function(v) self.name = v end,
+		function(v) return #v ~= 0 end
+	)
+end
+
+function Argument:gen_code(out, scratch)
+	out.write('\t#define v', self.d.hex(), ' ', self.name, '\n')
+end
+
+function Argument:get_tip(out)
+	out.write('d = ', self.name)
+end
+
+local StoreVector = class(Node)
+
+function StoreVector:get_help(out)
+	out.write[[
+Vector Store Indexed
+
+vec_st(a,b,c)
+
+EA = BoundAlign((b+c), 16)
+MEM(EA,16) = a
+
+Each operation performs a 16-byte store of the value of a at a 16-byte aligned address. The b is taken to be an integer value, while c is a pointer. BoundAlign(b+c,16) is the largest value less than or equal to a b+c that is a multiple of 16. This is not, by itself, an acceptable way to store aligned data to unaligned addresses. This store is the one that is generated for a storing dereference of a pointer to a vector type. Plain char * is excluded in the mapping for c.]]
+end
+
+function StoreVector:new()
+	Node.new(self)
+	self.offset = '0'
+	self.a = self.add_port(Input('a'))
+end
+
+function StoreVector:config(props)
+	Node.config(self, props)
+	props.delete('Name')
+	props.text_input(
+		'Argument',
+		function() return self.name end,
+		function(v) self.name = v end,
+		function(v) return #v ~= 0 end
+	)
+	props.text_input(
+		'Offset',
+		function() return self.offset end,
+		function(v) self.offset = v end,
+		function(v) return tonumber(v) and math.fmod(v + 0, 16) == 0 end
+	)
+end
+
+function StoreVector:gen_code(out, scratch)
+	local a = self.a.get_output().hex()
+	out.write('\tvec_st(v', a, ', ', self.offset, ', ', self.name, ');\n')
+end
+
+function StoreVector:get_tip(out)
+	out.write('vec_st(a, ', self.offset, ', ', self.name, ')')
+end
+
+local ReturnVector = class(Return)
+
+function ReturnVector:get_help(out)
+	out.write[[TODO]]
+end
+
+function ReturnVector:new()
+	Node.new(self)
+	self.a = self.add_port(Input('a'))
+end
+
+function ReturnVector:gen_code(out, scratch)
+	local a = self.a.get_output().hex()
+	out.write('\treturn v', a, ';\n')
+end
+
+function ReturnVector:get_tip(out)
+	out.write('return a')
+end
+
+local Cast = class(Node)
+
+function Cast:get_help(out)
+	out.write[[TODO]]
+end
+
+function Cast:new()
+	Node.new(self)
+	self.a = self.add_port(Input('a'))
+	self.d = self.add_port(Output('d'))
+	self.choices = { vsc, vuc, vss, vus, vsi, vui, vf }
+	self.op = 1
+end
+
+function Cast:get_type(port)
+	return self.choices[self.op]
+end
+
+function Cast:config(props)
+	Node.config(self, props)
+	props.list(
+		'Type',
+		self.choices,
+		function() return self.op end,
+		function(v) self.op = v end
+	)
+end
+
+function Cast:gen_code(out, scratch)
+	local a = self.a.get_output().hex()
+	out.write('\t#define v', self.d.hex(), ' ((', self.choices[self.op], ')v', a, ')\n')
+end
+
+function Cast:get_tip(out)
+	out.write('(', self.choices[self.op], ')a')
+end
+
+register {
+  __name = 'Altivec',
+  __prologue = '',
+  __epilogue = '',
+	['a + b'] = Add,
+	['a * b'] = Mul,
+	['1 / a'] = Reciprocal,
+	['round(a)'] = Round,
+	['float2uint(a)'] = Conv2Uint,
+	['a * b + c'] = MulAdd,
+	['pack(a,b)'] = Pack,
+	['a & b'] = And,
+	['a & ~b'] = AndC,
+	['a | b'] = Or,
+	['max(a,b)'] = Max,
+	['cmp(a,b)'] = Compare,
+	['const'] = Const,
+	['a << b | a >> -b'] = RotateLeft,
+	['load(a, b)'] = LoadVector,
+	['argument'] = Argument,
+	['store(a, b, c)'] = StoreVector,
+	['return a'] = ReturnVector,
+	['cast'] = Cast
+}

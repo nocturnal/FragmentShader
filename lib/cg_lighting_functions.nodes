@@ -1,0 +1,174 @@
+-- #################################################### --
+
+local cg_blinn_phong_specular = class(Node)
+
+function cg_blinn_phong_specular:get_help(out)
+    out.write( 'd = pow(saturate(dot(normal,normalize(light+view)), mat_power)' )
+    out.write( '\n' )
+    out.write( '\n' )
+    out.write( 'Supported Types:\n' )
+    out.write( 'float4\n' ) 
+    out.write( 'half4\n' ) 
+    out.write( 'fixed4\n' ) 
+    out.write( 'float3\n' ) 
+    out.write( 'half3\n' ) 
+    out.write( 'fixed3\n' ) 
+    out.write( 'float2\n' ) 
+    out.write( 'half2\n' ) 
+    out.write( 'fixed2\n' ) 
+end
+
+function cg_blinn_phong_specular:new()
+    Node.new(self)
+    self.in_normal    = self.add_port(Input('N'))
+    self.in_light     = self.add_port(Input('L'))
+    self.in_view      = self.add_port(Input('V'))
+    self.in_mat_power = self.add_port(Input('Cpow'))
+    self.out_spec     = self.add_port(Output('Cspec'))
+end
+
+function cg_blinn_phong_specular:get_type(port)
+
+    local t_normal    = self.in_normal.get_output().get_type()
+    local t_light     = self.in_light.get_output().get_type()
+    local t_view      = self.in_view.get_output().get_type()
+
+    -- Accept pretty much anything for in_mat_power. It'll get cast to the corresponding type.
+    -- local t_mat_power = self.in_mat_power.get_output().get_type()
+
+    if ( (t_normal == t_light) and (t_normal == t_view) ) then 
+
+        if (   ( t_normal == 'float4' ) 
+            or ( t_normal == 'float3' ) 
+            or ( t_normal == 'float2' )) then
+            
+            return 'float'
+
+        elseif (  ( t_normal == 'half4' ) 
+               or ( t_normal == 'half3' ) 
+               or ( t_normal == 'half2' )) then
+            
+            return 'half'
+
+        elseif (  ( t_normal == 'fixed4' ) 
+               or ( t_normal == 'fixed3' ) 
+               or ( t_normal == 'fixed2' )) then
+            
+            return 'fixed'
+        end
+
+    end
+
+    return nil
+end
+
+function cg_blinn_phong_specular:config(props)
+    Node.config(self, props)
+    props.delete('Name')
+end
+
+function cg_blinn_phong_specular:gen_code(out, scratch)
+    local normal      = 'r' .. self.in_normal.get_output().hex()
+    local light       = 'r' .. self.in_light.get_output().hex()
+    local view        = 'r' .. self.in_view.get_output().hex()
+    -- Cast mat_power to in_normal's type
+    local t_mat_power = self.get_type()
+    local mat_power   = 'r' .. self.in_mat_power.get_output().hex()
+    local t_d0        = self.in_normal.get_output().get_type()
+    local d0          = 'r' .. self.out_spec.hex() .. '0'
+    local t_d         = self.get_type()
+    local d           = 'r' .. self.out_spec.hex()
+
+    out.write( '\t' .. t_d0 .. ' ' .. d0 .. ' = normalize(' .. light .. '+' .. view .. ');\n' )
+    out.write( '\t' .. t_d  .. ' ' .. d  .. ' = pow(saturate(dot(' .. normal .. ',' .. d0 .. ')),' .. t_mat_power .. '(' .. mat_power .. '));\n' ) 
+end
+
+function cg_blinn_phong_specular:get_tip(out)
+    out.write( 'd = pow(saturate(dot(normal,normalize(light+view)), mat_power)' )
+end
+
+-- #################################################### --
+
+local cg_lambert_diffuse = class(Node)
+
+function cg_lambert_diffuse:get_help(out)
+    out.write( 'd = saturate(dot(normal,light))')
+    out.write( '\n' )
+    out.write( '\n' )
+    out.write( 'Supported Types:\n' )
+    out.write( 'float4\n' ) 
+    out.write( 'half4\n' ) 
+    out.write( 'fixed4\n' ) 
+    out.write( 'float3\n' ) 
+    out.write( 'half3\n' ) 
+    out.write( 'fixed3\n' ) 
+    out.write( 'float2\n' ) 
+    out.write( 'half2\n' ) 
+    out.write( 'fixed2\n' ) 
+end
+
+function cg_lambert_diffuse:new()
+    Node.new(self)
+    self.in_normal    = self.add_port(Input('N'))
+    self.in_light     = self.add_port(Input('L'))
+    self.out_diff     = self.add_port(Output('Cdiff'))
+end
+
+function cg_lambert_diffuse:get_type(port)
+
+    local t_normal    = self.in_normal.get_output().get_type()
+    local t_light     = self.in_light.get_output().get_type()
+
+    if ( (t_normal == t_light) ) then
+
+        if (   ( t_normal == 'float4' ) 
+            or ( t_normal == 'float3' ) 
+            or ( t_normal == 'float2' )) then
+            
+            return 'float'
+
+        elseif (  ( t_normal == 'half4' ) 
+               or ( t_normal == 'half3' ) 
+               or ( t_normal == 'half2' )) then
+            
+            return 'half'
+
+        elseif (  ( t_normal == 'fixed4' ) 
+               or ( t_normal == 'fixed3' ) 
+               or ( t_normal == 'fixed2' )) then
+            
+            return 'fixed'
+        end
+
+    end
+
+    return nil
+end
+
+function cg_lambert_diffuse:config(props)
+    Node.config(self, props)
+    props.delete('Name')
+end
+
+function cg_lambert_diffuse:gen_code(out, scratch)
+    local normal      = 'r' .. self.in_normal.get_output().hex()
+    local light       = 'r' .. self.in_light.get_output().hex()
+    local t_d         = self.get_type()
+    local d           = 'r' .. self.out_diff.hex()
+
+    out.write( '\t' .. t_d  .. ' ' .. d  .. ' = saturate(dot(' .. normal .. ',' .. light .. '));\n' )
+end
+
+function cg_lambert_diffuse:get_tip(out)
+    out.write( 'd = saturate(dot(normal,light))')
+end
+
+-- #################################################### --
+
+register {
+  __name = 'Cg [Lighting Functions]',
+  __prologue = '',
+  __epilogue = '',
+    ['Blinn-Phong Specular'] = cg_blinn_phong_specular,
+    ['Lambert Diffuse']      = cg_lambert_diffuse,
+}

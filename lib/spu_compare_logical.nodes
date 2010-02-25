@@ -1,0 +1,257 @@
+-- #################################################### --
+
+local si_clgt = class(Node)
+
+function si_clgt:get_help(out)
+  out.write[[ Compare Logical Greater Than Word  
+
+ rt.w[n] = (ra.w[n] > rb.w[n]) ? 0xF… : 0x0… ]]
+end
+
+function si_clgt:new()
+  Node.new(self)
+  self.ra = self.add_port(Input('ra'))
+  self.rb = self.add_port(Input('rb'))
+  self.rt = self.add_port(Output('rt'))
+end
+
+function si_clgt:config(props)
+  Node.config(self, props)
+  props.delete('Name')
+end
+
+function si_clgt:gen_code(out, scratch)
+  local rt = 'r' .. self.rt.hex()
+  local ra = 'r' .. self.ra.get_output().hex()
+  local rb = 'r' .. self.rb.get_output().hex()
+  out.write( '\t .reg ' .. rt .. '\n')
+  out.write( '\t clgt ' .. rt .. ', ' .. ra .. ', ' .. rb .. '\n' )
+end
+
+function si_clgt:get_tip(out)
+  out.write('Compare Logical Greater Than Word ')
+end
+
+function si_clgt:get_type(port)
+  return 'qword'
+end
+
+-- #################################################### --
+
+local si_clgti = class(Node)
+
+function si_clgti:get_help(out)
+  out.write[[ Compare Logical Greater Than Word Immediate  
+
+ rt.w[n] = (ra.w[n] > ext(s10)) ? 0xF… : 0x0… ]]
+end
+
+function si_clgti:new()
+  Node.new(self)
+  self.ra  = self.add_port(Input('ra'))
+  self.rt  = self.add_port(Output('rt'))
+  self.s10 = 0
+end
+
+function si_clgti:config(props)
+  Node.config(self, props)
+  props.delete('Name')
+  props.text_input(
+                    's10',
+                    function() return self.s10 end,
+                    function(v) self.s10 = v end,
+                    function(v) return math.evaluate(v) end
+                  )
+end
+
+function si_clgti:gen_code(out, scratch)
+  local rt  = 'r' .. self.rt.hex()
+  local ra  = 'r' .. self.ra.get_output().hex()
+  local s10 = math.evaluate(self.s10)
+  out.write( '\t .reg ' .. rt .. '\n')
+  out.write( '\t clgti ' .. rt .. ', ' .. ra .. ', ' .. s10 .. '\n' )
+end
+
+function si_clgti:get_tip(out)
+  out.write('Compare Logical Greater Than Word Immediate ')
+end
+
+function si_clgti:get_type(port)
+  return 'qword'
+end
+
+-- #################################################### --
+
+local si_clgth = class(Node)
+
+function si_clgth:get_help(out)
+  out.write[[ Compare Logical Greater Than Halfword  
+
+ rt.h[n] = (ra.h[n] > rb.h[n]) ? 0xF… : 0x0… ]]
+end
+
+function si_clgth:new()
+  Node.new(self)
+  self.ra = self.add_port(Input('ra'))
+  self.rb = self.add_port(Input('rb'))
+  self.rt = self.add_port(Output('rt'))
+end
+
+function si_clgth:config(props)
+  Node.config(self, props)
+  props.delete('Name')
+end
+
+function si_clgth:gen_code(out, scratch)
+  local rt = 'r' .. self.rt.hex()
+  local ra = 'r' .. self.ra.get_output().hex()
+  local rb = 'r' .. self.rb.get_output().hex()
+  out.write( '\t .reg ' .. rt .. '\n')
+  out.write( '\t clgth ' .. rt .. ', ' .. ra .. ', ' .. rb .. '\n' )
+end
+
+function si_clgth:get_tip(out)
+  out.write('Compare Logical Greater Than Halfword ')
+end
+
+function si_clgth:get_type(port)
+  return 'qword'
+end
+
+-- #################################################### --
+
+local si_clgthi = class(Node)
+
+function si_clgthi:get_help(out)
+  out.write[[ Compare Logical Greater Than Halfword Immediate  
+
+ rt.h[n] = (ra.h[n] > ext(s10)) ? 0xF… : 0x0… ]]
+end
+
+function si_clgthi:new()
+  Node.new(self)
+  self.ra  = self.add_port(Input('ra'))
+  self.rt  = self.add_port(Output('rt'))
+  self.s10 = 0
+end
+
+function si_clgthi:config(props)
+  Node.config(self, props)
+  props.delete('Name')
+  props.text_input(
+                    's10',
+                    function() return self.s10 end,
+                    function(v) self.s10 = v end,
+                    function(v) return math.evaluate(v) end
+                  )
+end
+
+function si_clgthi:gen_code(out, scratch)
+  local rt  = 'r' .. self.rt.hex()
+  local ra  = 'r' .. self.ra.get_output().hex()
+  local s10 = math.evaluate(self.s10)
+  out.write( '\t .reg ' .. rt .. '\n')
+  out.write( '\t clgthi ' .. rt .. ', ' .. ra .. ', ' .. s10 .. '\n' )
+end
+
+function si_clgthi:get_tip(out)
+  out.write('Compare Logical Greater Than Halfword Immediate ')
+end
+
+function si_clgthi:get_type(port)
+  return 'qword'
+end
+
+-- #################################################### --
+
+local si_clgtb = class(Node)
+
+function si_clgtb:get_help(out)
+  out.write[[ Compare Logical Greater Than Byte  
+
+ rt.b[n] = (ra.b[n] > rb.b[n]) ? 0xF… : 0x0… ]]
+end
+
+function si_clgtb:new()
+  Node.new(self)
+  self.ra = self.add_port(Input('ra'))
+  self.rb = self.add_port(Input('rb'))
+  self.rt = self.add_port(Output('rt'))
+end
+
+function si_clgtb:config(props)
+  Node.config(self, props)
+  props.delete('Name')
+end
+
+function si_clgtb:gen_code(out, scratch)
+  local rt = 'r' .. self.rt.hex()
+  local ra = 'r' .. self.ra.get_output().hex()
+  local rb = 'r' .. self.rb.get_output().hex()
+  out.write( '\t .reg ' .. rt .. '\n')
+  out.write( '\t clgtb ' .. rt .. ', ' .. ra .. ', ' .. rb .. '\n' )
+end
+
+function si_clgtb:get_tip(out)
+  out.write('Compare Logical Greater Than Byte ')
+end
+
+function si_clgtb:get_type(port)
+  return 'qword'
+end
+
+-- #################################################### --
+
+local si_clgtbi = class(Node)
+
+function si_clgtbi:get_help(out)
+  out.write[[ Compare Logical Greater Than Byte Immediate  
+
+ rt.b[n] = (ra.b[n] > s10) ? 0xF… : 0x0… ]]
+end
+
+function si_clgtbi:new()
+  Node.new(self)
+  self.ra  = self.add_port(Input('ra'))
+  self.rt  = self.add_port(Output('rt'))
+  self.s10 = 0
+end
+
+function si_clgtbi:config(props)
+  Node.config(self, props)
+  props.delete('Name')
+  props.text_input(
+                    's10',
+                    function() return self.s10 end,
+                    function(v) self.s10 = v end,
+                    function(v) return math.evaluate(v) end
+                  )
+end
+
+function si_clgtbi:gen_code(out, scratch)
+  local rt  = 'r' .. self.rt.hex()
+  local ra  = 'r' .. self.ra.get_output().hex()
+  local s10 = math.evaluate(self.s10)
+  out.write( '\t .reg ' .. rt .. '\n')
+  out.write( '\t clgtbi ' .. rt .. ', ' .. ra .. ', ' .. s10 .. '\n' )
+end
+
+function si_clgtbi:get_tip(out)
+  out.write('Compare Logical Greater Than Byte Immediate ')
+end
+
+function si_clgtbi:get_type(port)
+  return 'qword'
+end
+
+register {
+  __name = 'SPU [Compare Logical (Unsigned Elements)]',
+  __prologue = '',
+  __epilogue = '',
+  ['clgt'] = si_clgt,
+  ['clgti'] = si_clgti,
+  ['clgth'] = si_clgth,
+  ['clgthi'] = si_clgthi,
+  ['clgtb'] = si_clgtb,
+  ['clgtbi'] = si_clgtbi,
+}

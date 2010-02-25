@@ -1,0 +1,440 @@
+-- #################################################### --
+
+local cg_sqrt_one_sub_sqr = class(Node)
+
+function cg_sqrt_one_sub_sqr:get_help(out)
+    out.write( 'd = sqrt(1-x^2)' )
+    out.write( '\n' )
+    out.write( 'Supported Types:\n' )
+
+    out.write( 'float\n' ) 
+    out.write( 'half\n' ) 
+    out.write( 'fixed\n' ) 
+    out.write( 'int\n' ) 
+    out.write( 'float4\n' ) 
+    out.write( 'half4\n' ) 
+    out.write( 'fixed4\n' ) 
+    out.write( 'int4\n' ) 
+    out.write( 'float3\n' ) 
+    out.write( 'half3\n' ) 
+    out.write( 'fixed3\n' ) 
+    out.write( 'int3\n' ) 
+    out.write( 'float2\n' ) 
+    out.write( 'half2\n' ) 
+    out.write( 'fixed2\n' ) 
+    out.write( 'int2\n' ) 
+end
+
+function cg_sqrt_one_sub_sqr:new()
+    Node.new(self)
+    self.a = self.add_port(Input('a'))
+    self.d = self.add_port(Output('d'))
+end
+
+function cg_sqrt_one_sub_sqr:get_type(port)
+
+    local tx = self.a.get_output().get_type()
+
+    if (   ( tx == 'float' ) 
+        or ( tx == 'half' ) 
+        or ( tx == 'fixed' ) 
+        or ( tx == 'int' ) 
+        or ( tx == 'float4' ) 
+        or ( tx == 'half4' ) 
+        or ( tx == 'fixed4' ) 
+        or ( tx == 'int4' ) 
+        or ( tx == 'float3' ) 
+        or ( tx == 'half3' ) 
+        or ( tx == 'fixed3' ) 
+        or ( tx == 'int3' ) 
+        or ( tx == 'float2' ) 
+        or ( tx == 'half2' ) 
+        or ( tx == 'fixed2' ) 
+        or ( tx == 'int2' ) ) then
+        
+        return tx
+    end
+
+    return nil
+end
+
+function cg_sqrt_one_sub_sqr:config(props)
+    Node.config(self, props)
+    props.delete('Name')
+end
+
+function cg_sqrt_one_sub_sqr:gen_code(out, scratch)
+    local tx   = self.a.get_output().get_type()
+    local type = tx
+    local x    = 'r' .. self.a.get_output().hex()
+    local d    = 'r' .. self.d.hex()
+
+    out.write( '\t' .. type .. ' ' .. d .. ' = sqrt( ' .. type .. '(1) - (' .. x .. '*' .. x .. ') );\n' )
+end
+
+function cg_sqrt_one_sub_sqr:get_tip(out)
+    out.write( 'd = sqrt(1-x^2)' )
+end
+
+-- #################################################### --
+
+local cg_one_over_sqrt_one_sub_sqr = class(Node)
+
+function cg_one_over_sqrt_one_sub_sqr:get_help(out)
+    out.write( 'd = 1/sqrt(1-x^2)' )
+    out.write( '\n' )
+    out.write( 'Supported Types:\n' )
+
+    out.write( 'float\n' ) 
+    out.write( 'half\n' ) 
+    out.write( 'fixed\n' ) 
+    out.write( 'int\n' ) 
+    out.write( 'float4\n' ) 
+    out.write( 'half4\n' ) 
+    out.write( 'fixed4\n' ) 
+    out.write( 'int4\n' ) 
+    out.write( 'float3\n' ) 
+    out.write( 'half3\n' ) 
+    out.write( 'fixed3\n' ) 
+    out.write( 'int3\n' ) 
+    out.write( 'float2\n' ) 
+    out.write( 'half2\n' ) 
+    out.write( 'fixed2\n' ) 
+    out.write( 'int2\n' ) 
+end
+
+function cg_one_over_sqrt_one_sub_sqr:new()
+    Node.new(self)
+    self.a = self.add_port(Input('a'))
+    self.d = self.add_port(Output('d'))
+end
+
+function cg_one_over_sqrt_one_sub_sqr:get_type(port)
+
+    local tx = self.a.get_output().get_type()
+
+    if (   ( tx == 'float' ) 
+        or ( tx == 'half' ) 
+        or ( tx == 'fixed' ) 
+        or ( tx == 'int' ) 
+        or ( tx == 'float4' ) 
+        or ( tx == 'half4' ) 
+        or ( tx == 'fixed4' ) 
+        or ( tx == 'int4' ) 
+        or ( tx == 'float3' ) 
+        or ( tx == 'half3' ) 
+        or ( tx == 'fixed3' ) 
+        or ( tx == 'int3' ) 
+        or ( tx == 'float2' ) 
+        or ( tx == 'half2' ) 
+        or ( tx == 'fixed2' ) 
+        or ( tx == 'int2' ) ) then
+        
+        return tx
+    end
+
+    return nil
+end
+
+function cg_one_over_sqrt_one_sub_sqr:config(props)
+    Node.config(self, props)
+    props.delete('Name')
+end
+
+function cg_one_over_sqrt_one_sub_sqr:gen_code(out, scratch)
+    local tx   = self.a.get_output().get_type()
+    local type = tx
+    local x    = 'r' .. self.a.get_output().hex()
+    local d    = 'r' .. self.d.hex()
+
+    out.write( '\t' .. type .. ' ' .. d .. ' = ' .. type .. '(1)/sqrt( ' .. type .. '(1) - (' .. x .. '*' .. x .. ') );\n' )
+end
+
+function cg_one_over_sqrt_one_sub_sqr:get_tip(out)
+    out.write( 'd = 1/sqrt(1-x^2)' )
+end
+
+-- #################################################### --
+
+local cg_normalize3 = class(Node)
+
+function cg_normalize3:get_help(out)
+    out.write( 'd = normalize(a.xyz)' )
+    out.write( '\n' )
+    out.write( 'Supported Types:\n' )
+
+    out.write( 'float4\n' ) 
+    out.write( 'half4\n' ) 
+    out.write( 'fixed4\n' ) 
+    out.write( 'float3\n' ) 
+    out.write( 'half3\n' ) 
+    out.write( 'fixed3\n' ) 
+end
+
+function cg_normalize3:new()
+    Node.new(self)
+    self.a = self.add_port(Input('a'))
+    self.d = self.add_port(Output('d'))
+end
+
+function cg_normalize3:get_type(port)
+
+    local tx = self.a.get_output().get_type()
+
+    if ( tx == 'float4' ) then return 'float3' end
+    if ( tx == 'float3' ) then return 'float3' end
+    if ( tx == 'half4' )  then return 'half3'  end
+    if ( tx == 'half3' )  then return 'half3'  end
+    if ( tx == 'fixed4' ) then return 'fixed3' end
+    if ( tx == 'fixed3' ) then return 'fixed3' end
+
+    return nil
+end
+
+function cg_normalize3:config(props)
+    Node.config(self, props)
+    props.delete('Name')
+end
+
+function cg_normalize3:gen_code(out, scratch)
+    local tx   = self.a.get_output().get_type()
+    local type = self.get_type()
+    local x    = 'r' .. self.a.get_output().hex()
+    local d    = 'r' .. self.d.hex()
+
+    out.write( '\t' .. type .. ' ' .. d .. ' = normalize(' .. x .. '.xyz);\n' )
+end
+
+function cg_normalize3:get_tip(out)
+    out.write( 'd = normalize(a.xyz)' )
+end
+
+-- #################################################### --
+
+
+local cg_dot3 = class(Node)
+
+function cg_dot3:get_help(out)
+    out.write( 'd = dot(a.xyz,b.xyz)' )
+    out.write( '\n' )
+    out.write( 'Supported Types:\n' )
+
+    out.write( 'float4\n' ) 
+    out.write( 'half4\n' ) 
+    out.write( 'fixed4\n' ) 
+    out.write( 'float3\n' ) 
+    out.write( 'half3\n' ) 
+    out.write( 'fixed3\n' ) 
+end
+
+function cg_dot3:new()
+    Node.new(self)
+    self.a = self.add_port(Input('a'))
+    self.b = self.add_port(Input('b'))
+    self.d = self.add_port(Output('d'))
+end
+
+function cg_dot3:get_type(port)
+
+    local tx = self.a.get_output().get_type()
+    local ty = self.b.get_output().get_type()
+
+    if ( tx == 'float4' ) and ( ty == 'float4' ) then return 'float' end
+    if ( tx == 'float3' ) and ( ty == 'float3' ) then return 'float' end
+    if ( tx == 'half4' )  and ( ty == 'half4' )  then return 'half'  end
+    if ( tx == 'half3' )  and ( ty == 'half3' )  then return 'half'  end
+    if ( tx == 'fixed4' ) and ( ty == 'fixed4' ) then return 'fixed' end
+    if ( tx == 'fixed3' ) and ( ty == 'fixed3' ) then return 'fixed' end
+
+    return nil
+end
+
+function cg_dot3:config(props)
+    Node.config(self, props)
+    props.delete('Name')
+end
+
+function cg_dot3:gen_code(out, scratch)
+    local tx   = self.a.get_output().get_type()
+    local type = self.get_type()
+    local x    = 'r' .. self.a.get_output().hex()
+    local y    = 'r' .. self.b.get_output().hex()
+    local d    = 'r' .. self.d.hex()
+
+    out.write( '\t' .. type .. ' ' .. d .. ' = dot(' .. x .. '.xyz,' .. y .. '.xyz);\n' )
+end
+
+function cg_dot3:get_tip(out)
+    out.write( 'd = dot(a.xyz,b.xyz)' )
+end
+
+-- #################################################### --
+
+local cg_bx2 = class(Node)
+
+function cg_bx2:get_help(out)
+    out.write( 'd = 2x-1' )
+    out.write( '\n' )
+    out.write( 'Supported Types:\n' )
+
+    out.write( 'float\n' ) 
+    out.write( 'half\n' ) 
+    out.write( 'fixed\n' ) 
+    out.write( 'int\n' ) 
+    out.write( 'float4\n' ) 
+    out.write( 'half4\n' ) 
+    out.write( 'fixed4\n' ) 
+    out.write( 'int4\n' ) 
+    out.write( 'float3\n' ) 
+    out.write( 'half3\n' ) 
+    out.write( 'fixed3\n' ) 
+    out.write( 'int3\n' ) 
+    out.write( 'float2\n' ) 
+    out.write( 'half2\n' ) 
+    out.write( 'fixed2\n' ) 
+    out.write( 'int2\n' ) 
+end
+
+function cg_bx2:new()
+    Node.new(self)
+    self.a = self.add_port(Input('a'))
+    self.d = self.add_port(Output('d'))
+end
+
+function cg_bx2:get_type(port)
+
+    local tx = self.a.get_output().get_type()
+
+    if (   ( tx == 'float' ) 
+        or ( tx == 'half' ) 
+        or ( tx == 'fixed' ) 
+        or ( tx == 'int' ) 
+        or ( tx == 'float4' ) 
+        or ( tx == 'half4' ) 
+        or ( tx == 'fixed4' ) 
+        or ( tx == 'int4' ) 
+        or ( tx == 'float3' ) 
+        or ( tx == 'half3' ) 
+        or ( tx == 'fixed3' ) 
+        or ( tx == 'int3' ) 
+        or ( tx == 'float2' ) 
+        or ( tx == 'half2' ) 
+        or ( tx == 'fixed2' ) 
+        or ( tx == 'int2' ) ) then
+        
+        return tx
+    end
+
+
+    return nil
+end
+
+function cg_bx2:config(props)
+    Node.config(self, props)
+    props.delete('Name')
+end
+
+function cg_bx2:gen_code(out, scratch)
+    local tx            = self.a.get_output().get_type()
+    local type          = self.get_type()
+    local x             = 'r' .. self.a.get_output().hex()
+    local d             = 'r' .. self.d.hex()
+    local two           = type .. '(2)'
+    local one           = type .. '(1)'
+    local two_x         = '(' .. two .. '*' .. x .. ')'
+    local two_x_sub_one = '(' .. two_x .. '-' .. one .. ')'   
+
+
+    out.write( '\t' .. type .. ' ' .. d .. ' = ' .. two_x_sub_one .. ';\n' )
+end
+
+function cg_bx2:get_tip(out)
+    out.write( 'd = 2x-1' )
+end
+
+-- #################################################### --
+
+local cg_cos_wave_xy = class(Node)
+
+function cg_cos_wave_xy:get_help(out)
+    out.write( 'x = Vx+Ay*cos(Py+Fy*y); y = Vy+Ax*cos(Px+Fx*x)' )
+    out.write( '\n' )
+    out.write( 'Supported Types:\n' )
+
+    out.write( 'float2\n' ) 
+    out.write( 'half2\n' ) 
+    out.write( 'fixed2\n' ) 
+end
+
+function cg_cos_wave_xy:new()
+    Node.new(self)
+    self.value     = self.add_port(Input('Value'))
+    self.frequency = self.add_port(Input('Frequency'))
+    self.amplitude = self.add_port(Input('Amplitude'))
+    self.phase     = self.add_port(Input('Phase'))
+    self.d         = self.add_port(Output('d'))
+end
+
+function cg_cos_wave_xy:get_type(port)
+
+    local tvalue     = self.value.get_output().get_type()
+    local tfrequency = self.frequency.get_output().get_type()
+    local tamplitude = self.amplitude.get_output().get_type()
+    local tphase     = self.phase.get_output().get_type()
+
+    if (   ( tvalue == 'float2' ) 
+        or ( tvalue == 'half2' ) 
+        or ( tvalue == 'fixed2' ) ) then
+
+        if ( ( tvalue == tfrequency ) and ( tvalue == tamplitude ) and ( tvalue == tphase ) ) then 
+            return tvalue
+        end
+    end
+
+    return nil
+end
+
+function cg_cos_wave_xy:config(props)
+    Node.config(self, props)
+    props.delete('Name')
+end
+
+function cg_cos_wave_xy:gen_code(out, scratch)
+    local type        = self.value.get_output().get_type()
+    local value       = 'r' .. self.value.get_output().hex()
+    local frequency   = 'r' .. self.frequency.get_output().hex()
+    local amplitude   = 'r' .. self.amplitude.get_output().hex()
+    local phase       = 'r' .. self.phase.get_output().hex()
+
+    local d1            = 'r' .. self.d.hex() .. '_1'
+    local d2            = 'r' .. self.d.hex() .. '_2'
+    local d3            = 'r' .. self.d.hex() .. '_3'
+    local d4            = 'r' .. self.d.hex() .. '_4'
+    local d             = 'r' .. self.d.hex()
+
+    out.write( '\t' .. type .. ' ' .. d1 .. ' = ' .. frequency .. ' * ' .. value .. ';\n' )
+    out.write( '\t' .. type .. ' ' .. d2 .. ' = ' .. phase .. ' + ' .. d1 .. ';\n' )
+    out.write( '\t' .. type .. ' ' .. d3 .. ' = cos(' .. d2 .. ');\n' )
+    out.write( '\t' .. type .. ' ' .. d4 .. ' = ' .. amplitude .. ' * ' .. d3 .. ';\n' )
+    out.write( '\t' .. type .. ' ' .. d  .. ' = ' .. value .. ' + ' .. type .. '(' .. d4 .. '.y, ' ..  d4 .. '.x);\n' )
+end
+
+function cg_cos_wave_xy:get_tip(out)
+    out.write( 'x = Vx+Ay*cos(Py+Fy*y); y = Vy+Ax*cos(Px+Fx*x)' )
+end
+
+-- #################################################### --
+
+register {
+  __name = 'Cg [Misc Arithmetic]',
+  __prologue = '',
+  __epilogue = '',
+  ['sqrt(1-x^2)']       = cg_sqrt_one_sub_sqr,
+  ['1/sqrt(1-x^2)']     = cg_one_over_sqrt_one_sub_sqr,
+  ['normalize3(xyz)']   = cg_normalize3,
+  ['dot3(xyz)']         = cg_dot3,
+  ['bx2() [2x-1]']      = cg_bx2,
+  ['cos_wave(xy)']      = cg_cos_wave_xy,
+}
+
+

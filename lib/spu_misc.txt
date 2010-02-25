@@ -1,0 +1,7 @@
+NODENAME	SPU [Misc]
+
+absdb	"rt, ra, rb"	Absolute Differences of Bytes	rt.b[n] = abs(ra.b[n] = rb.b[n])
+avgb 	"rt, ra, rb"	Average Bytes 	rt.b[n] = (ra.b[n] + rb.b[n] + 1) / 2
+clz 	"rt, ra"	Count Leading Zeros 	rt.w[n] = leadingZeroCount(ra.w[n])
+cntb 	"rt, ra"	Count Ones in Bytes 	rt.b[n] = numOneBits(ra.b[n])
+sumb 	"rt, ra, rb"	Sum Bytes into Halfwords 	rt.h[n] = (n&1) ? (rb.b[(n-1)*2] + rb.b[(n-1)*2+1] + rb.b[(n-1)*2+2] + rb.b[(n-1)*2+3]) : (ra.b[n*2] + ra.b[n*2+1] + ra.b[n*2+2] + ra.b[n*2+3])

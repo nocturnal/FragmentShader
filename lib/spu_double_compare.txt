@@ -1,0 +1,5 @@
+NODENAME	SPU [Double Compare]
+dfceq	"rt, ra, rb"	Double Floating Compare Equal 	TODO
+dfcgt 	"rt, ra, rb"	Double Floating Compare Greater Than 	TODO
+dfcmeq 	"rt, ra, rb"	Double Floating Compare Magnitude Equal 	TODO
+dfcmgt 	"rt, ra, rb"	Double Floating Compare Magnitude Greater Than 	TODO

@@ -1,0 +1,255 @@
+-- #################################################### --
+
+local si_stqa = class(Node)
+
+function si_stqa:get_help(out)
+  out.write[[ Store Quadword (a-form)  
+
+ *(s18) = rt ]]
+end
+
+function si_stqa:new()
+  Node.new(self)
+  self.rt  = self.add_port(Input('rc'))
+  self.s18 = 0
+end
+
+function si_stqa:config(props)
+  Node.config(self, props)
+  props.delete('Name')
+  props.text_input(
+                    's18',
+                    function() return self.s18 end,
+                    function(v) self.s18 = v end,
+                    function(v) return math.evaluate(v) end
+                  )
+end
+
+function si_stqa:gen_code(out, scratch)
+  local rc  = 'r' .. self.rc.get_output().hex()
+  local s18 = math.evaluate(self.s18)
+  out.write( '\t stqa ' .. rc .. ', ' .. s18 .. '\n' )
+end
+
+function si_stqa:get_tip(out)
+  out.write('Store Quadword (a-form) ')
+end
+
+function si_stqa:get_type(port)
+  return 'qword'
+end
+
+-- #################################################### --
+
+local si_stqa_literal = class(Node)
+
+function si_stqa_literal:get_help(out)
+  out.write[[ Store Quadword (a-form)  
+
+ *(s18) = rt ]]
+end
+
+function si_stqa_literal:new()
+  Node.new(self)
+  self.rc  = self.add_port(Input('rc'))
+  self.s18 = 0
+end
+
+function si_stqa_literal:config(props)
+  Node.config(self, props)
+  props.delete('Name')
+  props.text_input(
+                    's18',
+                    function() return self.s18 end,
+                    function(v) self.s18 = v end,
+                    function(v) return v end
+                  )
+end
+
+function si_stqa_literal:gen_code(out, scratch)
+  local rc  = 'r' .. self.rc.get_output().hex()
+  local s18 = self.s18
+  out.write( '\t stqa ' .. rc .. ', ' .. s18 .. '\n' )
+end
+
+function si_stqa_literal:get_tip(out)
+  out.write('Store Quadword (a-form) ')
+end
+
+function si_stqa_literal:get_type(port)
+  return 'qword'
+end
+
+-- #################################################### --
+
+local si_stqd = class(Node)
+
+function si_stqd:get_help(out)
+  out.write[[ Store Quadword (d-form)  
+
+ *(ra+s14) = rt ]]
+end
+
+function si_stqd:new()
+  Node.new(self)
+  self.rc  = self.add_port(Input('rc'))
+  self.ra  = self.add_port(Input('ra'))
+  self.s14 = 0
+end
+
+function si_stqd:config(props)
+  Node.config(self, props)
+  props.delete('Name')
+  props.text_input(
+                    's14',
+                    function() return self.s14 end,
+                    function(v) self.s14 = v end,
+                    function(v) return math.evaluate(v) end
+                  )
+end
+
+function si_stqd:gen_code(out, scratch)
+  local rc  = 'r' .. self.rc.get_output().hex()
+  local ra  = 'r' .. self.ra.get_output().hex()
+  local s14 = math.evaluate(self.s14)
+  out.write( '\t stqd ' .. rc .. ', ' .. s14 .. '(' .. ra .. ')\n' )
+end
+
+function si_stqd:get_tip(out)
+  out.write('Store Quadword (d-form) ')
+end
+
+function si_stqd:get_type(port)
+  return 'qword'
+end
+
+-- #################################################### --
+
+local si_stqr = class(Node)
+
+function si_stqr:get_help(out)
+  out.write[[ Store Quadword Instruction Relative (a-form)  
+
+ *(s18) = rt ]]
+end
+
+function si_stqr:new()
+  Node.new(self)
+  self.rt  = self.add_port(Input('rc'))
+  self.s18 = 0
+end
+
+function si_stqr:config(props)
+  Node.config(self, props)
+  props.delete('Name')
+  props.text_input(
+                    's18',
+                    function() return self.s18 end,
+                    function(v) self.s18 = v end,
+                    function(v) return math.evaluate(v) end
+                  )
+end
+
+function si_stqr:gen_code(out, scratch)
+  local rc  = 'r' .. self.rc.get_output().hex()
+  local s18 = math.evaluate(self.s18)
+  out.write( '\t stqr ' .. rc .. ', ' .. s18 .. '\n' )
+end
+
+function si_stqr:get_tip(out)
+  out.write('Store Quadword Instruction Relative (a-form) ')
+end
+
+function si_stqr:get_type(port)
+  return 'qword'
+end
+
+-- #################################################### --
+
+local si_stqr_literal = class(Node)
+
+function si_stqr_literal:get_help(out)
+  out.write[[ Store Quadword Instruction Relative (a-form)  
+
+ *(s18) = rt ]]
+end
+
+function si_stqr_literal:new()
+  Node.new(self)
+  self.rc  = self.add_port(Input('rc'))
+  self.s18 = 0
+end
+
+function si_stqr_literal:config(props)
+  Node.config(self, props)
+  props.delete('Name')
+  props.text_input(
+                    's18',
+                    function() return self.s18 end,
+                    function(v) self.s18 = v end,
+                    function(v) return v end
+                  )
+end
+
+function si_stqr_literal:gen_code(out, scratch)
+  local rc  = 'r' .. self.rc.get_output().hex()
+  local s18 = self.s18
+  out.write( '\t stqr ' .. rc .. ', ' .. s18 .. '\n' )
+end
+
+function si_stqr_literal:get_tip(out)
+  out.write('Store Quadword Instruction Relative (a-form) ')
+end
+
+function si_stqr_literal:get_type(port)
+  return 'qword'
+end
+
+-- #################################################### --
+
+local si_stqx = class(Node)
+
+function si_stqx:get_help(out)
+  out.write[[ Store Quadword (x-form)  
+
+ *(ra+rb) = rt ]]
+end
+
+function si_stqx:new()
+  Node.new(self)
+  self.rc = self.add_port(Input('rc'))
+  self.ra = self.add_port(Input('ra'))
+  self.rb = self.add_port(Input('rb'))
+end
+
+function si_stqx:config(props)
+  Node.config(self, props)
+  props.delete('Name')
+end
+
+function si_stqx:gen_code(out, scratch)
+  local rc = 'r' .. self.rc.get_output().hex()
+  local ra = 'r' .. self.ra.get_output().hex()
+  local rb = 'r' .. self.rb.get_output().hex()
+  out.write( '\t stqx ' .. rc .. ', ' .. ra .. ', ' .. rb .. '\n' )
+end
+
+function si_stqx:get_tip(out)
+  out.write('Store Quadword (x-form) ')
+end
+
+function si_stqx:get_type(port)
+  return 'qword'
+end
+
+register {
+  __name = 'SPU [Store]',
+  __prologue = '',
+  __epilogue = '',
+  ['stqa'] = si_stqa,
+  ['stqa_literal'] = si_stqa_literal,
+  ['stqd'] = si_stqd,
+  ['stqr'] = si_stqr,
+  ['stqr_literal'] = si_stqr_literal,
+  ['stqx'] = si_stqx,
+}

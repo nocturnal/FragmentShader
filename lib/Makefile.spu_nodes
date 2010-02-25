@@ -1,0 +1,64 @@
+ALL: spu_logical.nodes spu_misc.nodes spu_byte_shuffle.nodes spu_select_bits.nodes spu_rotate.nodes spu_rotate_and_mask.nodes spu_shift.nodes spu_compare.nodes spu_compare_logical.nodes spu_integer_math.nodes spu_signed_integer_convert.nodes spu_float_compare.nodes spu_float_math.nodes spu_integer_to_float.nodes spu_float_to_integer.nodes spu_double_compare.nodes spu_double_math.nodes spu_double_convert.nodes spu_load.nodes spu_store.nodes spu_uv_anim.nodes
+
+spu_logical.nodes: gen_spu_nodes.awk spu_logical.txt 
+	awk -f gen_spu_nodes.awk spu_logical.txt > spu_logical.nodes
+
+spu_misc.nodes: gen_spu_nodes.awk spu_misc.txt
+	awk -f gen_spu_nodes.awk spu_misc.txt > spu_misc.nodes
+
+spu_byte_shuffle.nodes: gen_spu_nodes.awk spu_byte_shuffle.txt
+	awk -f gen_spu_nodes.awk spu_byte_shuffle.txt > spu_byte_shuffle.nodes
+
+spu_select_bits.nodes: gen_spu_nodes.awk spu_select_bits.txt
+	awk -f gen_spu_nodes.awk spu_select_bits.txt > spu_select_bits.nodes
+
+spu_rotate.nodes: gen_spu_nodes.awk spu_rotate.txt
+	awk -f gen_spu_nodes.awk spu_rotate.txt > spu_rotate.nodes
+
+spu_rotate_and_mask.nodes: gen_spu_nodes.awk spu_rotate_and_mask.txt
+	awk -f gen_spu_nodes.awk spu_rotate_and_mask.txt > spu_rotate_and_mask.nodes
+
+spu_shift.nodes: gen_spu_nodes.awk spu_shift.txt
+	awk -f gen_spu_nodes.awk spu_shift.txt > spu_shift.nodes
+
+spu_compare.nodes: gen_spu_nodes.awk spu_compare.txt
+	awk -f gen_spu_nodes.awk spu_compare.txt > spu_compare.nodes
+
+spu_compare_logical.nodes: gen_spu_nodes.awk spu_compare_logical.txt
+	awk -f gen_spu_nodes.awk spu_compare_logical.txt > spu_compare_logical.nodes
+
+spu_integer_math.nodes: gen_spu_nodes.awk spu_integer_math.txt
+	awk -f gen_spu_nodes.awk spu_integer_math.txt > spu_integer_math.nodes
+
+spu_signed_integer_convert.nodes: gen_spu_nodes.awk spu_signed_integer_convert.txt
+	awk -f gen_spu_nodes.awk spu_signed_integer_convert.txt > spu_signed_integer_convert.nodes
+
+spu_float_compare.nodes: gen_spu_nodes.awk spu_float_compare.txt
+	awk -f gen_spu_nodes.awk spu_float_compare.txt > spu_float_compare.nodes
+
+spu_float_math.nodes: gen_spu_nodes.awk spu_float_math.txt
+	awk -f gen_spu_nodes.awk spu_float_math.txt > spu_float_math.nodes
+
+spu_integer_to_float.nodes: gen_spu_nodes.awk spu_integer_to_float.txt
+	awk -f gen_spu_nodes.awk spu_integer_to_float.txt > spu_integer_to_float.nodes
+
+spu_float_to_integer.nodes: gen_spu_nodes.awk spu_float_to_integer.txt
+	awk -f gen_spu_nodes.awk spu_float_to_integer.txt > spu_float_to_integer.nodes
+
+spu_double_compare.nodes: gen_spu_nodes.awk spu_double_compare.txt
+	awk -f gen_spu_nodes.awk spu_double_compare.txt > spu_double_compare.nodes
+
+spu_double_math.nodes: gen_spu_nodes.awk spu_double_math.txt
+	awk -f gen_spu_nodes.awk spu_double_math.txt > spu_double_math.nodes
+
+spu_double_convert.nodes: gen_spu_nodes.awk spu_double_convert.txt
+	awk -f gen_spu_nodes.awk spu_double_convert.txt > spu_double_convert.nodes
+
+spu_load.nodes: gen_spu_nodes.awk spu_load.txt
+	awk -f gen_spu_nodes.awk spu_load.txt > spu_load.nodes
+
+spu_store.nodes: gen_spu_nodes.awk spu_store.txt
+	awk -f gen_spu_nodes.awk spu_store.txt > spu_store.nodes
+
+spu_uv_anim.nodes: gen_spu_nodes.awk spu_uv_anim.txt
+	awk -f gen_spu_nodes.awk spu_uv_anim.txt > spu_uv_anim.nodes
