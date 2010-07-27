@@ -1,8 +1,8 @@
 *.suo
 *.ncb
 *.user
-Build/*
-Built/*
+build/*
+built/*
 BASE.*
 LOCAL.*
 REMOTE.*
