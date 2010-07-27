@@ -1,0 +1,4 @@
+FragmentShader is a graph editor program that allow construction of
+node graphs that generate code (like vertex and fragment programs).
+
+Code generation is accomplished via lua for easy extensibility.
