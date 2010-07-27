@@ -21,8 +21,8 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="$(SolutionDir)Build\$(ConfigurationName)\$(ProjectName)"
-			IntermediateDirectory="$(SolutionDir)Build\$(ConfigurationName)\$(ProjectName)"
+			OutputDirectory="$(SolutionDir)build\$(ConfigurationName)\$(ProjectName)"
+			IntermediateDirectory="$(SolutionDir)build\$(ConfigurationName)\$(ProjectName)"
 			ConfigurationType="4"
 			CharacterSet="0"
 			WholeProgramOptimization="0"
@@ -154,8 +154,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="$(SolutionDir)Build\$(ConfigurationName)\$(ProjectName)"
-			IntermediateDirectory="$(SolutionDir)Build\$(ConfigurationName)\$(ProjectName)"
+			OutputDirectory="$(SolutionDir)build\$(ConfigurationName)\$(ProjectName)"
+			IntermediateDirectory="$(SolutionDir)build\$(ConfigurationName)\$(ProjectName)"
 			ConfigurationType="4"
 			CharacterSet="0"
 			WholeProgramOptimization="0"
@@ -283,8 +283,8 @@
 		</Configuration>
 		<Configuration
 			Name="Debug Unicode|Win32"
-			OutputDirectory="$(SolutionDir)Build\$(ConfigurationName)\$(ProjectName)"
-			IntermediateDirectory="$(SolutionDir)Build\$(ConfigurationName)\$(ProjectName)"
+			OutputDirectory="$(SolutionDir)build\$(ConfigurationName)\$(ProjectName)"
+			IntermediateDirectory="$(SolutionDir)build\$(ConfigurationName)\$(ProjectName)"
 			ConfigurationType="4"
 			CharacterSet="1"
 			WholeProgramOptimization="0"
@@ -416,8 +416,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release Unicode|Win32"
-			OutputDirectory="$(SolutionDir)Build\$(ConfigurationName)\$(ProjectName)"
-			IntermediateDirectory="$(SolutionDir)Build\$(ConfigurationName)\$(ProjectName)"
+			OutputDirectory="$(SolutionDir)build\$(ConfigurationName)\$(ProjectName)"
+			IntermediateDirectory="$(SolutionDir)build\$(ConfigurationName)\$(ProjectName)"
 			ConfigurationType="4"
 			CharacterSet="1"
 			WholeProgramOptimization="0"
