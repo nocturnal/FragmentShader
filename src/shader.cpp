@@ -312,7 +312,7 @@ Shader::EnableMenu(const wxString& label, bool enable)
 void
 Shader::OnTimer(wxTimerEvent& evt)
 {
-	wxString title = wxT("igFragmentShader - ");
+	wxString title = wxT("FragmentShader - ");
 	if (m_FileName.IsEmpty())
 	{
 		title.Append(wxT("(untitled)"));
