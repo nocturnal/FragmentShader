@@ -88,6 +88,8 @@
 		</Configuration>
 		<Configuration
 			Name="Debug|x64"
+			OutputDirectory="$(SolutionDir)build\$(ConfigurationName)\$(ProjectName)"
+			IntermediateDirectory="$(SolutionDir)build\$(ConfigurationName)\$(ProjectName)"
 			ConfigurationType="4"
 			CharacterSet="0"
 			WholeProgramOptimization="0"
@@ -219,6 +221,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release|x64"
+			OutputDirectory="$(SolutionDir)build\$(ConfigurationName)\$(ProjectName)"
+			IntermediateDirectory="$(SolutionDir)build\$(ConfigurationName)\$(ProjectName)"
 			ConfigurationType="4"
 			CharacterSet="0"
 			WholeProgramOptimization="0"
@@ -350,6 +354,8 @@
 		</Configuration>
 		<Configuration
 			Name="Debug Unicode|x64"
+			OutputDirectory="$(SolutionDir)build\$(ConfigurationName)\$(ProjectName)"
+			IntermediateDirectory="$(SolutionDir)build\$(ConfigurationName)\$(ProjectName)"
 			ConfigurationType="4"
 			CharacterSet="1"
 			WholeProgramOptimization="0"
@@ -481,6 +487,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release Unicode|x64"
+			OutputDirectory="$(SolutionDir)build\$(ConfigurationName)\$(ProjectName)"
+			IntermediateDirectory="$(SolutionDir)build\$(ConfigurationName)\$(ProjectName)"
 			ConfigurationType="4"
 			CharacterSet="1"
 			WholeProgramOptimization="0"
