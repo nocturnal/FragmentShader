@@ -324,7 +324,7 @@ namespace LuaUtil
 	void
 	LoadResource(lua_State *L, HMODULE hModule, const wxChar *resourcename, const char *chunkname)
 	{
-		HRSRC src = FindResourceW(hModule, resourcename, RT_RCDATA);
+		HRSRC src = FindResource(hModule, resourcename, RT_RCDATA);
 		if (src == NULL)
 		{
 			THROW("Resource not found");
