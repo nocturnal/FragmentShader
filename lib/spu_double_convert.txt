@@ -1,3 +1,0 @@
-NODENAME	SPU [Double Convert]
-frds 	"rt, ra"	Floating Round Double to Single 	TODO
-fesd 	"rt, ra"	Floating Extend Single to Double 	TODO

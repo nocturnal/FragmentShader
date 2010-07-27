@@ -1,553 +1,509 @@
-#include <wx/wx.h>
-#include <wx/splitter.h>
-#include <wx/treectrl.h>
-#include <wx/propgrid/propgrid.h>
-#include <wx/dir.h>
-#include <wx/filedlg.h>
-#include <wx/notebook.h>
-#include <wx/filename.h>
+#include "shader.h"
+
 #include <wx/config.h>
-#include <errno.h>
+#include <wx/filename.h>
+#include <wx/dir.h>
+#include <wx/wfstream.h>
+#include <wx/aboutdlg.h>
+#include <wx/clipbrd.h>
 
-#include "wxcanvas.h"
-#include "wxpopupmenu.h"
-#include "graph.h"
-#include "propedit.h"
-#include "luabind.h"
+#include "luautil.h"
+#include "project.h"
+#include "menustate.h"
 
-extern "C" {
-#include <lua.h>
-#include <lauxlib.h>
-#include <lualib.h>
-};
+#include "debug.h"
 
-#define wxID_COPYMETAFILE    (wxID_HIGHEST + 0)
-#define wxID_COPYCODE    (wxID_HIGHEST + 1)
-#define wxID_RELOAD        (wxID_HIGHEST + 2)
-#define wxID_SAVECODE    (wxID_HIGHEST + 3)
+#include "copy.xpm"
+#include "cut.xpm"
+#include "new.xpm"
+#include "open.xpm"
+#include "paste.xpm"
+#include "save.xpm"
+#include "x.xpm"
 
-class MainFrame: public wxFrame
-{
-    public:
-        MainFrame();
-        ~MainFrame() { lua_close(L); }
-        void OnClose(wxCloseEvent& evt);
-        void OnQuit(wxCommandEvent& evt);
-        void OnCommand(wxCommandEvent& evt);
-        void OnItemActivated(wxTreeEvent& evt);
-        void OnSelChanged(wxTreeEvent& evt);
-        wxString file_path, code_path;
-
-    private:
-        int GetItemLevel(wxTreeItemId item);
-        void SaveConfig();
-        void ReloadLibs();
-        void OpenLibs();
-        void Open();
-        void Save();
-        void SaveAs();
-        void SaveCode();
-        void ConfirmSave();
-        wxMenu *edit;
-        wxStatusBar *status;
-        wxPropertyEditor *props;
-        Graph *graph;
-        wxTextCtrl *code, *comments;
-        wxTreeCtrl *nodes;
-        wxNotebook *ph;
-        lua_State *L;
-        wxString file_name, code_name;
-        wxSplitterWindow *versplitter, *horsplitter;
-    
-    DECLARE_NO_COPY_CLASS(MainFrame)
-    DECLARE_EVENT_TABLE()
-};
-
-BEGIN_EVENT_TABLE(MainFrame, wxFrame)
-    EVT_CLOSE(MainFrame::OnClose)
-    EVT_MENU(wxID_EXIT, MainFrame::OnQuit)
-    EVT_MENU(wxID_ANY, MainFrame::OnCommand)
-    EVT_TREE_ITEM_ACTIVATED(wxID_ANY, MainFrame::OnItemActivated)
-    EVT_TREE_SEL_CHANGED(wxID_ANY, MainFrame::OnSelChanged) 
+BEGIN_EVENT_TABLE(Shader, wxFrame)
+	EVT_CLOSE(Shader::OnClose)
+	EVT_COMMAND_RANGE(wxID_TYPES, wxID_TYPES + 99, wxEVT_COMMAND_MENU_SELECTED, Shader::OnNew)
+	EVT_COMMAND_RANGE(wxID_RECENT + 1, wxID_RECENT + 20, wxEVT_COMMAND_MENU_SELECTED, Shader::OnRecent)
+	EVT_COMMAND_RANGE(wxID_VIEWERS, wxID_VIEWERS + 99, wxEVT_COMMAND_MENU_SELECTED, Shader::OnViewer)
+	EVT_COMMAND(wxID_ABOUT, wxEVT_COMMAND_MENU_SELECTED, Shader::OnAbout)
+	EVT_MENU(wxID_ANY, Shader::OnCommand)
+	EVT_TIMER(wxID_ANY, Shader::OnTimer)
 END_EVENT_TABLE()
 
-typedef struct
+Shader::Shader()
+	: wxFrame(NULL, wxID_ANY, wxT("FragmentShader"))
 {
-    int functions;
-} regdata_t;
-
-static int include(lua_State *L)
-{
-    const char *lib_path = (const char *)lua_tostring(L, lua_upvalueindex(1));
-    const char *file_name = lua_tostring(L, 1);
-    
-    wxString path = wxString::FromAscii(lib_path);
-    path.Append(file_name);
-    if (load_lua(L, (const char *)path.c_str(), 0) != 0)
-    {
-        printf("%s\n", lua_tostring(L, -1)); fflush(stdout);
-        lua_error(L);
-        return 0;
-    }
-    return 0;
+	BuildMenu();
+	AddStatusBar();
+	LoadConfig();
+	m_Timer.SetOwner(this);
+	m_Timer.Start(1000, wxTIMER_CONTINUOUS);
 }
 
-static int lregister(lua_State *L)
+Shader::~Shader()
 {
-    regdata_t *rd = (regdata_t *)lua_touserdata(L, lua_upvalueindex(1)); // table
-    if (rd->functions == LUA_NOREF)
-    {
-        lua_newtable(L); // table, master
-        rd->functions = luaL_ref(L, LUA_REGISTRYINDEX); // table
-    }
-    lua_rawgeti(L, LUA_REGISTRYINDEX, rd->functions); // table, master
-    lua_pushnil(L);  // table, master, nil
-    while (lua_next(L, 1) != 0) // table, master, key, value
-    {
-        lua_pushvalue(L, 3); // table, master, key, value, key
-        lua_gettable(L, 2); // table, master, key, value, value
-        if (lua_isnil(L, 5))
-        {
-            lua_pop(L, 1); // table, master, key, value
-            lua_pushvalue(L, 3); // table, master, key, value, key
-            lua_insert(L, 4); // table, master, key, key, value
-            lua_settable(L, 2); // table, master, key
-        }
-        else
-            lua_pop(L, 2); // table, master, key
-    }
-    lua_pop(L, 1);
-    return 0;
+	SaveConfig();
+}
+
+static void
+AppendItem(wxMenu *menu, int id, char **xpm, const wxString& text = "", wxMenu *submenu = NULL)
+{
+	wxMenuItem *item = NEW(wxMenuItem, (menu, id, text, wxT(""), wxITEM_NORMAL, submenu));
+	item->SetBitmap(wxBitmap(xpm));
+	menu->Append(item);
 }
 
 void
-MainFrame::OpenLibs()
+Shader::BuildMenu()
 {
-    wxTreeItemId root = nodes->AddRoot(wxT("Nodes"));
-#ifdef __WIN32__
-    char lib_path[MAX_PATH];
-    GetModuleFileName(NULL, lib_path, sizeof(lib_path));
-    *(strrchr(lib_path, '\\') + 1) = '\0';
-    strcat(lib_path, "lib\\");
-    wxDir dir(lib_path);
-#else
-    const char *lib_path = "/usr/local/shader/lib/";
-    wxDir dir(wxString::FromAscii(lib_path));
-#endif
-    if (!dir.IsOpened())
-        return;
-    regdata_t rd;
-    lua_pushstring(L, lib_path);
-    lua_pushcclosure(L, include, 1);
-    lua_setglobal(L, "include");
-    lua_pushlightuserdata(L, (void *)&rd);
-    lua_pushcclosure(L, lregister, 1);
-    lua_setglobal(L, "register");
-    wxString filename;
-    bool cont = dir.GetFirst(&filename, wxT("*.nodes"), wxDIR_FILES);
-    while (cont)
-    {
-        rd.functions = LUA_NOREF;
-        filename.Prepend(wxString::FromAscii(lib_path));
-        if (load_lua(L, (const char *)filename.c_str(), 0) != 0)
-        {
-            wxMessageDialog dialog(this, wxString::FromAscii(lua_tostring(L, -1)), wxT("Error"), wxOK);
-            dialog.ShowModal();
-            return;
-        }
-        if (rd.functions != LUA_NOREF)
-        {
-            lua_rawgeti(L, LUA_REGISTRYINDEX, rd.functions);
-            lua_getfield(L, -1, "__name");
-            wxString name_space = wxString::FromAscii(lua_tostring(L, -1));
-            lua_pop(L, 1);
-            wxTreeItemId library = nodes->AppendItem(root, name_space);
-            lua_pushvalue(L, -1);
-            lua_setglobal(L, name_space.c_str());
-            lua_pushnil(L);  // first key
-            while (lua_next(L, -2) != 0)
-            {
-                lua_pushvalue(L, -2);
-                const char *name = lua_tostring(L, -1);
-                if (name[0] != '_' || name[1] != '_')
-                    nodes->AppendItem(library, wxString::FromAscii(name));
-                lua_pop(L, 2);
-            }
-            lua_pop(L, 1);
-            nodes->SortChildren(library);
-        }
-        cont = dir.GetNext(&filename);
-    }
-    nodes->SortChildren(root);
-    nodes->Expand(root);
-    lua_pushnil(L);
-    lua_setglobal(L, "register");
-    lua_pushnil(L);
-    lua_setglobal(L, "include");
+	// --------------------------------------------------
+	// The main menu,
+	m_MenuBar = NEW(wxMenuBar, (0));
+
+	// --------------------------------------------------
+	// The list of available projects.
+	m_ProjectsMenu = NEW(wxMenu, ());
+	wxArrayString types = Project::GetProjectTypes();
+	for (unsigned int index = 0; index < types.GetCount(); index++)
+	{
+		m_ProjectsMenu->Append(wxID_TYPES + index, types[index]);
+	}
+	if (m_ProjectsMenu->GetMenuItemCount() == 0)
+	{
+		m_ProjectsMenu->Append(wxID_TYPES, wxT("Empty"));
+		m_ProjectsMenu->Enable(wxID_TYPES, false);
+	}
+
+	// --------------------------------------------------
+	// The list of recent projects.
+	m_RecentMenu = NEW(RecentMenu, (wxID_RECENT + 1, wxID_RECENT + 20));
+
+	// --------------------------------------------------
+	// The file menu.
+	m_FileMenu = NEW(wxMenu, ());
+	AppendItem(m_FileMenu, wxID_NEW, new_xpm, wxT(""), m_ProjectsMenu);
+	AppendItem(m_FileMenu, wxID_OPEN, open_xpm);
+	m_FileMenu->Append(wxID_RECENT, wxT("Recent projects\tCtrl-R"), m_RecentMenu);
+	m_FileMenu->AppendSeparator();
+	AppendItem(m_FileMenu, wxID_SAVE, save_xpm);
+	m_FileMenu->Append(wxID_SAVEAS, wxT("Save as...\tCtrl-A"));
+	m_FileMenu->AppendSeparator();
+	AppendItem(m_FileMenu, wxID_EXIT, x_xpm, wxT("Quit\tCtrl-Q"));
+	// Disable some options.
+	m_FileMenu->Enable(wxID_SAVE, false);
+	m_FileMenu->Enable(wxID_SAVEAS, false);
+	m_MenuBar->Append(m_FileMenu, wxT("&File"));
+
+	// --------------------------------------------------
+	// The edit menu.
+	m_EditMenu = NEW(wxMenu, ());
+	m_EditMenu->Append(wxID_UNDO, wxT("&Undo\tCtrl-Z"));
+	m_EditMenu->Append(wxID_REDO, wxT("&Redo\tCtrl-Y"));
+	m_EditMenu->AppendSeparator();
+	AppendItem(m_EditMenu, wxID_CUT, cut_xpm);
+	AppendItem(m_EditMenu, wxID_COPY, copy_xpm);
+	AppendItem(m_EditMenu, wxID_PASTE, paste_xpm);
+	m_EditMenu->Append(wxID_DUPLICATE, wxT("&Duplicate\tCtrl-D"));
+	m_EditMenu->AppendSeparator();
+	m_EditMenu->Append(wxID_GROUP, wxT("Group\tCtrl-G"));
+	m_EditMenu->Append(wxID_UNGROUP, wxT("Ungroup\tCtrl-U"));
+	m_EditMenu->Append(wxID_SAVEGROUP, wxT("Save group...\tCtrl-H"));
+	m_EditMenu->AppendSeparator();
+	m_EditMenu->Append(wxID_COPYMETAFILE, wxT("Copy as &metafile\tCtrl-M"));
+	m_EditMenu->AppendSeparator();
+	m_EditMenu->Append(wxID_CONFIGURE, wxT("Project configuration...\tCtrl-P"));
+	// Disable some options.
+	m_EditMenu->Enable(wxID_UNDO, false);
+	m_EditMenu->Enable(wxID_REDO, false);
+	m_EditMenu->Enable(wxID_CUT, false);
+	m_EditMenu->Enable(wxID_COPY, false);
+	m_EditMenu->Enable(wxID_PASTE, false);
+	m_EditMenu->Enable(wxID_DUPLICATE, false);
+	m_EditMenu->Enable(wxID_GROUP, false);
+	m_EditMenu->Enable(wxID_UNGROUP, false);
+	//m_EditMenu->Enable(wxID_COPYMETAFILE, false);
+	m_MenuBar->Append(m_EditMenu, wxT("&Edit"));
+
+	// --------------------------------------------------
+	// The tools menu.
+	m_ToolsMenu = NEW(wxMenu, ());
+	m_ToolsMenu->Append(wxID_RELOADLIBS, wxT("Reload libraries\tCtrl-L"));
+	// Disable some options.
+	m_ToolsMenu->Enable(wxID_RELOADLIBS, false);
+	m_MenuBar->Append(m_ToolsMenu, wxT("&Tools"));
+
+	// --------------------------------------------------
+	// The viewers menu.
+	//m_ViewersMenu = NEW(wxMenu, ());
+	//m_MenuBar->Append(m_ViewersMenu, wxT("&Viewers"));
+
+	// --------------------------------------------------
+	// The help menu.
+	m_HelpMenu = NEW(wxMenu, ());
+	m_HelpMenu->Append(wxID_ABOUT, wxT("About...\tF1"));
+	m_MenuBar->Append(m_HelpMenu, wxT("&Help"));
+
+	// --------------------------------------------------
+	// Set the menu.
+	this->SetMenuBar(m_MenuBar);
 }
 
 void
-MainFrame::Open()
+Shader::AddStatusBar()
 {
-    ConfirmSave();
-    wxFileDialog dialog(this, wxT("Open file"), file_path, wxT(""), wxT("Shader files (*.shader)|*.shader|All files (*.*)|*.*"), wxFD_OPEN | wxFD_FILE_MUST_EXIST);
-    if (dialog.ShowModal() == wxID_OK)
-    {
-        file_name = dialog.GetPath();
-        wxFileName fn(file_name);
-        file_path = fn.GetPath();
-        graph->Open((const char *)file_name.c_str());
-        SetTitle(wxT("Shader - ") + wxFileName::FileName(file_name).GetFullName());
-    }
+	m_StatusBar = NEW(wxStatusBar, (this, wxID_ANY, wxST_SIZEGRIP));
+	this->SetStatusBar(m_StatusBar);
 }
 
 void
-MainFrame::Save()
+Shader::NewProject(const wxString& type)
 {
-    if (file_name.IsEmpty())
-    {
-        SaveAs();
-        return;
-    }
-    graph->Save((const char *)file_name.c_str());
+	MenuState *ms = NEW(MenuState, (m_MenuBar));
+	ms->Add(wxID_UNDO);
+	ms->Add(wxID_REDO);
+	ms->Add(wxID_CUT);
+	ms->Add(wxID_COPY);
+	//ms->Add(wxID_PASTE);
+	ms->Add(wxID_DUPLICATE);
+	ms->Add(wxID_GROUP);
+	ms->Add(wxID_UNGROUP);
+	ms->Add(wxID_SAVEGROUP);
+	ms->Get();
+	Project::New(this, ms, type);
 }
 
 void
-MainFrame::SaveAs()
+Shader::Open(const wxString& file)
 {
-    wxFileDialog dialog(this, wxT("Save as"), file_path, file_name, wxT("Shader files (*.shader)|*.shader"), wxFD_SAVE | wxFD_CHANGE_DIR);
-    if (dialog.ShowModal() == wxID_OK)
-    {
-        file_name = dialog.GetPath();
-        wxFileName fn(file_name);
-        file_path = fn.GetPath();
-        graph->Save((const char *)file_name.c_str());
-        SetTitle(wxT("Shader - ") + wxFileName::FileName(file_name).GetFullName());
-    }
-}
+	MenuState *ms = NEW(MenuState, (m_MenuBar));
+	ms->Add(wxID_UNDO);
+	ms->Add(wxID_REDO);
+	ms->Add(wxID_CUT);
+	ms->Add(wxID_COPY);
+	//ms->Add(wxID_PASTE);
+	ms->Add(wxID_DUPLICATE);
+	ms->Add(wxID_GROUP);
+	ms->Add(wxID_UNGROUP);
+	ms->Add(wxID_SAVEGROUP);
+	ms->Get();
 
-void
-MainFrame::SaveCode()
-{
-    wxFileDialog dialog(this, wxT("Save code"), code_path, code_name, wxT("All files (*.*)|*.*"), wxFD_SAVE | wxFD_CHANGE_DIR);
-    if (dialog.ShowModal() == wxID_OK)
-        {
-        long from, to;
-        code->GetSelection(&from, &to);
-        code->SetSelection(-1, -1);
-        wxString source = code->GetStringSelection();
-        code->SetSelection(from, to);
-        code_name = dialog.GetPath();
-        wxFileName fn(code_name);
-        code_path = fn.GetPath();
-
-        FILE* file = fopen( code_name.c_str(), "wb" );
-        if (file != NULL)
-        {
-            fwrite(source.c_str(), 1, source.length(), file);
-            fclose(file);
-        }
-        else
-        {
-            wxMessageDialog dialog(this, wxString::FromAscii(strerror(errno)), wxT("Error"), wxOK);
-            dialog.ShowModal();
-        }
-    }
-}
-
-void
-MainFrame::ConfirmSave()
-{
-    if (graph->IsModified())
-    {
-        wxString message = wxT("Save changes to ");
-        if (file_name.IsEmpty())
-            message.Append(wxT("(untitled)"));
-        else
-            message.Append(file_name);
-        message.Append('?');
-        wxMessageDialog dialog(this, message, wxT("Confirm"), wxYES_NO);
-        if (dialog.ShowModal() == wxID_YES)
-            Save();
-    }
-}
-
-MainFrame::MainFrame() : wxFrame(NULL, wxID_ANY, wxT("igFragmentShader"))
-{
-    L = luaB_openlua();
-
-    wxMenuBar *menu = new wxMenuBar(0);
-
-    wxMenu *file = new wxMenu();
-    file->Append(wxID_NEW);
-    file->Append(wxID_OPEN);
-    file->Append(wxID_SAVE);
-    file->Append(wxID_SAVEAS, wxT("Save As...\tCtrl-A"));
-    file->AppendSeparator();
-    file->Append(wxID_SAVECODE, wxT("Save code\tCtrl-G"));
-    file->AppendSeparator();
-    file->Append(wxID_EXIT, wxT("Quit\tCtrl-Q"));
-    menu->Append(file, wxT("&File"));
-    
-    edit = new wxMenu();
-    edit->Append(wxID_UNDO, wxT("&Undo\tCtrl-Z"));
-    edit->Append(wxID_REDO, wxT("&Redo\tCtrl-Y"));
-    edit->AppendSeparator();
-    edit->Append(wxID_CUT);
-    edit->Append(wxID_COPY);
-    edit->Append(wxID_PASTE);
-    edit->Append(wxID_DUPLICATE, wxT("&Duplicate\tCtrl-D"));
-    edit->AppendSeparator();
-    edit->Append(wxID_COPYMETAFILE, wxT("Copy as &metafile\tCtrl-M"));
-    edit->Append(wxID_COPYCODE, wxT("Copy code\tCtrl-P"));
-    menu->Append(edit, wxT("&Edit"));
-    
-    wxMenu *tools = new wxMenu();
-    tools->Append(wxID_RELOAD, wxT("Reload libraries\tCtrl-R"));
-    menu->Append(tools, wxT("&Tools"));
-
-    this->SetMenuBar(menu);
-    
-    status = new wxStatusBar(this);
-    const int widths[] = { -1, -1, -1 };
-    status->SetFieldsCount(3, widths);
-    this->SetStatusBar(status);
-
-    versplitter = new wxSplitterWindow(this, wxID_ANY);
-    horsplitter = new wxSplitterWindow(versplitter, wxID_ANY);
-    
-    // top-left window
-    nodes = new wxTreeCtrl(horsplitter, wxID_ANY); //, wxDefaultPosition, wxDefaultSize, wxTR_HAS_BUTTONS | wxTR_HIDE_ROOT);
-    
-    // bottom-left window
-    ph = new wxNotebook(horsplitter, wxID_ANY);
-    props = new wxPropertyEditor(ph);
-    ph->AddPage(props, wxT("Properties"), true);
-    comments = new wxTextCtrl(ph, wxID_ANY, wxT(""), wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE | wxTE_READONLY | wxTE_RICH);
-    ph->AddPage(comments, wxT("Help"));
-
-    // right window
-    wxNotebook *notebook = new wxNotebook(versplitter, wxID_ANY);
-#ifdef __WIN32__
-    char dot_path[MAX_PATH];
-    GetModuleFileName(NULL, dot_path + 1, sizeof(dot_path) - 1);
-    dot_path[0] = '"';
-    *(strrchr(dot_path, '\\') + 1) = '\0';
-    strcat(dot_path, "dot\\dot.exe\"");
-    graph = new Graph(notebook, dot_path, L);
-#else
-    graph = new Graph(notebook, "dot", L);
-#endif
-    notebook->AddPage(graph, wxT("Graph"), true);
-    code = new wxTextCtrl(notebook, wxID_ANY, wxT(""), wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE | wxTE_READONLY | wxTE_RICH);
-    notebook->AddPage(code, wxT("Code"));
-    
-    horsplitter->SplitHorizontally(nodes, ph);
-    versplitter->SplitVertically(horsplitter, notebook);
-    versplitter->SetMinimumPaneSize(20);
-    horsplitter->SetMinimumPaneSize(20);
-    luaB_setfuncs(L, edit, status, props, graph, code, ph);
-
-    OpenLibs();
-    
-    graph->New();
-    
-    wxConfig *config = new wxConfig(wxT("igFragmentShader"));
-    wxRect pos = GetScreenRect();
-    long value;
-    bool ok = config->Read(wxT("x"), &value);
-    pos.SetX(value);
-    ok = ok && config->Read(wxT("y"), &value);
-    pos.SetY(value);
-    ok = ok && config->Read(wxT("width"), &value);
-    pos.SetWidth(value);
-    ok = ok && config->Read(wxT("height"), &value);
-    pos.SetHeight(value);
-    ok = ok && config->Read(wxT("filepath"), &file_path);
-    ok = ok && config->Read(wxT("codepath"), &code_path);
-    long horpos, verpos;
-    ok = ok && config->Read(wxT("horsash"), &horpos);
-    ok = ok && config->Read(wxT("versash"), &verpos);
-    ok = ok && config->Read(wxT("maximized"), &value);
-    if (ok)
-    {
-        SetSize(pos);
-        horsplitter->SetSashPosition(horpos, true);
-        versplitter->SetSashPosition(verpos, true);
-        if (value != 0)
-            Maximize();
-    }
-    delete config;
-}
-
-void
-MainFrame::ReloadLibs()
-{
-    graph->Save("C:\\temp.shader");
-    graph->New();
-    props->Clear();
-    lua_close(L);
-    L = luaB_openlua();
-    luaB_setfuncs(L, edit, status, props, graph, code, ph);
-    graph->SetLuaState(L);
-    nodes->DeleteAllItems();
-    OpenLibs();
-    graph->Open("C:\\temp.shader");
-    graph->Redraw();
-}
-
-void
-MainFrame::SaveConfig()
-{
-    wxConfig *config = new wxConfig(wxT("igFragmentShader"));
-    wxRect pos = GetRect();
-    config->Write(wxT("x"), pos.GetX());
-    config->Write(wxT("y"), pos.GetY());
-    config->Write(wxT("width"), pos.GetWidth());
-    config->Write(wxT("height"), pos.GetHeight());
-    config->Write(wxT("filepath"), file_path);
-    config->Write(wxT("codepath"), code_path);
-    config->Write(wxT("horsash"), horsplitter->GetSashPosition());
-    config->Write(wxT("versash"), versplitter->GetSashPosition());
-    config->Write(wxT("maximized"), IsMaximized() ? 1 : 0);
-    delete config;
-}
-
-void
-MainFrame::OnClose(wxCloseEvent& evt)
-{
-    SaveConfig();
-    ConfirmSave();
-    Destroy();
-}
-
-void
-MainFrame::OnQuit(wxCommandEvent& evt)
-{
-    SaveConfig();
-    ConfirmSave();
-    Close(true);
-}
-
-void
-MainFrame::OnCommand(wxCommandEvent& evt)
-{
-    switch (evt.GetId())
-    {
-        case wxID_OPEN:
-            Open();
-            break;
-        case wxID_SAVE:
-            Save();
-            break;
-        case wxID_SAVEAS:
-            SaveAs();
-            break;
-        case wxID_SAVECODE:
-            SaveCode();
-            break;
-        case wxID_NEW:
-            ConfirmSave();
-            graph->New();
-            file_name.Empty();
-            SetTitle(wxT("Shader"));
-            break;
-        case wxID_UNDO:
-            graph->Undo();
-            break;
-        case wxID_REDO:
-            graph->Redo();
-            break;
-        case wxID_CUT:
-            graph->Cut();
-            break;
-        case wxID_COPY:
-            graph->Copy();
-            break;
-        case wxID_PASTE:
-            graph->Paste();
-            break;
-        case wxID_DUPLICATE:
-            graph->Duplicate();
-            break;
-        case wxID_COPYMETAFILE:
-            graph->CopyAsMetafile();
-            break;
-        case wxID_COPYCODE:
-        {
-            long from, to;
-            code->GetSelection(&from, &to);
-            code->SetSelection(-1, -1);
-            code->Copy();
-            code->SetSelection(from, to);
-            break;
-        }
-        case wxID_RELOAD:
-            ReloadLibs();
-            break;
-    }
+  m_FileName = file;
+  wxFileName fn(m_FileName);
+  m_FilePath = fn.GetPath();	
+  Project::Load(this, ms, m_FileName);
+	m_RecentMenu->Put(m_FileName);
 }
 
 int
-MainFrame::GetItemLevel(wxTreeItemId item)
+Shader::Compile(int index, const wxString& output)
 {
-    wxTreeItemId root = nodes->GetRootItem();
-    int level = 0;
-    while (item != root)
-    {
-        level++;
-        item = nodes->GetItemParent(item);
-    }
-    return level;
+	return Project::GetProject()->Compile(index, output);
 }
 
 void
-MainFrame::OnItemActivated(wxTreeEvent& evt)
+Shader::Open()
 {
-    wxTreeItemId item = evt.GetItem();
-    if (GetItemLevel(item) == 2)
+	if (ConfirmSave() != wxID_CANCEL)
+	{
+		wxFileDialog dialog(this, wxT("Open file"), m_FilePath, wxT(""), wxT("Shader files (*.graphshader)|*.graphshader|All files (*.*)|*.*"), wxFD_OPEN | wxFD_FILE_MUST_EXIST);
+		if (dialog.ShowModal() == wxID_OK)
+		{
+			Open(dialog.GetPath());
+		}
+	}
+}
+
+int
+Shader::Save()
+{
+	if (Project::GetProject() != 0)
+	{
+		if (m_FileName.IsEmpty())
+		{
+			return SaveAs();
+		}
+		Project::GetProject()->Save(m_FileName);
+	}
+	return wxID_YES;
+}
+
+int
+Shader::SaveAs()
+{
+	wxFileDialog dialog(this, wxT("Save as"), m_FilePath, m_FileName, wxT("Shader files (*.graphshader)|*.graphshader"), wxFD_SAVE | wxFD_CHANGE_DIR | wxFD_OVERWRITE_PROMPT);
+	int choice = dialog.ShowModal();
+
+  if (choice == wxID_OK)
+  {
+    m_FileName = dialog.GetPath();
+    wxFileName fn(m_FileName);
+    m_FilePath = fn.GetPath();
+    Project::GetProject()->Save(m_FileName);
+    m_RecentMenu->Put(m_FileName);
+  }
+
+	return choice;
+}
+
+int
+Shader::ConfirmSave()
+{
+  Project* project  = Project::GetProject();
+  bool     modified = false;
+ 
+  if (project != 0)
+  {
+    int count = (int)project->GetPageCount();
+    for (int index = 0; index < count; index++)
     {
-        wxTreeItemId parent = nodes->GetItemParent(item);
-        graph->AddNode((const char *)nodes->GetItemText(parent).c_str(), (const char *)nodes->GetItemText(item).c_str());
+      Panel*  panel = (Panel *)project->GetPage(index);
+      modified      = modified || panel->GetUndoerCtrl()->IsDirty();
     }
+  }
+
+	if (modified)
+	{
+		wxString message = wxT("Save changes to ");
+		if (m_FileName.IsEmpty())
+		{
+			message.Append(wxT("(untitled)"));
+		}
+		else
+		{
+			message.Append(m_FileName);
+		}
+		message.Append('?');
+		wxMessageDialog dialog(this, message, wxT("Confirm"), wxYES_NO | wxCANCEL);
+		int choice = dialog.ShowModal();
+		if (choice == wxID_YES)
+		{
+			return Save();
+		}
+		return choice;
+	}
+	return wxID_YES;
 }
 
 void
-MainFrame::OnSelChanged(wxTreeEvent& evt)
+Shader::EnableMenu(const wxString& label, bool enable)
 {
-    wxTreeItemId parent, item = evt.GetItem();
-    int level = GetItemLevel(item);
-    wxString help;
-    switch (level)
-    {
-        case 1:
-            help = graph->GetHelp((const char *)nodes->GetItemText(item).c_str(), NULL).c_str();
-            break;
-        case 2:
-            parent = nodes->GetItemParent(item);
-            help = graph->GetHelp((const char *)nodes->GetItemText(parent).c_str(), (const char *)nodes->GetItemText(item).c_str()).c_str();
-            break;
-        default:
-            help = wxString::FromAscii("Click on a item to see a help text about it; double-click it to add the item to the graph");
-            break;
-    }
-    comments->ChangeValue(help);
+	int slash = label.Find('/');
+	if (slash != wxNOT_FOUND)
+	{
+		wxString first = label.Left(slash);
+		wxString second = label.Mid(slash + 1);
+		int id = m_MenuBar->FindMenuItem(first, second);
+		if (id != wxNOT_FOUND)
+		{
+			m_MenuBar->Enable(id, enable);
+		}
+	}
+	else
+	{
+		int pos = m_MenuBar->FindMenu(label);
+		if (pos != wxNOT_FOUND)
+		{
+			m_MenuBar->EnableTop(pos, enable);
+		}
+	}
 }
 
-class MyApp: public wxApp
+void
+Shader::OnTimer(wxTimerEvent& evt)
 {
-    public:
-        MyApp() { }
-        virtual bool OnInit();
+	wxString title = wxT("igFragmentShader - ");
+	if (m_FileName.IsEmpty())
+	{
+		title.Append(wxT("(untitled)"));
+	}
+	else
+	{
+		title.append(wxFileName::FileName(m_FileName).GetFullName());
+	}
+	if (Project::GetProject() != 0)
+	{
+		m_MenuBar->Enable(wxID_SAVEAS, true);
+		m_MenuBar->Enable(wxID_SAVE, true);
+	}
+	else
+	{
+		m_MenuBar->Enable(wxID_SAVEAS, false);
+		m_MenuBar->Enable(wxID_SAVE, false);
+	}
+	SetTitle(title);
+	m_MenuBar->Enable(wxID_PASTE, wxTheClipboard->IsSupported(wxDataFormat(wxDF_TEXT)));
+}
 
-    DECLARE_NO_COPY_CLASS(MyApp)
-};
-
-IMPLEMENT_APP(MyApp)
-
-bool MyApp::OnInit()
+void
+Shader::OnClose(wxCloseEvent& evt)
 {
-    MainFrame* frame = new MainFrame();
-    frame->Show(true);
-    return true;
+	SaveConfig();
+	if (evt.CanVeto())
+	{
+		if (ConfirmSave() != wxID_CANCEL)
+		{
+			goto destroy;
+		}
+		else
+		{
+			evt.Veto();
+		}
+	}
+	else
+	{
+		Save();
+		destroy:
+		Project::Destroy();
+		Destroy();
+	}
+}
+
+void
+Shader::OnNew(wxCommandEvent& evt)
+{
+	if (ConfirmSave() != wxID_CANCEL)
+	{
+		NewProject(m_ProjectsMenu->GetLabelText(evt.GetId()));
+		m_FileName.Empty();
+	}
+}
+
+void
+Shader::OnRecent(wxCommandEvent& evt)
+{
+	wxString file;
+	if (m_RecentMenu->Get(evt.GetId(), file) && ConfirmSave() != wxID_CANCEL)
+	{
+		Open(file);
+	}
+}
+
+void
+Shader::OnViewer(wxCommandEvent& evt)
+{
+	//project->OnViewer(evt.GetId() - wxID_VIEWERS);
+}
+
+void
+Shader::OnAbout(wxCommandEvent& evt)
+{
+	wxAboutDialogInfo info;
+	info.SetName(wxT("FragmentShader"));
+	info.SetDescription(wxT("Built on " __TDATE__ " " __TTIME__));
+	wxAboutBox(info);
+}
+
+void
+Shader::OnCommand(wxCommandEvent& evt)
+{
+	Project *project = Project::GetProject();
+	Panel *panel;
+	Undoer *undoer;
+	Graph *graph;
+	if (project != NULL)
+	{
+		panel = project->GetPanel();
+		if (panel != NULL)
+		{
+			undoer = panel->GetUndoerCtrl();
+			graph = panel->GetGraphCtrl();
+		}
+	}
+	switch (evt.GetId())
+	{
+	case wxID_OPEN:
+		Open();
+		break;
+	case wxID_SAVE:
+		Save();
+		break;
+	case wxID_SAVEAS:
+		SaveAs();
+		break;
+	case wxID_EXIT:
+		Close(false);
+		break;
+	case wxID_UNDO:
+		undoer->Undo();
+		break;
+	case wxID_REDO:
+		undoer->Redo();
+		break;
+	case wxID_CUT:
+		graph->Cut();
+		break;
+	case wxID_COPY:
+		graph->Copy();
+		break;
+	case wxID_PASTE:
+		graph->Paste();
+		break;
+	case wxID_DUPLICATE:
+		graph->Duplicate();
+		break;
+	case wxID_GROUP:
+		graph->GroupNodes();
+		break;
+	case wxID_UNGROUP:
+		graph->UngroupNodes();
+		break;
+	case wxID_SAVEGROUP:
+		graph->SaveGroup();
+		break;
+	case wxID_COPYMETAFILE:
+		graph->CopyAsMetafile();
+		break;
+	case wxID_CONFIGURE:
+		project->Configure();
+		break;
+	case wxID_RELOADLIBS:
+		//project->ReloadLibs();
+		break;
+	}
+}
+
+void
+Shader::LoadConfig()
+{
+	wxConfigBase *config = wxConfigBase::Get();
+	//config->DeleteAll();
+	// Load the window position on the screen.
+	wxRect pos = GetScreenRect();
+	long value;
+	bool ok = config->Read(wxT("main_x"), &value);
+	pos.SetX(value);
+	ok = ok && config->Read(wxT("main_y"), &value);
+	pos.SetY(value);
+	ok = ok && config->Read(wxT("main_width"), &value);
+	pos.SetWidth(value);
+	ok = ok && config->Read(wxT("main_height"), &value);
+	pos.SetHeight(value);
+	if (ok)
+	{
+		SetSize(pos);
+	}
+	// Check if the window was maximized.
+	if (config->Read(wxT("main_maximized"), &value) && value != 0)
+	{
+		Maximize();
+	}
+	// Load the list of recent projects.
+	m_RecentMenu->Load(*config, wxT("main_recent"));
+}
+
+void
+Shader::SaveConfig()
+{
+	wxConfigBase *config = wxConfigBase::Get();
+	wxRect pos = GetRect();
+	// Save the window position on the screen.
+	config->Write(wxT("main_x"), pos.GetX());
+	config->Write(wxT("main_y"), pos.GetY());
+	config->Write(wxT("main_width"), pos.GetWidth());
+	config->Write(wxT("main_height"), pos.GetHeight());
+	// Save 1 if the window is maximized.
+	config->Write(wxT("main_maximized"), IsMaximized() ? 1 : 0);
+	// Write the list of recent projects.
+	m_RecentMenu->Save(*config, wxT("main_recent"));
 }

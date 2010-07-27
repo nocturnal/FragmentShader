@@ -1,5 +1,0 @@
-NODENAME	SPU [Store]
-stqa 	"rc, s18"	Store Quadword (a-form) 	*(s18) = rt
-stqd 	"rc, s14(ra)"	Store Quadword (d-form) 	*(ra+s14) = rt
-stqr 	"rc, s18"	Store Quadword Instruction Relative (a-form) 	*(s18) = rt
-stqx 	"rc, ra, rb"	Store Quadword (x-form) 	*(ra+rb) = rt

@@ -1,9 +1,0 @@
-NODENAME	SPU [Load]
-ila 	"rt, u18"	Immediate Load Address 	rt.w[n] = u18
-il 	"rt, s16"	Immediate Load Word 	rt.w[n] = ext(s16)
-ilh 	"rt, u16"	Immediate Load Halfword 	rt.h[n] = u16
-ilhu 	"rt, u16"	Immediate Load Halfword Upper 	rt.w[n] = u16 << 16
-lqa 	"rt, s18"	Load Quadword (a-form) 	rt = *(s18)
-lqd 	"rt, s14(ra)"	Load Quadword (d-form) 	rt = *(s14 + ra)
-lqr 	"rt, s18"	Load Quadword Instruction Relative (a-form) 	rt = *(s18)
-lqx 	"rt, ra, rb"	Load Quadword (x-form) 	rt = *(ra+rb)

@@ -1,3 +1,0 @@
-NODENAME	SPU [Float to Integer]
-cflts 	"rt, ra, scale7"	Convert Floating to Signed Integer 	TODO
-cfltu 	"rt, ra, scale7"	Convert Floating to Unsigned Integer 	TODO

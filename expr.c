@@ -1,9 +1,33 @@
+/*
+Copyright (c) 2007 Andre de Leiradella
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+*/
+
 #include "expr.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <math.h>
 #include <ctype.h>
+
+#define inline __inline
 
 /* Tokens. */
 #define EOE	0
@@ -113,7 +137,7 @@ static inline int is_alpha(char k) {
 static int match_any(parser_t *p) {
 	int	k;
 	char	*lexeme;
-	
+
 	/* Skip spaces. */
 	do
 		k = p->config->get_char(p->config->user_data);
@@ -121,16 +145,21 @@ static int match_any(parser_t *p) {
 	/* Return EOE if we've reached the end of the input. */
 	if (k == -1) {
 		p->token = EOE;
-		strcpy(p->lexeme, "EOE");
+		strcpy_s(p->lexeme, sizeof(p->lexeme), "EOE");
 		return 1;
 	}
 	lexeme = p->lexeme;
-	/* If the character is a digit, the token is a number. */
-	if (is_digit(k)) {
+	/* If the character is a digit or a dot, the token is a number. */
+	if (is_digit(k) || k == '.') {
 		/* Assume a NUM for now... */
 		p->token = NUM;
+		/* If the character is a dot, add it to the lexeme and skip it. */
+		if (k == '.') {
+			*lexeme++ = k;
+			k = p->config->get_char(p->config->user_data);
+		}
 		/* Check for octal and hexadecimal numbers. */
-		if (k == '0') {
+		else if (k == '0') {
 			/* Skip the leading zero... */
 			*lexeme++ = k;
 			k = p->config->get_char(p->config->user_data);
@@ -156,7 +185,7 @@ static int match_any(parser_t *p) {
 				/* Check for an invalid digit. */
 				if (k == '8' || k == '9') {
 					*lexeme = '\0';
-					sprintf(p->config->id, "%c", k);
+					sprintf_s(p->config->id, sizeof(p->config->id), "%c", k);
 					p->error = EXPR_INVALID_DIGIT;
 					return 0;
 				}
@@ -418,15 +447,15 @@ static int match_any(parser_t *p) {
 	}
 	/* Invalid character found. */
 	if (k >= 0 && k < 32)
-		sprintf(p->config->id, "0x%.2x", k);
+		sprintf_s(p->config->id, sizeof(p->config->id), "0x%.2x", k);
 	else
-		sprintf(p->config->id, "%c", k);
+		sprintf_s(p->config->id, sizeof(p->config->id), "%c", k);
 	p->error = EXPR_INVALID_CHAR;
 	return 0;
 	/* Lexeme too big. */
 	toobig:
 	*lexeme = '\0';
-	strcpy(p->config->id, lexeme);
+	strcpy_s(p->config->id, sizeof(p->config->id), lexeme);
 	p->error = EXPR_LEXEME_TOO_BIG;
 	return 0;
 	/* Ok. */
@@ -439,13 +468,13 @@ static int match_any(parser_t *p) {
 static int match(parser_t *p, int token) {
 	if (p->token != token) {
 		p->error = EXPR_UNEXPECTED;
-		strcpy(p->config->id, p->lexeme);
+		strcpy_s(p->config->id, sizeof(p->config->id), p->lexeme);
 		return 0;
 	}
 	return match_any(p);
 }
 
-/* Pushe a number on the stack. */
+/* Push a number on the stack. */
 static int push_number(parser_t *p, double d) {
 	if (p->stack_pointer == p->stack_max) {
 		p->error = EXPR_STACK_OVERFLOW;
@@ -500,7 +529,7 @@ static int terminal(parser_t *p) {
 			return push_number(p, strtod(p->lexeme, NULL)) && match_any(p);
 		case ID:
 			/* Get the identifier. */
-			strcpy(p->config->id, p->lexeme);
+			strcpy_s(p->config->id, sizeof(p->config->id), p->lexeme);
 			if (!match_any(p)) return 0;
 			/* If there is an '(' following the id, it's a method call. */
 			if (p->token == LPAR) {
@@ -526,7 +555,7 @@ static int terminal(parser_t *p) {
 						}
 						get_value(p, p->stack_pointer);
 						parameters[num_parameters++] = p->stack_pointer->d;
-                                        }
+					}
 				}
 				if (!match(p, RPAR)) return 0;
 				if (num_parameters != f->num_parameters) {
@@ -555,7 +584,7 @@ static int unary(parser_t *p) {
 	int		op;
 	value_t	*arg;
 	double	d;
-	
+
 	if (p->token == ADD || p->token == SUB || p->token == NEG || p->token == NOT || p->token == INC || p->token == DEC) {
 		op = p->token;
 		if (!match_any(p) || !unary(p)) return 0;
@@ -710,7 +739,7 @@ static int term(parser_t *p) {
 static int shift(parser_t *p) {
 	int		op;
 	value_t	*larg, *rarg;
-	
+
 	/* Get the left operand. */
 	if (!term(p)) return 0;
 	/* Parse shifts. */
@@ -739,7 +768,7 @@ static int shift(parser_t *p) {
 static int conditional(parser_t *p) {
 	int		op;
 	value_t	*larg, *rarg;
-	
+
 	/* Get the left operand. */
 	if (!shift(p)) return 0;
 	/* Parse conditionals. */
@@ -774,7 +803,7 @@ static int conditional(parser_t *p) {
 static int equal(parser_t *p) {
 	int		op;
 	value_t	*larg, *rarg;
-	
+
 	/* Get the left operand. */
 	if (!conditional(p)) return 0;
 	/* Parse (in)equalities. */
@@ -802,7 +831,7 @@ static int equal(parser_t *p) {
 /* Parses bitwise and operations. */
 static int bitwise_and(parser_t *p) {
 	value_t	*larg, *rarg;
-	
+
 	/* Get the left operand. */
 	if (!equal(p)) return 0;
 	/* Parse bitwise ands. */
@@ -821,7 +850,7 @@ static int bitwise_and(parser_t *p) {
 /* Parses bitwise xor operations. */
 static int bitwise_xor(parser_t *p) {
 	value_t	*larg, *rarg;
-	
+
 	/* Get the left operand. */
 	if (!bitwise_and(p)) return 0;
 	/* Parse bitwise xors. */
@@ -840,7 +869,7 @@ static int bitwise_xor(parser_t *p) {
 /* Parses bitwise or operations. */
 static int bitwise_or(parser_t *p) {
 	value_t	*larg, *rarg;
-	
+
 	/* Get the left operand. */
 	if (!bitwise_xor(p)) return 0;
 	/* Parse bitwise ors. */
@@ -859,7 +888,7 @@ static int bitwise_or(parser_t *p) {
 /* Parses logical and operations. */
 static int logical_and(parser_t *p) {
 	value_t	*larg, *rarg;
-	
+
 	/* Get the left operand. */
 	if (!bitwise_or(p)) return 0;
 	/* Parse logical ands. */
@@ -878,7 +907,7 @@ static int logical_and(parser_t *p) {
 /* Parses logical or operations. */
 static int logical_or(parser_t *p) {
 	value_t	*larg, *rarg;
-	
+
 	/* Get the left operand. */
 	if (!logical_and(p)) return 0;
 	/* Parse logical ors. */
@@ -897,7 +926,7 @@ static int logical_or(parser_t *p) {
 /* Parses the ternary operator. */
 static int ternary(parser_t *p) {
 	int	first;
-	
+
 	/* Evaluate the logical expression. */
 	if (!logical_or(p)) return 0;
 	if (p->token == QUEST) {
@@ -924,7 +953,7 @@ static int ternary(parser_t *p) {
 static int assignment(parser_t *p) {
 	int		op;
 	value_t	*lvalue, *expr;
-	
+
 	/* Evaluate the lvalue. */
 	if (!ternary(p)) return 0;
 	if (p->token == LET || p->token == ADDLET || p->token == SUBLET || p->token == MULLET || p->token == DIVLET || p->token == MODLET || p->token == ANDLET || p->token == XORLET || p->token == ORLET || p->token == SHLLET || p->token == SHRLET) {
@@ -999,7 +1028,6 @@ static int expression(parser_t *p) {
 /* Evaluate an expression. */
 int expr_evaluate(expr_config_t *config, double *result) {
 	parser_t p;
-	char k;
 
 	/* Initialize the parser. */
 	p.config = config;
@@ -1054,7 +1082,7 @@ int expr_evaluate_string(expr_config_t *config, const char *string, double *resu
 	expr_config_t	config2;
 	strud_t		ud;
 	int			error;
-	
+
 	ud.config = config;
 	ud.string = string;
 	config2.user_data = (void *)&ud;
@@ -1063,6 +1091,6 @@ int expr_evaluate_string(expr_config_t *config, const char *string, double *resu
 	config2.get_function = string_function;
 	config2.get_variable = string_variable;
 	error = expr_evaluate(&config2, result);
-	strcpy(config->id, config2.id);
+	strcpy_s(config->id, sizeof(config->id), config2.id);
 	return error;
 }

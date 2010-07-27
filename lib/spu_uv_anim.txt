@@ -1,7 +1,0 @@
-NODENAME	SPU [_UV Anim]
-u_in	"p_rt"	u-input generator	blah
-v_in	"p_rt"	v-input generator	blahblah
-uv_time	"p_rt"	time-input generator	blahblah
-uv_ndx	"p_rt"	uv current index generator	blahblah
-u_out	"c_ra"	u-output consumer	blah
-v_out	"c_ra"	v-output consumer	blahblah

@@ -1,4 +1,0 @@
-NODENAME	SPU [Signed Integer Convert]
-xswd 	"rt, ra"	Extend Sign Word to Doubleword 	rt.d[n] = ext(ra.d[n] & 0xFFFFFFFF)
-xshw 	"rt, ra"	Extend Sign Halfword to Word 	rt.w[n] = ext(ra.w[n] & 0xFFFF)
-xsbh 	"rt, ra"	Extend Sign Byte to Halfword 	rt.h[n] = ext(ra.h[n] & 0xFF)
