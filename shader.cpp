@@ -390,7 +390,7 @@ Shader::OnAbout(wxCommandEvent& evt)
 {
 	wxAboutDialogInfo info;
 	info.SetName(wxT("FragmentShader"));
-	info.SetDescription(wxT("Built on " __TDATE__ " " __TTIME__));
+	info.SetDescription(wxT("Built on ") __TDATE__ wxT(" ") __TTIME__);
 	wxAboutBox(info);
 }
 

@@ -182,7 +182,7 @@ namespace Debug
 		AllocConsole();
 		console = GetStdHandle(STD_OUTPUT_HANDLE);
 		// Create the log file.
-		log = CreateFile("C:\\Users\\Andre\\Desktop\\log.txt", GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+		log = CreateFile(wxT("log.txt"), GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 		// Register global Lua functions.
 		lua_pushcfunction(L, LuaAssert);
 		lua_setglobal(L, "assert");

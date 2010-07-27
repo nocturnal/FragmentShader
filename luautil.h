@@ -43,7 +43,7 @@ namespace LuaUtil
 
 	lua_State *NewState();
 	void LoadBuffer(lua_State *L, const char *buffer, size_t size, const char *chunkname);
-	void LoadResource(lua_State *L, HMODULE hModule, const char *resourcename, const char *chunkname);
+	void LoadResource(lua_State *L, HMODULE hModule, const wxChar *resourcename, const char *chunkname);
 	void LoadFile(lua_State *L, const char *filename);
 	void Push(lua_State *L, const wxVariant& value);
 	wxVariant Get(lua_State *L, int index);
